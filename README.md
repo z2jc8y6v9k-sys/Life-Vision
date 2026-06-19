@@ -19,3 +19,4 @@ This version fixes the Safari typing bug.
 ## Important
 Your data is saved in the browser using localStorage.
 Use Export Data regularly as a backup.
+
