@@ -1,22 +1,25 @@
-# My Life Vision App v7
+# My Life Vision App v8
 
-This version keeps v6 intact and adds only the two features requested:
-
-1. Life Balance Score
-   - Shows momentum across Relationships, Health, Adventure, Creativity, and Impact.
-   - Based on average progress in each category.
-
-2. Weekly Review
-   - A dedicated weekly review page.
-   - Saves to Supabase using the existing life_reviews table.
-
-No new Supabase SQL migration is needed if v5 was already installed.
-
-Deploy:
-1. Upload/replace these GitHub files:
-   - index.html
-   - styles.css
-   - app.js
-   - README.md
-2. Wait for GitHub Pages to redeploy.
-3. Hard refresh the site if the old version appears.
+Changes:
+- Removed Support Needed section
+- Enhanced Weekly Review prompts:
+  - Wins
+  - Lessons
+  - What mattered most
+  - What drained energy
+  - Top 3 priorities next week
+  - What to stop doing
+- Enhanced Strategic Brief:
+  - What changed
+  - Biggest opportunity
+  - Biggest risk
+  - Most neglected category
+  - Highest leverage action
+  - One thing to stop doing
+- Cleaner goal card layout
+- Status and Progress emphasized together
+- Dashboard focused on:
+  - Goals On Track
+  - Goals At Risk
+  - Goals Completed
+  - Goals Not Started
