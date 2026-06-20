@@ -1,13 +1,23 @@
-# My Life Vision App v3
+# My Life Vision App v4
 
-This version uses Supabase for login and cloud sync.
+This version keeps your Supabase cloud sync and adds:
+- Better mobile layout
+- Better dashboard
+- Progress by category
+- Recently updated section
+- Quarterly review section
+- Annual review section
+- Stronger save/status messages
+- Export backup
 
-Replace your GitHub Pages files with:
-- index.html
-- styles.css
-- app.js
-- README.md
+To deploy:
+1. Unzip.
+2. Replace the GitHub repo files with:
+   - index.html
+   - styles.css
+   - app.js
+   - README.md
+3. Commit changes.
+4. Wait for GitHub Pages to redeploy.
 
-Then wait a few minutes for GitHub Pages to redeploy.
-
-After you create your own account in the app, go back to Supabase Authentication settings and turn off new signups.
+Your goals stay in Supabase and should not be erased by replacing these files.

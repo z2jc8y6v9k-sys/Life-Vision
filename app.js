@@ -1,3 +1,4 @@
+
 const SUPABASE_URL = "https://ssbgtibgpazxtnoagyrl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_9RfCRi_W5ZecyZsY-l_Pgg_CNt9ueDG";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -32,7 +33,7 @@ const starterGoals = [
   { category: "Impact", title: "Help leaders become more effective." }
 ];
 
-let state = { goals: [], user: null };
+let state = { goals: [], user: null, reviews: { quarterly: "", annual: "" } };
 let activeCategory = "All";
 let showAdd = false;
 let saveTimer = null;
@@ -41,12 +42,10 @@ let updateTimers = {};
 async function init() {
   const { data } = await supabaseClient.auth.getSession();
   state.user = data.session?.user || null;
-  if (!state.user) {
-    renderAuth();
-    return;
-  }
+  if (!state.user) return renderAuth();
   await seedStarterGoalsIfEmpty();
   await loadGoals();
+  loadLocalReviews();
   render();
 }
 
@@ -64,8 +63,7 @@ function renderAuth(message = "") {
         </div>
         <div class="message">${escapeHtml(message)}</div>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
 async function signUp() {
@@ -88,26 +86,21 @@ async function signIn() {
   state.user = data.user;
   await seedStarterGoalsIfEmpty();
   await loadGoals();
+  loadLocalReviews();
   render();
 }
 
 async function logout() {
   await supabaseClient.auth.signOut();
-  state = { goals: [], user: null };
+  state = { goals: [], user: null, reviews: { quarterly: "", annual: "" } };
   renderAuth("Signed out.");
 }
 
 async function seedStarterGoalsIfEmpty() {
   const { data, error } = await supabaseClient.from("goals").select("id").limit(1);
-  if (error) {
-    alert("Database error: " + error.message);
-    return;
-  }
+  if (error) return alert("Database error: " + error.message);
   if (data && data.length > 0) return;
-
-  const rows = starterGoals.map(g => ({
-    user_id: state.user.id, category: g.category, title: g.title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: []
-  }));
+  const rows = starterGoals.map(g => ({ user_id: state.user.id, category: g.category, title: g.title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [] }));
   await supabaseClient.from("goals").insert(rows);
 }
 
@@ -121,8 +114,10 @@ function showSaved(text = "Saved to cloud") {
   const el = document.getElementById("saveStatus");
   if (!el) return;
   el.textContent = text;
+  el.style.background = text.includes("error") ? "#fff1f2" : "#ecfdf3";
+  el.style.color = text.includes("error") ? "#9f1239" : "#027a48";
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => { if (el) el.textContent = "Cloud Sync On"; }, 1200);
+  saveTimer = setTimeout(() => { if (el) el.textContent = "Cloud Sync On"; }, 1400);
 }
 
 function updateGoalNoRender(id, key, value) {
@@ -143,6 +138,7 @@ function updateProgress(id, value) {
   if (fill) fill.style.width = `${value}%`;
   if (label) label.textContent = `Progress: ${value}%`;
   updateStatsOnly();
+  updateDashboardOnly();
 }
 
 async function toggleAge(id, age) {
@@ -175,11 +171,22 @@ async function deleteGoal(id) {
 }
 
 function exportData() {
-  const blob = new Blob([JSON.stringify(state.goals, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify({ goals: state.goals, reviews: state.reviews }, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "my-life-vision-cloud-data.json";
+  a.download = "my-life-vision-v4-backup.json";
   a.click();
+}
+
+function loadLocalReviews() {
+  const key = `lifeVisionReviews_${state.user.id}`;
+  try { state.reviews = JSON.parse(localStorage.getItem(key)) || { quarterly: "", annual: "" }; } catch(e) {}
+}
+
+function updateReview(key, value) {
+  state.reviews[key] = value;
+  localStorage.setItem(`lifeVisionReviews_${state.user.id}`, JSON.stringify(state.reviews));
+  showSaved("Saved locally");
 }
 
 function filteredGoals() {
@@ -194,16 +201,50 @@ function completionStats() {
   return { total, avg, active, complete };
 }
 
+function categoryStats() {
+  return Object.keys(categories).map(cat => {
+    const goals = state.goals.filter(g => g.category === cat);
+    const avg = goals.length ? Math.round(goals.reduce((s,g)=>s+Number(g.progress||0),0)/goals.length) : 0;
+    return { cat, count: goals.length, avg };
+  });
+}
+
+function recentGoals() {
+  return [...state.goals].sort((a,b)=>new Date(b.updated_at || b.created_at)-new Date(a.updated_at || a.created_at)).slice(0,5);
+}
+
 function updateStatsOnly() {
   const stats = completionStats();
-  const total = document.getElementById("statTotal");
-  const avg = document.getElementById("statAvg");
-  const active = document.getElementById("statActive");
-  const complete = document.getElementById("statComplete");
-  if (total) total.textContent = stats.total;
-  if (avg) avg.textContent = `${stats.avg}%`;
-  if (active) active.textContent = stats.active;
-  if (complete) complete.textContent = stats.complete;
+  ["Total","Avg","Active","Complete"].forEach(k => {
+    const el = document.getElementById("stat"+k);
+    if (!el) return;
+    if (k==="Total") el.textContent = stats.total;
+    if (k==="Avg") el.textContent = stats.avg + "%";
+    if (k==="Active") el.textContent = stats.active;
+    if (k==="Complete") el.textContent = stats.complete;
+  });
+}
+
+function updateDashboardOnly() {
+  const el = document.getElementById("categoryProgress");
+  if (el) el.innerHTML = categoryProgressHtml();
+}
+
+function categoryProgressHtml() {
+  return categoryStats().map(s => `
+    <div class="category-row">
+      <span style="color:${categories[s.cat].color}">${s.cat}</span>
+      <div class="mini-bar"><div class="mini-fill" style="width:${s.avg}%;background:${categories[s.cat].color}"></div></div>
+      <small>${s.avg}%</small>
+    </div>`).join("");
+}
+
+function recentHtml() {
+  return recentGoals().map(g => `
+    <div class="recent-item">
+      <strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong>
+      <small>${g.category} • Progress ${g.progress || 0}%</small>
+    </div>`).join("");
 }
 
 function fieldCard(goal, key, label, className = "") {
@@ -211,8 +252,7 @@ function fieldCard(goal, key, label, className = "") {
   return `
     <div class="field-card ${className}">
       <div class="field-header" style="background:${color}">${label}</div>
-      <textarea class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" 
-        oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea>
+      <textarea class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea>
     </div>`;
 }
 
@@ -226,16 +266,14 @@ function goalCard(goal) {
       </div>
       ${fieldCard(goal, "why", "Why This Matters", "full")}
       <div class="timeline-label">Time Horizon</div>
-      <div class="timeline">
-        ${ageBands.map(age => `<label class="age-chip"><input type="checkbox" ${goal.ages?.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />${age}</label>`).join("")}
-      </div>
+      <div class="timeline">${ageBands.map(age => `<label class="age-chip"><input type="checkbox" ${goal.ages?.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />${age}</label>`).join("")}</div>
       <div class="grid-two">${fieldCard(goal, "people", "People")}${fieldCard(goal, "money", "Money")}</div>
       <div class="grid-two">${fieldCard(goal, "next30", "Next 30 Days")}${fieldCard(goal, "next12", "Next 12 Months")}</div>
       <div class="card-actions">
         <div class="progress-wrap">
           <div class="progress-label" data-progress-label="${goal.id}">Progress: ${goal.progress || 0}%</div>
           <input class="progress-slider" type="range" min="0" max="100" value="${goal.progress || 0}" oninput="updateProgress('${goal.id}', this.value)" />
-          <div class="progress-bar"><div class="progress-fill" data-progress-fill="${goal.id}" style="width:${goal.progress || 0}%; background:${color}"></div></div>
+          <div class="progress-bar"><div class="progress-fill" data-progress-fill="${goal.id}" style="width:${goal.progress || 0}%;background:${color}"></div></div>
         </div>
         <button class="delete" onclick="deleteGoal('${goal.id}')">Delete</button>
       </div>
@@ -252,38 +290,61 @@ function addForm() {
     </form>`;
 }
 
+function reviewsHtml() {
+  return `
+    <section class="panel">
+      <h3>Planning Reviews</h3>
+      <div class="review-grid">
+        <div class="review-card">
+          <div class="field-header" style="background:#111827">Quarterly Review</div>
+          <textarea placeholder="What changed this quarter? What needs attention?" oninput="updateReview('quarterly', this.value)">${escapeHtml(state.reviews.quarterly || "")}</textarea>
+        </div>
+        <div class="review-card">
+          <div class="field-header" style="background:#111827">Annual Review</div>
+          <textarea placeholder="What mattered most this year? What do I want next year?" oninput="updateReview('annual', this.value)">${escapeHtml(state.reviews.annual || "")}</textarea>
+        </div>
+      </div>
+    </section>`;
+}
+
 function render() {
   const stats = completionStats();
   const nav = ["All", ...Object.keys(categories)].map(cat => {
     const color = cat === "All" ? "#111827" : categories[cat].color;
     return `<button class="nav-button ${activeCategory === cat ? "active" : ""}" style="${activeCategory === cat ? `background:${color}` : ""}" onclick="activeCategory='${cat}'; render();">${cat}</button>`;
   }).join("");
-
   const grouped = Object.keys(categories).map(cat => {
     const goals = filteredGoals().filter(g => g.category === cat);
     if (!goals.length) return "";
     return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
-
   document.getElementById("app").innerHTML = `
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand"><h1>My Life Vision</h1><p>Strategic Life Workbook | Ages 53–93</p></div>
         ${nav}
         <button class="add-button" onclick="showAdd=!showAdd; render();">${showAdd ? "Close Add Goal" : "+ Add Goal"}</button>
-        <button class="utility-button" onclick="exportData()">Export Data</button>
+        <button class="utility-button" onclick="exportData()">Export Backup</button>
         <button class="utility-button" onclick="logout()">Sign Out</button>
         <div id="saveStatus" class="save-status">Cloud Sync On</div>
         <div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div>
       </aside>
       <main class="content">
-        <section class="hero"><h2>Life Portfolio</h2><p>Add goals, fill in your planning fields, choose age horizons, and track progress over time. Your writing now syncs between your devices.</p></section>
+        <section class="hero">
+          <div><h2>Life Portfolio</h2><p>A cloud-synced operating system for your goals, people, money, next actions, and long-term life horizon.</p></div>
+          <div class="hero-badge"><strong>${stats.avg}%</strong><span>Average progress across ${stats.total} goals</span></div>
+        </section>
         <section class="stats">
           <div class="stat"><strong id="statTotal">${stats.total}</strong><span>Total goals</span></div>
           <div class="stat"><strong id="statAvg">${stats.avg}%</strong><span>Average progress</span></div>
           <div class="stat"><strong id="statActive">${stats.active}</strong><span>Goals started</span></div>
           <div class="stat"><strong id="statComplete">${stats.complete}</strong><span>Completed</span></div>
         </section>
+        <section class="dashboard-grid">
+          <div class="panel"><h3>Progress by Category</h3><div id="categoryProgress">${categoryProgressHtml()}</div></div>
+          <div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div>
+        </section>
+        ${reviewsHtml()}
         ${showAdd ? addForm() : ""}
         ${grouped}
       </main>
@@ -291,7 +352,7 @@ function render() {
 }
 
 function escapeHtml(text) {
-  return String(text || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  return String(text || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
 }
 
 init();
