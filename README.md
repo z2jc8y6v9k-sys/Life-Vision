@@ -1,22 +1,13 @@
-# My Life Vision App v2
+# My Life Vision App v3
 
-This version fixes the Safari typing bug.
+This version uses Supabase for login and cloud sync.
 
-## What changed in v2
-- Typing in a box no longer re-renders the whole page.
-- You can type normally without losing the cursor.
-- Autosave still works.
-- Added Import Data.
-- Added Export Data.
-- Keeps the same workbook structure and category colors.
+Replace your GitHub Pages files with:
+- index.html
+- styles.css
+- app.js
+- README.md
 
-## How to use
-1. Unzip this folder.
-2. Open `index.html` in Safari or Chrome.
-3. Type into any field.
-4. Your writing saves automatically in that browser.
+Then wait a few minutes for GitHub Pages to redeploy.
 
-## Important
-Your data is saved in the browser using localStorage.
-Use Export Data regularly as a backup.
-
+After you create your own account in the app, go back to Supabase Authentication settings and turn off new signups.

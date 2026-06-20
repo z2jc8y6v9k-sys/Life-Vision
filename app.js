@@ -1,3 +1,7 @@
+const SUPABASE_URL = "https://ssbgtibgpazxtnoagyrl.supabase.co";
+const SUPABASE_KEY = "sb_publishable_9RfCRi_W5ZecyZsY-l_Pgg_CNt9ueDG";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const categories = {
   Relationships: { color: "#1f4e79" },
   Health: { color: "#2e7d32" },
@@ -7,7 +11,6 @@ const categories = {
 };
 
 const ageBands = ["On-going", "53-58", "58-63", "63-68", "68-73", "73-78", "78-83", "83-88", "88-93"];
-const storageKey = "lifeVisionGoalsV2";
 
 const starterGoals = [
   { category: "Relationships", title: "Spend time with my mom" },
@@ -29,69 +32,108 @@ const starterGoals = [
   { category: "Impact", title: "Help leaders become more effective." }
 ];
 
-let state = loadState();
+let state = { goals: [], user: null };
 let activeCategory = "All";
 let showAdd = false;
 let saveTimer = null;
+let updateTimers = {};
 
-function createGoal(goal) {
-  return {
-    id: self.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
-    category: goal.category,
-    title: goal.title,
-    why: "",
-    people: "",
-    money: "",
-    next30: "",
-    next12: "",
-    ages: [],
-    progress: 0,
-    updatedAt: new Date().toISOString()
-  };
-}
-
-function loadState() {
-  const saved = localStorage.getItem(storageKey);
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved);
-      if (parsed && Array.isArray(parsed.goals)) return parsed;
-    } catch (e) {}
+async function init() {
+  const { data } = await supabaseClient.auth.getSession();
+  state.user = data.session?.user || null;
+  if (!state.user) {
+    renderAuth();
+    return;
   }
+  await seedStarterGoalsIfEmpty();
+  await loadGoals();
+  render();
+}
 
-  const v1 = localStorage.getItem("lifeVisionGoalsV1");
-  if (v1) {
-    try {
-      const parsed = JSON.parse(v1);
-      if (parsed && Array.isArray(parsed.goals)) {
-        localStorage.setItem(storageKey, JSON.stringify(parsed));
-        return parsed;
-      }
-    } catch (e) {}
+function renderAuth(message = "") {
+  document.getElementById("app").innerHTML = `
+    <div class="auth-page">
+      <div class="auth-card">
+        <h1>My Life Vision</h1>
+        <p>Sign in to sync your goals between your Mac and iPhone.</p>
+        <input id="email" type="email" placeholder="Email" />
+        <input id="password" type="password" placeholder="Password" />
+        <div class="auth-actions">
+          <button onclick="signIn()">Sign In</button>
+          <button class="secondary" onclick="signUp()">Create Account</button>
+        </div>
+        <div class="message">${escapeHtml(message)}</div>
+      </div>
+    </div>
+  `;
+}
+
+async function signUp() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  if (error) return renderAuth(error.message);
+  const session = await supabaseClient.auth.getSession();
+  state.user = session.data.session?.user || data.user;
+  await seedStarterGoalsIfEmpty();
+  await loadGoals();
+  render();
+}
+
+async function signIn() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) return renderAuth(error.message);
+  state.user = data.user;
+  await seedStarterGoalsIfEmpty();
+  await loadGoals();
+  render();
+}
+
+async function logout() {
+  await supabaseClient.auth.signOut();
+  state = { goals: [], user: null };
+  renderAuth("Signed out.");
+}
+
+async function seedStarterGoalsIfEmpty() {
+  const { data, error } = await supabaseClient.from("goals").select("id").limit(1);
+  if (error) {
+    alert("Database error: " + error.message);
+    return;
   }
+  if (data && data.length > 0) return;
 
-  return { goals: starterGoals.map(createGoal) };
+  const rows = starterGoals.map(g => ({
+    user_id: state.user.id, category: g.category, title: g.title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: []
+  }));
+  await supabaseClient.from("goals").insert(rows);
 }
 
-function saveState(show = true) {
-  localStorage.setItem(storageKey, JSON.stringify(state));
-  if (show) showSaved();
+async function loadGoals() {
+  const { data, error } = await supabaseClient.from("goals").select("*").order("created_at", { ascending: true });
+  if (error) return alert("Could not load goals: " + error.message);
+  state.goals = data || [];
 }
 
-function showSaved() {
+function showSaved(text = "Saved to cloud") {
   const el = document.getElementById("saveStatus");
   if (!el) return;
-  el.textContent = "Saved";
+  el.textContent = text;
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => { if (el) el.textContent = "Autosave On"; }, 1200);
+  saveTimer = setTimeout(() => { if (el) el.textContent = "Cloud Sync On"; }, 1200);
 }
 
 function updateGoalNoRender(id, key, value) {
   const goal = state.goals.find(g => g.id === id);
   if (!goal) return;
   goal[key] = value;
-  goal.updatedAt = new Date().toISOString();
-  saveState();
+  clearTimeout(updateTimers[id + key]);
+  updateTimers[id + key] = setTimeout(async () => {
+    const { error } = await supabaseClient.from("goals").update({ [key]: value, updated_at: new Date().toISOString() }).eq("id", id);
+    if (error) showSaved("Save error"); else showSaved();
+  }, 450);
 }
 
 function updateProgress(id, value) {
@@ -103,64 +145,41 @@ function updateProgress(id, value) {
   updateStatsOnly();
 }
 
-function toggleAge(id, age) {
+async function toggleAge(id, age) {
   const goal = state.goals.find(g => g.id === id);
   if (!goal) return;
   goal.ages = goal.ages.includes(age) ? goal.ages.filter(a => a !== age) : [...goal.ages, age];
-  goal.updatedAt = new Date().toISOString();
-  saveState();
+  const { error } = await supabaseClient.from("goals").update({ ages: goal.ages, updated_at: new Date().toISOString() }).eq("id", id);
+  if (error) showSaved("Save error"); else showSaved();
 }
 
-function addGoal(event) {
+async function addGoal(event) {
   event.preventDefault();
   const title = document.getElementById("newGoalTitle").value.trim();
   const category = document.getElementById("newGoalCategory").value;
   if (!title) return;
-  state.goals.push(createGoal({ title, category }));
-  saveState(false);
+  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [] };
+  const { error } = await supabaseClient.from("goals").insert(row);
+  if (error) return alert("Could not add goal: " + error.message);
   showAdd = false;
+  await loadGoals();
   render();
 }
 
-function deleteGoal(id) {
+async function deleteGoal(id) {
   if (!confirm("Delete this goal?")) return;
-  state.goals = state.goals.filter(g => g.id !== id);
-  saveState(false);
+  const { error } = await supabaseClient.from("goals").delete().eq("id", id);
+  if (error) return alert("Could not delete goal: " + error.message);
+  await loadGoals();
   render();
 }
 
 function exportData() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify(state.goals, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "my-life-vision-data-v2.json";
+  a.download = "my-life-vision-cloud-data.json";
   a.click();
-}
-
-function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const parsed = JSON.parse(reader.result);
-      if (!parsed || !Array.isArray(parsed.goals)) throw new Error("Invalid file");
-      state = parsed;
-      saveState(false);
-      render();
-      alert("Import complete.");
-    } catch (e) {
-      alert("That file could not be imported.");
-    }
-  };
-  reader.readAsText(file);
-}
-
-function resetApp() {
-  if (!confirm("Reset all goals and notes to the original starter version?")) return;
-  localStorage.removeItem(storageKey);
-  state = { goals: starterGoals.map(createGoal) };
-  render();
 }
 
 function filteredGoals() {
@@ -194,8 +213,7 @@ function fieldCard(goal, key, label, className = "") {
       <div class="field-header" style="background:${color}">${label}</div>
       <textarea class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" 
         oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea>
-    </div>
-  `;
+    </div>`;
 }
 
 function goalCard(goal) {
@@ -206,40 +224,22 @@ function goalCard(goal) {
         <span class="category-pill" style="background:${color}">${goal.category}</span>
         <textarea class="goal-title" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', 'title', this.value)">${escapeHtml(goal.title)}</textarea>
       </div>
-
       ${fieldCard(goal, "why", "Why This Matters", "full")}
-
       <div class="timeline-label">Time Horizon</div>
       <div class="timeline">
-        ${ageBands.map(age => `
-          <label class="age-chip">
-            <input type="checkbox" ${goal.ages.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />
-            ${age}
-          </label>
-        `).join("")}
+        ${ageBands.map(age => `<label class="age-chip"><input type="checkbox" ${goal.ages?.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />${age}</label>`).join("")}
       </div>
-
-      <div class="grid-two">
-        ${fieldCard(goal, "people", "People")}
-        ${fieldCard(goal, "money", "Money")}
-      </div>
-
-      <div class="grid-two">
-        ${fieldCard(goal, "next30", "Next 30 Days")}
-        ${fieldCard(goal, "next12", "Next 12 Months")}
-      </div>
-
+      <div class="grid-two">${fieldCard(goal, "people", "People")}${fieldCard(goal, "money", "Money")}</div>
+      <div class="grid-two">${fieldCard(goal, "next30", "Next 30 Days")}${fieldCard(goal, "next12", "Next 12 Months")}</div>
       <div class="card-actions">
         <div class="progress-wrap">
           <div class="progress-label" data-progress-label="${goal.id}">Progress: ${goal.progress || 0}%</div>
-          <input class="progress-slider" type="range" min="0" max="100" value="${goal.progress || 0}" 
-            oninput="updateProgress('${goal.id}', this.value)" />
+          <input class="progress-slider" type="range" min="0" max="100" value="${goal.progress || 0}" oninput="updateProgress('${goal.id}', this.value)" />
           <div class="progress-bar"><div class="progress-fill" data-progress-fill="${goal.id}" style="width:${goal.progress || 0}%; background:${color}"></div></div>
         </div>
         <button class="delete" onclick="deleteGoal('${goal.id}')">Delete</button>
       </div>
-    </article>
-  `;
+    </article>`;
 }
 
 function addForm() {
@@ -247,21 +247,16 @@ function addForm() {
     <form class="add-form" onsubmit="addGoal(event)">
       <strong>Add a New Goal</strong>
       <textarea id="newGoalTitle" rows="3" placeholder="Write your goal..."></textarea>
-      <select id="newGoalCategory">
-        ${Object.keys(categories).map(c => `<option value="${c}">${c}</option>`).join("")}
-      </select>
+      <select id="newGoalCategory">${Object.keys(categories).map(c => `<option value="${c}">${c}</option>`).join("")}</select>
       <button type="submit">Add Goal</button>
-    </form>
-  `;
+    </form>`;
 }
 
 function render() {
   const stats = completionStats();
   const nav = ["All", ...Object.keys(categories)].map(cat => {
     const color = cat === "All" ? "#111827" : categories[cat].color;
-    return `<button class="nav-button ${activeCategory === cat ? "active" : ""}" 
-      style="${activeCategory === cat ? `background:${color}` : ""}"
-      onclick="activeCategory='${cat}'; render();">${cat}</button>`;
+    return `<button class="nav-button ${activeCategory === cat ? "active" : ""}" style="${activeCategory === cat ? `background:${color}` : ""}" onclick="activeCategory='${cat}'; render();">${cat}</button>`;
   }).join("");
 
   const grouped = Object.keys(categories).map(cat => {
@@ -273,43 +268,30 @@ function render() {
   document.getElementById("app").innerHTML = `
     <div class="app-shell">
       <aside class="sidebar">
-        <div class="brand">
-          <h1>My Life Vision</h1>
-          <p>Strategic Life Workbook | Ages 53–93</p>
-        </div>
+        <div class="brand"><h1>My Life Vision</h1><p>Strategic Life Workbook | Ages 53–93</p></div>
         ${nav}
         <button class="add-button" onclick="showAdd=!showAdd; render();">${showAdd ? "Close Add Goal" : "+ Add Goal"}</button>
         <button class="utility-button" onclick="exportData()">Export Data</button>
-        <label class="import-label">Import Data<input class="import-input" type="file" accept="application/json" onchange="importData(event)" /></label>
-        <button class="utility-button" onclick="resetApp()">Reset</button>
-        <div id="saveStatus" class="save-status">Autosave On</div>
+        <button class="utility-button" onclick="logout()">Sign Out</button>
+        <div id="saveStatus" class="save-status">Cloud Sync On</div>
+        <div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div>
       </aside>
-
       <main class="content">
-        <section class="hero">
-          <h2>Life Portfolio</h2>
-          <p>Add goals, fill in your planning fields, choose age horizons, and track progress over time. Your writing is saved automatically in this browser.</p>
-        </section>
-
+        <section class="hero"><h2>Life Portfolio</h2><p>Add goals, fill in your planning fields, choose age horizons, and track progress over time. Your writing now syncs between your devices.</p></section>
         <section class="stats">
           <div class="stat"><strong id="statTotal">${stats.total}</strong><span>Total goals</span></div>
           <div class="stat"><strong id="statAvg">${stats.avg}%</strong><span>Average progress</span></div>
           <div class="stat"><strong id="statActive">${stats.active}</strong><span>Goals started</span></div>
           <div class="stat"><strong id="statComplete">${stats.complete}</strong><span>Completed</span></div>
         </section>
-
         ${showAdd ? addForm() : ""}
         ${grouped}
       </main>
-    </div>
-  `;
+    </div>`;
 }
 
 function escapeHtml(text) {
-  return String(text || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
+  return String(text || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
-render();
+init();
