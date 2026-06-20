@@ -458,20 +458,55 @@ function aiCoachHtml() {
   </section>`;
 }
 
+
+function lifeBalanceHtml() {
+  const stats = categoryStats();
+  const cards = stats.map(s => {
+    let note = "Needs attention";
+    if (s.avg >= 75) note = "Strong momentum";
+    else if (s.avg >= 40) note = "Developing";
+    else if (s.avg >= 15) note = "Early progress";
+
+    return `<div class="balance-card">
+      <strong style="color:${categories[s.cat].color}">${s.cat}</strong>
+      <div class="balance-score" style="color:${categories[s.cat].color}">${s.avg}</div>
+      <div class="mini-bar"><div class="mini-fill" style="width:${s.avg}%;background:${categories[s.cat].color}"></div></div>
+      <div class="balance-note">${note}</div>
+    </div>`;
+  }).join("");
+
+  return `<section class="panel">
+    <h3>Life Balance Score</h3>
+    <p>A simple readout of how much momentum you have across your five core life categories.</p>
+    <div class="balance-grid">${cards}</div>
+  </section>`;
+}
+
+function weeklyReviewHtml() {
+  return `<section class="panel weekly-review-box">
+    <h3>Weekly Review</h3>
+    <p>Use this once a week to decide what deserves attention now.</p>
+    <div class="review-card">
+      <div class="field-header" style="background:#111827">Weekly Review</div>
+      <textarea placeholder="Wins this week&#10;Lessons learned&#10;What needs attention&#10;Top 3 priorities next week&#10;What to stop doing" oninput="updateReview('weekly', this.value)">${escapeHtml(state.reviews.weekly || "")}</textarea>
+    </div>
+  </section>`;
+}
+
 function render() {
   const stats = completionStats();
   const navCats = ["All", ...Object.keys(categories)].map(cat => {
     const color = cat === "All" ? "#111827" : categories[cat].color;
     return `<button class="nav-button ${activeCategory === cat && activeView==="Workbook" ? "active" : ""}" style="${activeCategory === cat && activeView==="Workbook" ? `background:${color}` : ""}" onclick="activeView='Workbook';activeCategory='${cat}';render();">${cat}</button>`;
   }).join("");
-  const viewButtons = ["Dashboard","Reviews","Vision Board","Coach"].map(v=>`<button class="nav-button ${activeView===v?"active":""}" style="${activeView===v?"background:#111827":""}" onclick="activeView='${v}';render();">${v}</button>`).join("");
+  const viewButtons = ["Dashboard","Weekly Review","Reviews","Vision Board","Coach"].map(v=>`<button class="nav-button ${activeView===v?"active":""}" style="${activeView===v?"background:#111827":""}" onclick="activeView='${v}';render();">${v}</button>`).join("");
   const grouped = Object.keys(categories).map(cat => {
     const goals = filteredGoals().filter(g => g.category === cat);
     if (!goals.length) return "";
     return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
-  const dashboard = `<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
-  let main = activeView === "Dashboard" ? dashboard : activeView === "Reviews" ? reviewsHtml() : activeView === "Vision Board" ? visionHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
+  const dashboard = `<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${lifeBalanceHtml()}${metricsHtml()}${coachHtml()}`;
+  let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Vision Board" ? visionHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
   document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div>${viewButtons}<hr>${navCats}<button class="add-button" onclick="activeView='Workbook';showAdd=!showAdd;render();">${showAdd ? "Close Add Goal" : "+ Add Goal"}</button><button class="utility-button" onclick="exportData()">Export Backup</button><button class="utility-button" onclick="logout()">Sign Out</button><div id="saveStatus" class="save-status">Cloud Sync On</div><div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div></aside><main class="content"><section class="hero"><div><h2>Life Portfolio</h2><p>A cloud-synced personal operating system for goals, people, money, next actions, scorecards, reviews, vision, and coaching.</p></div><div class="hero-badge"><strong>${stats.avg}%</strong><span>Average progress across ${stats.total} goals</span></div></section><section class="stats"><div class="stat"><strong id="statTotal">${stats.total}</strong><span>Total goals</span></div><div class="stat"><strong id="statAvg">${stats.avg}%</strong><span>Average progress</span></div><div class="stat"><strong id="statActive">${stats.active}</strong><span>Goals started</span></div><div class="stat"><strong id="statComplete">${stats.complete}</strong><span>Completed</span></div></section>${main}</main></div>`;
 }
 function escapeHtml(text) {

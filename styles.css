@@ -75,3 +75,43 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
   border-radius: 14px;
   font-size: 14px;
 }
+
+
+.balance-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+
+.balance-card {
+  background: #fbfaf7;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 15px;
+}
+
+.balance-card strong {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.balance-score {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+}
+
+.balance-note {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.weekly-review-box textarea {
+  min-height: 220px;
+}
+
+@media(max-width:950px){
+  .balance-grid { grid-template-columns: 1fr; }
+}
