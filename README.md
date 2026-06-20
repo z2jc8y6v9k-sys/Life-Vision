@@ -1,24 +1,23 @@
-# My Life Vision App v5
+# My Life Vision App v6
 
 This version adds:
-- Goal scorecard status
-- Life Dashboard metrics
-- Progress by category
-- Recently updated goals
-- Annual planning
-- Quarterly planning
-- Stop-doing and year-success reviews
-- Vision Board with image URLs
-- Built-in Coach insights
-- Cloud sync through Supabase
+- Money renamed to Resources throughout the user interface
+- Real OpenAI-powered AI Coach page
+- "Review My Life" button
+- OpenAI API key setup stored locally in your browser
+- All v5 dashboards, scorecards, reviews, metrics, vision board, and Supabase cloud sync retained
 
-IMPORTANT:
-Before uploading the v5 app files, run `supabase_v5_migration.sql` once in Supabase SQL Editor.
+Important:
+- Your Life Vision data remains in Supabase.
+- Your OpenAI API key is stored only in browser localStorage on the device where you enter it.
+- For a production-grade version, the OpenAI call should be moved to a Supabase Edge Function so the key is never in the browser.
 
-Then replace the GitHub repo files with:
-- index.html
-- styles.css
-- app.js
-- README.md
-
-You do NOT upload the SQL file to GitHub unless you want to keep it as documentation.
+Deploy:
+1. Upload/replace these GitHub files:
+   - index.html
+   - styles.css
+   - app.js
+   - README.md
+2. You do not need to run a new SQL migration if v5 migration was already run.
+3. Wait for GitHub Pages to redeploy.
+4. Open the app, go to Coach, paste your OpenAI API key, and click Review My Life.

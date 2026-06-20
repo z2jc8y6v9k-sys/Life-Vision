@@ -317,7 +317,7 @@ function goalCard(goal) {
     <div class="grid-two"><label>Status<br><select class="status-select" onchange="updateGoalNoRender('${goal.id}','status',this.value)">${statuses.map(s=>`<option ${(goal.status||"Not Started")===s?"selected":""}>${s}</option>`).join("")}</select></label><label>Objective<br><textarea class="field-body" oninput="updateGoalNoRender('${goal.id}','objective',this.value)">${escapeHtml(goal.objective||"")}</textarea></label></div>
     ${fieldCard(goal, "why", "Why This Matters", "full")}
     <div class="timeline-label">Time Horizon</div><div class="timeline">${ageBands.map(age => `<label class="age-chip"><input type="checkbox" ${goal.ages?.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />${age}</label>`).join("")}</div>
-    <div class="grid-two">${fieldCard(goal, "people", "People")}${fieldCard(goal, "money", "Money")}</div>
+    <div class="grid-two">${fieldCard(goal, "people", "People")}${fieldCard(goal, "money", "Resources")}</div>
     <div class="grid-two">${fieldCard(goal, "next30", "Next 30 Days")}${fieldCard(goal, "next12", "Next 12 Months")}</div>
     <div class="grid-two">${fieldCard(goal, "key_results", "Key Results")}${fieldCard(goal, "blockers", "Blockers")}</div>
     ${fieldCard(goal, "support_needed", "Support Needed", "full")}
@@ -340,11 +340,124 @@ function reviewsHtml() {
   return `<section class="panel"><h3>Planning Reviews</h3><div class="review-grid">${reviews.map(r=>`<div class="review-card"><div class="field-header" style="background:#111827">${r[1]}</div><textarea placeholder="${r[2]}" oninput="updateReview('${r[0]}', this.value)">${escapeHtml(state.reviews[r[0]] || "")}</textarea></div>`).join("")}</div></section>`;
 }
 function coachHtml() {
-  return `<section class="panel"><h3>AI Coach</h3><p>Built-in coaching based on your goals, progress, statuses, people fields, and next actions.</p><div class="coach-list">${coachInsights().map(i=>`<div class="coach-item"><strong>${escapeHtml(i.title)}</strong><p>${escapeHtml(i.text)}</p></div>`).join("")}</div></section>`;
+  return `<section class="panel"><h3>Built-in Coach</h3><p>Rules-based coaching based on your goals, progress, statuses, people fields, and next actions.</p><div class="coach-list">${coachInsights().map(i=>`<div class="coach-item"><strong>${escapeHtml(i.title)}</strong><p>${escapeHtml(i.text)}</p></div>`).join("")}</div></section>`;
 }
 function visionHtml() {
   return `<section class="panel"><h3>Vision Board</h3><p>Add image URLs for Italy, music, family, adventure, leadership, or anything that pulls you forward.</p><button class="primary" onclick="showAddVision=!showAddVision;render()">${showAddVision?"Close":"Add Vision Item"}</button>${showAddVision?`<form class="add-form" onsubmit="addVisionItem(event)"><select id="visionCategory">${Object.keys(categories).map(c=>`<option>${c}</option>`).join("")}</select><input id="visionTitle" placeholder="Title" /><input id="visionImage" placeholder="Image URL" /><textarea id="visionNote" placeholder="Note"></textarea><button>Add</button></form>`:""}<div class="vision-grid">${state.vision.map(v=>`<div class="vision-item"><div class="vision-img" style="background-image:url('${escapeHtml(v.image_url)}')"></div><div class="vision-body"><select onchange="updateVision('${v.id}','category',this.value)">${Object.keys(categories).map(c=>`<option ${v.category===c?"selected":""}>${c}</option>`).join("")}</select><input value="${escapeHtml(v.title)}" oninput="updateVision('${v.id}','title',this.value)" placeholder="Title" /><input value="${escapeHtml(v.image_url)}" oninput="updateVision('${v.id}','image_url',this.value)" placeholder="Image URL" /><textarea oninput="updateVision('${v.id}','note',this.value)" placeholder="Note">${escapeHtml(v.note||"")}</textarea><button class="delete" onclick="deleteVision('${v.id}')">Delete</button></div></div>`).join("")}</div></section>`;
 }
+
+function getOpenAIKey() {
+  return localStorage.getItem("lifeVisionOpenAIKey") || "";
+}
+
+function saveOpenAIKey() {
+  const key = document.getElementById("openaiKey")?.value.trim();
+  if (!key) return alert("Paste your OpenAI API key first.");
+  localStorage.setItem("lifeVisionOpenAIKey", key);
+  showSaved("AI key saved locally");
+  render();
+}
+
+function clearOpenAIKey() {
+  localStorage.removeItem("lifeVisionOpenAIKey");
+  showSaved("AI key removed");
+  render();
+}
+
+function buildAIPrompt() {
+  const payload = {
+    goals: state.goals.map(g => ({
+      category: g.category,
+      title: g.title,
+      status: g.status,
+      progress: g.progress,
+      why: g.why,
+      people: g.people,
+      resources: g.money,
+      next30: g.next30,
+      next12: g.next12,
+      objective: g.objective,
+      key_results: g.key_results,
+      blockers: g.blockers,
+      support_needed: g.support_needed,
+      ages: g.ages
+    })),
+    reviews: state.reviews,
+    metrics: state.metrics,
+    vision: state.vision
+  };
+
+  return `You are a direct, thoughtful personal strategy coach. Analyze this Life Vision operating system for Todd.
+
+Return a concise but substantive review with these sections:
+1. Biggest pattern you see
+2. What is over-invested
+3. What is under-invested
+4. Top 3 priorities for the next 30 days
+5. Top 3 questions Todd should answer
+6. One bold recommendation
+7. One thing to stop doing
+8. One relationship/resource move to make
+
+Use the user's own categories: Relationships, Health, Adventure, Creativity, Impact.
+Be candid, practical, and not generic.
+
+Here is the data:
+${JSON.stringify(payload, null, 2)}`;
+}
+
+async function runAICoach() {
+  const key = getOpenAIKey();
+  if (!key) return alert("Add your OpenAI API key first.");
+  const out = document.getElementById("aiOutput");
+  if (out) out.textContent = "Reviewing your Life Vision data...";
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${key}`
+      },
+      body: JSON.stringify({
+        model: "gpt-5.5",
+        input: buildAIPrompt()
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error?.message || "OpenAI request failed.");
+    }
+
+    const text = data.output_text || (data.output || []).map(item => {
+      return (item.content || []).map(c => c.text || "").join("");
+    }).join("\n");
+
+    if (out) out.textContent = text || "No response text returned.";
+  } catch (error) {
+    if (out) out.textContent = "AI Coach error: " + error.message + "\n\nIf this happens in Safari, the next version should move the OpenAI call into a Supabase Edge Function so the browser never calls OpenAI directly.";
+  }
+}
+
+function aiCoachHtml() {
+  const hasKey = !!getOpenAIKey();
+  return `<section class="panel">
+    <h3>AI Coach</h3>
+    <p>This uses OpenAI to review your goals, progress, reviews, metrics, vision board, blockers, people, and resources. Your OpenAI key is stored only in this browser's local storage.</p>
+    <div class="ai-warning">For a stronger production version, the OpenAI key should eventually be moved to a secure Supabase Edge Function. This version is designed for your personal use.</div>
+    <div class="ai-setup">
+      <input id="openaiKey" type="password" placeholder="${hasKey ? "OpenAI API key saved locally" : "Paste OpenAI API key"}" />
+      <div class="ai-actions">
+        <button class="primary" onclick="saveOpenAIKey()">Save API Key</button>
+        <button class="secondary" onclick="clearOpenAIKey()">Clear Key</button>
+        <button class="primary" onclick="runAICoach()">Review My Life</button>
+      </div>
+      <div id="aiOutput" class="ai-output">Click “Review My Life” to generate a personalized strategic review.</div>
+    </div>
+  </section>`;
+}
+
 function render() {
   const stats = completionStats();
   const navCats = ["All", ...Object.keys(categories)].map(cat => {
@@ -358,7 +471,7 @@ function render() {
     return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
   const dashboard = `<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
-  let main = activeView === "Dashboard" ? dashboard : activeView === "Reviews" ? reviewsHtml() : activeView === "Vision Board" ? visionHtml() : activeView === "Coach" ? coachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
+  let main = activeView === "Dashboard" ? dashboard : activeView === "Reviews" ? reviewsHtml() : activeView === "Vision Board" ? visionHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
   document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div>${viewButtons}<hr>${navCats}<button class="add-button" onclick="activeView='Workbook';showAdd=!showAdd;render();">${showAdd ? "Close Add Goal" : "+ Add Goal"}</button><button class="utility-button" onclick="exportData()">Export Backup</button><button class="utility-button" onclick="logout()">Sign Out</button><div id="saveStatus" class="save-status">Cloud Sync On</div><div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div></aside><main class="content"><section class="hero"><div><h2>Life Portfolio</h2><p>A cloud-synced personal operating system for goals, people, money, next actions, scorecards, reviews, vision, and coaching.</p></div><div class="hero-badge"><strong>${stats.avg}%</strong><span>Average progress across ${stats.total} goals</span></div></section><section class="stats"><div class="stat"><strong id="statTotal">${stats.total}</strong><span>Total goals</span></div><div class="stat"><strong id="statAvg">${stats.avg}%</strong><span>Average progress</span></div><div class="stat"><strong id="statActive">${stats.active}</strong><span>Goals started</span></div><div class="stat"><strong id="statComplete">${stats.complete}</strong><span>Completed</span></div></section>${main}</main></div>`;
 }
 function escapeHtml(text) {
