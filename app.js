@@ -103,7 +103,7 @@ async function seedStarterGoalsIfEmpty() {
   if (data && data.length > 0) return;
   const rows = starterGoals.map(g => ({ 
     user_id: state.user.id, category: g.category, title: g.title, why: "", people: "", money: "", 
-    next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective: "", key_results: "", blockers: "", support_needed: ""
+    next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective: "", key_results: "", blockers: "", resources: ""
   }));
   await supabaseClient.from("goals").insert(rows);
 }
@@ -174,7 +174,7 @@ async function addGoal(event) {
   const title = document.getElementById("newGoalTitle").value.trim();
   const category = document.getElementById("newGoalCategory").value;
   if (!title) return;
-  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", blockers:"", support_needed:"" };
+  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", blockers:"", resources:"" };
   const { error } = await supabaseClient.from("goals").insert(row);
   if (error) return alert("Could not add goal: " + error.message);
   showAdd = false;
@@ -299,7 +299,7 @@ function coachInsights() {
   const noPeople = state.goals.filter(g => !(g.people||"").trim());
   if (lowest) insights.push({title:`Under-invested area: ${lowest.cat}`, text:`This category has the lowest average progress at ${lowest.avg}%. Pick one small next action this week.`});
   if (highest && highest.avg > 0) insights.push({title:`Strongest momentum: ${highest.cat}`, text:`This category is currently leading at ${highest.avg}%. Ask what is working here that could transfer elsewhere.`});
-  if (atRisk.length) insights.push({title:`At-risk goals need attention`, text:`You marked ${atRisk.length} goal(s) as At Risk. Review blockers and support needed before adding new goals.`});
+  if (atRisk.length) insights.push({title:`At-risk goals need attention`, text:`You marked ${atRisk.length} goal(s) as At Risk. Review blockers and resources before adding new goals.`});
   if (noNext30.length) insights.push({title:`Next 30 Days gap`, text:`${noNext30.length} goal(s) have no next-30-day action. These are likely to stay aspirational unless you define the next move.`});
   if (noPeople.length) insights.push({title:`People strategy gap`, text:`${noPeople.length} goal(s) do not name people yet. Add collaborators, beneficiaries, or supporters.`});
   if (insights.length === 0) insights.push({title:"Solid system health", text:"Your goals have next actions, people, and progress. Use the quarterly review to choose what matters most now."});
@@ -320,7 +320,6 @@ function goalCard(goal) {
     <div class="grid-two">${fieldCard(goal, "people", "People")}${fieldCard(goal, "money", "Resources")}</div>
     <div class="grid-two">${fieldCard(goal, "next30", "Next 30 Days")}${fieldCard(goal, "next12", "Next 12 Months")}</div>
     <div class="grid-two">${fieldCard(goal, "key_results", "Key Results")}${fieldCard(goal, "blockers", "Blockers")}</div>
-    ${fieldCard(goal, "support_needed", "Support Needed", "full")}
     <div class="card-actions"><div class="progress-wrap"><div class="progress-label" data-progress-label="${goal.id}">Progress: ${goal.progress || 0}%</div><input class="progress-slider" type="range" min="0" max="100" value="${goal.progress || 0}" oninput="updateProgress('${goal.id}', this.value)" /><div class="progress-bar"><div class="progress-fill" data-progress-fill="${goal.id}" style="width:${goal.progress || 0}%;background:${color}"></div></div></div><button class="delete" onclick="deleteGoal('${goal.id}')">Delete</button></div>
   </article>`;
 }
@@ -332,7 +331,7 @@ function metricsHtml() {
 }
 function reviewsHtml() {
   const reviews = [
-    ["quarterly","Quarterly Review","Objective, key results, next 30 days, blockers, support needed."],
+    ["quarterly","Quarterly Review","Objective, key results, next 30 days, blockers, resources."],
     ["annual","Annual Review","What mattered most this year? What do I want next year?"],
     ["stop_doing","Stop Doing","What should I stop doing to make room for what matters?"],
     ["year_success","This Year Success","What would make this year a success?"]
@@ -379,7 +378,7 @@ function buildAIPrompt() {
       objective: g.objective,
       key_results: g.key_results,
       blockers: g.blockers,
-      support_needed: g.support_needed,
+      
       ages: g.ages
     })),
     reviews: state.reviews,
@@ -463,10 +462,54 @@ function weeklyReviewHtml() {
   return `<section class="panel weekly-review-box">
     <h3>Weekly Review</h3>
     <p>Use this once a week to decide what deserves attention now.</p>
-    <div class="review-card">
-      <div class="field-header" style="background:#111827">Weekly Review</div>
-      <textarea placeholder="Wins this week&#10;Lessons learned&#10;What needs attention&#10;Top 3 priorities next week&#10;What to stop doing" oninput="updateReview('weekly', this.value)">${escapeHtml(state.reviews.weekly || "")}</textarea>
+    <div class="review-grid">
+      <div class="review-card">
+        <div class="field-header" style="background:#111827">Wins</div>
+        <textarea placeholder="What worked this week? What gave you energy?" oninput="updateReview('weekly_wins', this.value)">${escapeHtml(state.reviews.weekly_wins || "")}</textarea>
+      </div>
+      <div class="review-card">
+        <div class="field-header" style="background:#111827">Lessons</div>
+        <textarea placeholder="What did you learn? What pattern do you notice?" oninput="updateReview('weekly_lessons', this.value)">${escapeHtml(state.reviews.weekly_lessons || "")}</textarea>
+      </div>
+      <div class="review-card">
+        <div class="field-header" style="background:#111827">What Mattered Most</div>
+        <textarea placeholder="What mattered most this week?" oninput="updateReview('weekly_mattered', this.value)">${escapeHtml(state.reviews.weekly_mattered || "")}</textarea>
+      </div>
+      <div class="review-card">
+        <div class="field-header" style="background:#111827">What Drained Energy</div>
+        <textarea placeholder="What drained energy or pulled you out of alignment?" oninput="updateReview('weekly_drained', this.value)">${escapeHtml(state.reviews.weekly_drained || "")}</textarea>
+      </div>
+      <div class="review-card">
+        <div class="field-header" style="background:#111827">Top 3 Priorities Next Week</div>
+        <textarea placeholder="1.
+2.
+3." oninput="updateReview('weekly_priorities', this.value)">${escapeHtml(state.reviews.weekly_priorities || "")}</textarea>
+      </div>
+      <div class="review-card">
+        <div class="field-header" style="background:#111827">What To Stop Doing</div>
+        <textarea placeholder="What should you stop doing, pause, or decline?" oninput="updateReview('weekly_stop', this.value)">${escapeHtml(state.reviews.weekly_stop || "")}</textarea>
+      </div>
     </div>
+  </section>`;
+}
+
+
+function statusCounts() {
+  return {
+    onTrack: state.goals.filter(g => g.status === "On Track").length,
+    atRisk: state.goals.filter(g => g.status === "At Risk").length,
+    completed: state.goals.filter(g => g.status === "Completed" || Number(g.progress||0) >= 100).length,
+    notStarted: state.goals.filter(g => (g.status || "Not Started") === "Not Started" && Number(g.progress||0) === 0).length
+  };
+}
+
+function statusDashboardHtml() {
+  const s = statusCounts();
+  return `<section class="stats">
+    <div class="stat"><strong>${s.onTrack}</strong><span>Goals On Track</span></div>
+    <div class="stat"><strong>${s.atRisk}</strong><span>Goals At Risk</span></div>
+    <div class="stat"><strong>${s.completed}</strong><span>Goals Completed</span></div>
+    <div class="stat"><strong>${s.notStarted}</strong><span>Goals Not Started</span></div>
   </section>`;
 }
 
@@ -476,14 +519,23 @@ function strategicBriefText() {
   const lowest = [...cats].sort((a,b)=>a.avg-b.avg)[0];
   const highest = [...cats].sort((a,b)=>b.avg-a.avg)[0];
   const atRisk = state.goals.filter(g => g.status === "At Risk");
+  const onTrack = state.goals.filter(g => g.status === "On Track");
+  const completed = state.goals.filter(g => g.status === "Completed" || Number(g.progress||0) >= 100);
+  const notStarted = state.goals.filter(g => (g.status || "Not Started") === "Not Started" && Number(g.progress||0) === 0);
   const noNext30 = state.goals.filter(g => !(g.next30||"").trim());
+  const noResources = state.goals.filter(g => !(g.money||"").trim());
+  const noPeople = state.goals.filter(g => !(g.people||"").trim());
   const recent = recentGoals().slice(0,3);
+
+  const highestLeverage = state.goals
+    .filter(g => (g.next30||"").trim() || (g.blockers||"").trim() || g.status === "At Risk")
+    .sort((a,b) => (b.status === "At Risk") - (a.status === "At Risk") || Number(b.progress||0)-Number(a.progress||0))[0];
 
   return `TODD'S STRATEGIC BRIEF
 
 What changed:
 - You currently have ${stats.total} goals with ${stats.avg}% average progress.
-- ${stats.active} goals have started and ${stats.complete} are complete.
+- ${onTrack.length} goals are On Track, ${atRisk.length} are At Risk, ${completed.length} are Completed, and ${notStarted.length} are Not Started.
 - Most recent updates: ${recent.map(g => g.title).join("; ") || "No recent updates yet."}
 
 Biggest opportunity:
@@ -491,16 +543,22 @@ Biggest opportunity:
 - The opportunity is to transfer what is working there into a weaker category.
 
 Biggest risk:
-- ${lowest ? lowest.cat + " is the lowest-progress category at " + lowest.avg + "%." : "No category risk detected yet."}
+- ${lowest ? lowest.cat + " is the most neglected category at " + lowest.avg + "%." : "No category risk detected yet."}
 - ${atRisk.length ? atRisk.length + " goal(s) are marked At Risk." : "No goals are currently marked At Risk."}
+
+Most neglected category:
+- ${lowest ? lowest.cat + " needs the most attention right now." : "Not enough data yet."}
+
+Highest leverage action:
+- ${highestLeverage ? "Focus on: " + highestLeverage.title : "Pick one goal and define a concrete next 30-day action."}
 
 Top 3 actions this week:
 1. Add or update Next 30 Days for ${noNext30.length ? "one of the " + noNext30.length + " goals missing it" : "your highest-priority goal"}.
-2. Pick one relationship/resource move that supports a major goal.
-3. Update progress and status on any goal that has changed.
+2. Add People or Resources to ${Math.max(noPeople.length, noResources.length)} goal(s) missing execution support.
+3. Move one Not Started goal either into action or consciously defer it.
 
-Stop doing:
-- Stop letting goals remain only aspirational. Every active goal should have a next 30-day move, a person/resource attached, or a conscious decision to defer it.`;
+One thing to stop doing:
+- Stop letting goals remain only aspirational. Every active goal should have a next 30-day move, people/resources attached, or a conscious decision to defer it.`;
 }
 
 function strategicBriefHtml() {
@@ -526,7 +584,7 @@ function render() {
     if (!goals.length) return "";
     return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
-  const dashboard = `<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
+  const dashboard = `${statusDashboardHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
   let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Vision Board" ? visionHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
   document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div>${viewButtons}<hr>${navCats}<button class="add-button" onclick="activeView='Workbook';showAdd=!showAdd;render();">${showAdd ? "Close Add Goal" : "+ Add Goal"}</button><button class="utility-button" onclick="exportData()">Export Backup</button><button class="utility-button" onclick="logout()">Sign Out</button><div id="saveStatus" class="save-status">Cloud Sync On</div><div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div></aside><main class="content"><section class="hero"><div><h2>Life Portfolio</h2><p>A cloud-synced personal operating system for goals, people, money, next actions, scorecards, reviews, vision, and coaching.</p></div><div class="hero-badge"><strong>${stats.avg}%</strong><span>Average progress across ${stats.total} goals</span></div></section><section class="stats"><div class="stat"><strong id="statTotal">${stats.total}</strong><span>Total goals</span></div><div class="stat"><strong id="statAvg">${stats.avg}%</strong><span>Average progress</span></div><div class="stat"><strong id="statActive">${stats.active}</strong><span>Goals started</span></div><div class="stat"><strong id="statComplete">${stats.complete}</strong><span>Completed</span></div></section>${main}</main></div>`;
 }

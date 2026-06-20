@@ -97,3 +97,16 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
   gap: 12px;
   flex-wrap: wrap;
 }
+
+
+.status-progress-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 18px;
+  align-items: end;
+  margin-bottom: 18px;
+}
+
+@media(max-width:950px){
+  .status-progress-row { grid-template-columns: 1fr; }
+}
