@@ -1,23 +1,24 @@
-# My Life Vision App v4
+# My Life Vision App v5
 
-This version keeps your Supabase cloud sync and adds:
-- Better mobile layout
-- Better dashboard
+This version adds:
+- Goal scorecard status
+- Life Dashboard metrics
 - Progress by category
-- Recently updated section
-- Quarterly review section
-- Annual review section
-- Stronger save/status messages
-- Export backup
+- Recently updated goals
+- Annual planning
+- Quarterly planning
+- Stop-doing and year-success reviews
+- Vision Board with image URLs
+- Built-in Coach insights
+- Cloud sync through Supabase
 
-To deploy:
-1. Unzip.
-2. Replace the GitHub repo files with:
-   - index.html
-   - styles.css
-   - app.js
-   - README.md
-3. Commit changes.
-4. Wait for GitHub Pages to redeploy.
+IMPORTANT:
+Before uploading the v5 app files, run `supabase_v5_migration.sql` once in Supabase SQL Editor.
 
-Your goals stay in Supabase and should not be erased by replacing these files.
+Then replace the GitHub repo files with:
+- index.html
+- styles.css
+- app.js
+- README.md
+
+You do NOT upload the SQL file to GitHub unless you want to keep it as documentation.
