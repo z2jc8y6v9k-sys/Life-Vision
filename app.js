@@ -838,11 +838,13 @@ function dashboardIntroHtml(stats) {
 function utilityMenuHtml() {
   return `<details class="utility-menu">
     <summary>Menu</summary>
+    <div id="saveStatus" class="menu-save-status">Cloud Sync On</div>
     <button onclick="activeView='Workbook';showAdd=!showAdd;render();scrollToContentTop();">${showAdd ? "Close Add Goal" : "Add Goal"}</button>
     <button onclick="exportData()">Export Backup</button>
     <button onclick="logout()">Sign Out</button>
   </details>`;
 }
+
 
 function render() {
   const stats = completionStats();
@@ -855,7 +857,7 @@ function render() {
   }).join("");
   const dashboard = `${priorityStackHtml()}${todayThisWeekHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
   let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Today / This Week" ? todayThisWeekHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}<section class="type-note"><strong></section>${grouped}`;
-  document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div>${utilityMenuHtml()}<div id="saveStatus" class="save-status">Cloud Sync On</div><div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div></aside><main class="content">
+  document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div>${utilityMenuHtml()}</aside><main class="content">
         <div class="top-app-row">
           ${mainNavCardHtml()}
           ${workbookCardHtml()}

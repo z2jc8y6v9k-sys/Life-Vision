@@ -657,3 +657,117 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
     grid-row: auto !important;
   }
 }
+
+/* v23 clean top layout */
+.top-app-row {
+  display: grid !important;
+  grid-template-columns: 240px minmax(280px, 360px) !important;
+  gap: 16px !important;
+  align-items: start !important;
+  justify-content: start !important;
+  margin-bottom: 18px !important;
+}
+
+.main-nav-card {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  display: block !important;
+}
+
+.workbook-card {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  display: block !important;
+}
+
+.status-card {
+  grid-column: 2 !important;
+  grid-row: 1 / span 2 !important;
+  align-self: start !important;
+}
+
+.main-nav-card button,
+.workbook-card button {
+  width: 100% !important;
+  display: block !important;
+  margin: 5px 0 !important;
+  padding: 7px 9px !important;
+  font-size: 12px !important;
+  border-radius: 12px !important;
+  line-height: 1.15 !important;
+  text-align: left !important;
+}
+
+.utility-menu {
+  margin: 4px 0 10px !important;
+  border: 1px solid var(--line);
+  border-radius: 12px !important;
+  background: #fbfaf7;
+  padding: 5px 7px !important;
+  width: fit-content;
+  min-width: 96px;
+}
+
+.utility-menu summary {
+  cursor: pointer;
+  font-size: 12px !important;
+  font-weight: 900;
+  color: var(--ink);
+  list-style: none;
+  line-height: 1.1;
+}
+
+.utility-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.utility-menu summary::after {
+  content: "▾";
+  margin-left: 8px;
+  color: var(--muted);
+}
+
+.utility-menu[open] summary::after {
+  content: "▴";
+}
+
+.utility-menu button {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 10px;
+  padding: 7px 9px;
+  margin-top: 6px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.menu-save-status {
+  margin-top: 7px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  background: #ecfdf3;
+  color: #027a48;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.user-box,
+.save-status {
+  display: none !important;
+}
+
+@media(max-width:950px){
+  .top-app-row {
+    grid-template-columns: 1fr !important;
+  }
+  .main-nav-card,
+  .workbook-card,
+  .status-card {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+}

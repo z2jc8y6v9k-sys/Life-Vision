@@ -1,10 +1,10 @@
-# My Life Vision App v22
+# My Life Vision App v23 Layout Clean
 
 Changes:
-- Removed the Project vs Behavior instructional paragraph.
-- Kept Project / Behavior functionality.
-- Kept Behavior Ratings.
-- Kept Progress % tracking for projects.
-- Keeps v21 layout and navigation changes.
-
-No new SQL migration required.
+- Cloud Sync moved under Menu.
+- Menu button made smaller.
+- Removed signed-in email from the visible top/sidebar area.
+- Navigate buttons are stacked in a compact left column.
+- Workbook buttons are stacked below Navigate.
+- Status is side-by-side to the right of Navigate/Workbook.
+- No new Supabase SQL migration required.
