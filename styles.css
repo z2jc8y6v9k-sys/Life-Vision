@@ -127,3 +127,10 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
   color: var(--muted);
   margin-bottom: 18px;
 }
+
+
+.behavior-rating {
+  width: min(360px, 100%);
+  font-size: 16px;
+  margin-top: 4px;
+}

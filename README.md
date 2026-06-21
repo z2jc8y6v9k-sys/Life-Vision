@@ -1,18 +1,19 @@
-# My Life Vision App v9
+# My Life Vision App v10
 
 Changes:
-- Removed Blockers from the goal card
-- Removed Support Needed from the goal card
-- Added Today / This Week
-- Added Project vs Behavior type
-- Progress slider changes meaning:
-  - Project = Completion
-  - Behavior = Consistency
-- Added Behavior Rhythm / Standard field for behavior-based goals
-- Keeps Resources instead of Money
+- Project goals keep the percentage slider as Completion.
+- Behavior goals no longer use percentage.
+- Behavior goals now use:
+  - Needs Improvement
+  - Meets
+  - Exceeds
+- Keeps Project vs Behavior type from v9.
+- Keeps Today / This Week.
+- Keeps Resources instead of Money.
+- Keeps Blockers and Support Needed removed.
 
 Important:
-Run `supabase_v9_migration.sql` once in Supabase SQL Editor before uploading v9 files.
+Run `supabase_v10_migration.sql` once in Supabase SQL Editor before uploading v10 files.
 
 Deploy:
 1. Run the SQL migration in Supabase.

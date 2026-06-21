@@ -12,6 +12,7 @@ const categories = {
 };
 const ageBands = ["On-going", "53-58", "58-63", "63-68", "68-73", "73-78", "78-83", "83-88", "88-93"];
 const statuses = ["Not Started", "In Progress", "On Track", "At Risk", "Completed"];
+const behaviorRatings = ["Needs Improvement", "Meets", "Exceeds"];
 const metricKeys = ["Strength", "VO2", "Weight", "Cholesterol", "Energy", "Kids", "Mom", "Friends", "Books Read", "Songs Written"];
 
 const starterGoals = [
@@ -174,7 +175,7 @@ async function addGoal(event) {
   const title = document.getElementById("newGoalTitle").value.trim();
   const category = document.getElementById("newGoalCategory").value;
   if (!title) return;
-  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", today_this_week:"", behavior_standard:"", goal_type:"Project", friction:"", resources:"" };
+  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", today_this_week:"", behavior_standard:"", goal_type:"Project", behavior_rating:"Needs Improvement", friction:"", resources:"" };
   const { error } = await supabaseClient.from("goals").insert(row);
   if (error) return alert("Could not add goal: " + error.message);
   showAdd = false;
@@ -378,10 +379,18 @@ function goalCard(goal) {
 
     <div class="card-actions">
       <div class="progress-wrap">
-        <div class="progress-label" data-progress-label="${goal.id}">${progressLabel}: ${goal.progress || 0}%</div>
-        <input class="progress-slider" type="range" min="0" max="100" value="${goal.progress || 0}" oninput="updateProgress('${goal.id}', this.value)" />
-        <div class="progress-bar"><div class="progress-fill" data-progress-fill="${goal.id}" style="width:${goal.progress || 0}%;background:${color}"></div></div>
-        <div class="progress-help">${type === "Behavior" ? "Use this as consistency, not completion. 0 = not happening, 100 = fully embedded rhythm." : "Use this as project completion."}</div>
+        ${type === "Behavior" ? `
+          <div class="progress-label">Behavior Rating</div>
+          <select class="status-select behavior-rating" onchange="updateGoalNoRender('${goal.id}','behavior_rating',this.value)">
+            ${behaviorRatings.map(r=>`<option ${(goal.behavior_rating||"Needs Improvement")===r?"selected":""}>${r}</option>`).join("")}
+          </select>
+          <div class="progress-help">Use this to rate the current rhythm: Needs Improvement, Meets, or Exceeds.</div>
+        ` : `
+          <div class="progress-label" data-progress-label="${goal.id}">Completion: ${goal.progress || 0}%</div>
+          <input class="progress-slider" type="range" min="0" max="100" value="${goal.progress || 0}" oninput="updateProgress('${goal.id}', this.value)" />
+          <div class="progress-bar"><div class="progress-fill" data-progress-fill="${goal.id}" style="width:${goal.progress || 0}%;background:${color}"></div></div>
+          <div class="progress-help">Use this as project completion.</div>
+        `}
       </div>
       <button class="delete" onclick="deleteGoal('${goal.id}')">Delete</button>
     </div>
@@ -435,6 +444,7 @@ function buildAIPrompt() {
       title: g.title,
       status: g.status,
       progress: g.progress,
+      behavior_rating: g.behavior_rating,
       why: g.why,
       people: g.people,
       resources: g.money,
@@ -587,6 +597,7 @@ function strategicBriefText() {
   const onTrack = state.goals.filter(g => g.status === "On Track");
   const completed = state.goals.filter(g => g.status === "Completed" || Number(g.progress||0) >= 100);
   const notStarted = state.goals.filter(g => (g.status || "Not Started") === "Not Started" && Number(g.progress||0) === 0);
+  const needsImprovement = state.goals.filter(g => g.goal_type === "Behavior" && (g.behavior_rating || "Needs Improvement") === "Needs Improvement");
   const noNext30 = state.goals.filter(g => !(g.next30||"").trim());
   const noResources = state.goals.filter(g => !(g.money||"").trim());
   const noPeople = state.goals.filter(g => !(g.people||"").trim());
@@ -609,7 +620,7 @@ Biggest opportunity:
 
 Biggest risk:
 - ${lowest ? lowest.cat + " is the most neglected category at " + lowest.avg + "%." : "No category risk detected yet."}
-- ${atRisk.length ? atRisk.length + " goal(s) are marked At Risk." : "No goals are currently marked At Risk."}
+- ${atRisk.length ? atRisk.length + " project/goal(s) are marked At Risk." : "No project goals are currently marked At Risk."}\n- ${needsImprovement.length ? needsImprovement.length + " behavior goal(s) are rated Needs Improvement." : "No behavior goals are currently rated Needs Improvement."}
 
 Most neglected category:
 - ${lowest ? lowest.cat + " needs the most attention right now." : "Not enough data yet."}
