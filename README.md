@@ -1,25 +1,32 @@
-# My Life Vision App v11
+# My Life Vision App v12
 
 Changes:
-- Behavior goals no longer show project-style Status.
-- For Behavior goals, Behavior Rating replaces Status:
-  - Needs Improvement
-  - Meets
-  - Exceeds
-- Project goals still show:
-  - Status
-  - Completion %
-- Behavior goals no longer show a completion percentage.
-- Strategic Brief logic treats:
-  - Project Status separately from Behavior Rating.
+- Behavior goals now use the SAME planning structure as Projects:
+  - Objective
+  - Key Results
+  - Why This Matters
+  - People
+  - Resources
+  - Today / This Week
+  - Next 30 Days
+  - Next 12 Months
+  - Life Season
 
-No new Supabase SQL migration is needed if v10 migration was already run.
+- Removed:
+  - Behavior Standard
+  - How I'll Know I'm Living It
 
-Deploy:
-1. Upload/replace these GitHub files:
-   - index.html
-   - styles.css
-   - app.js
-   - README.md
-2. Wait for GitHub Pages to redeploy.
-3. Hard refresh the site if the old version appears.
+- Difference between types:
+  Project:
+    - Status
+    - Completion %
+
+  Behavior:
+    - Behavior Rating
+      * Needs Improvement
+      * Meets
+      * Exceeds
+
+Planned next:
+- Life Season View
+- Priority Stack
