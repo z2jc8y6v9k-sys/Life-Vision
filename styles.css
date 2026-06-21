@@ -1414,18 +1414,46 @@ body .content .view-title + div:empty {
 
 /* But when showAdd is false, no add form should exist; this prevents empty shells from showing. */
 
-
-/* v31 requested-only updates: equal Dashboard/Workbook boxes + bullet-friendly fields */
+/* v32: Workbook left + Dashboard right, equal box sizing only */
 .nav-workbook-row {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
   align-items: stretch !important;
+  max-width: 760px !important;
 }
 
-.nav-box.dashboard-box,
-.nav-box.workbook-box {
+.workbook-box {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+}
+
+.dashboard-box {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+}
+
+.nav-workbook-row .nav-box {
   width: 100% !important;
-  min-height: 96px !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
-.field-body[data-bullet-field="true"] {
-  white-space: pre-wrap;
+.nav-workbook-row .button-wrap {
+  flex: 1 1 auto !important;
+  align-content: flex-start !important;
+}
+
+@media(max-width:800px) {
+  .nav-workbook-row {
+    grid-template-columns: 1fr !important;
+    max-width: none !important;
+  }
+  .workbook-box,
+  .dashboard-box {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
 }
