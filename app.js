@@ -776,44 +776,28 @@ function statusCardHtml(stats) {
 
   const projectStarted = projects.filter(g => Number(g.progress || 0) > 0 || !["Not Started", "", null, undefined].includes(g.status)).length;
   const projectDone = projects.filter(g => g.status === "Completed" || Number(g.progress || 0) >= 100).length;
-  const projectAtRisk = projects.filter(g => g.status === "At Risk").length;
 
   const behaviorStarted = behaviors.filter(g => (g.behavior_rating || "Needs Improvement") !== "Needs Improvement" || (g.today_this_week || "").trim() || (g.key_results || "").trim()).length;
-  const behaviorDone = behaviors.filter(g => (g.behavior_rating || "") === "Exceeds").length;
   const behaviorMeets = behaviors.filter(g => ["Meets", "Exceeds"].includes(g.behavior_rating || "")).length;
 
-  return `<aside class="status-card top-card">
-    <div class="top-card-title">Status</div>
-    <div class="status-compact-row">
-      <div>
-        <b>Projects</b>
-        <span>${projects.length} total</span>
-        <span>${projectStarted} started</span>
-        <span>${projectDone} done</span>
-        <span>${projectAtRisk} at risk</span>
-      </div>
-      <div>
-        <b>Behaviors</b>
-        <span>${behaviors.length} total</span>
-        <span>${behaviorStarted} started</span>
-        <span>${behaviorMeets} meet+</span>
-        <span>${behaviorDone} exceed</span>
-      </div>
-    </div>
+  return `<aside class="status-square">
+    <div class="status-title">Status</div>
+    <div class="status-line"><b>Projects</b><span>${projectStarted}/${projects.length} started</span><span>${projectDone} done</span></div>
+    <div class="status-line"><b>Behaviors</b><span>${behaviorStarted}/${behaviors.length} started</span><span>${behaviorMeets} meet+</span></div>
   </aside>`;
 }
 
 function mainNavCardHtml() {
   const views = ["Dashboard","Priority Stack","Today / This Week","Life Seasons","Weekly Review","Strategic Brief","Coach"];
-  return `<aside class="main-nav-card top-card">
-    <div class="top-card-title">Navigate</div>
+  return `<aside class="nav-box">
+    <div class="box-title">Navigate</div>
     ${views.map(v => `<button onclick="setMainView('${v}')" class="${activeView===v ? "active" : ""}">${v}</button>`).join("")}
   </aside>`;
 }
 
 function workbookCardHtml() {
-  return `<aside class="workbook-card top-card">
-    <div class="top-card-title">Workbook</div>
+  return `<aside class="nav-box">
+    <div class="box-title">Workbook</div>
     <button onclick="activeView='Workbook';activeCategory='All';render();scrollToContentTop();" class="${activeView==='Workbook' && activeCategory==='All' ? 'active' : ''}">All</button>
     ${Object.keys(categories).map(cat => `<button onclick="activeView='Workbook';activeCategory='${cat}';render();scrollToContentTop();" class="${activeView==='Workbook' && activeCategory===cat ? 'active' : ''}" style="${activeView==='Workbook' && activeCategory===cat ? `background:${categories[cat].color};color:#fff;border-color:${categories[cat].color}` : `color:${categories[cat].color}`}">${cat}</button>`).join("")}
   </aside>`;
@@ -845,8 +829,8 @@ function dashboardIntroHtml(stats) {
 
 
 function utilityMenuHtml() {
-  return `<details class="utility-menu">
-    <summary>Menu</summary>
+  return `<details class="tiny-menu">
+    <summary>☰</summary>
     <div id="saveStatus" class="menu-save-status">Cloud Sync On</div>
     <button onclick="activeView='Workbook';showAdd=!showAdd;render();scrollToContentTop();">${showAdd ? "Close Add Goal" : "Add Goal"}</button>
     <button onclick="exportData()">Export Backup</button>
@@ -867,11 +851,22 @@ function render() {
   const dashboard = `${priorityStackHtml()}${todayThisWeekHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
   let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Today / This Week" ? todayThisWeekHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}<section class="type-note"><strong></section>${grouped}`;
   document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand-row"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS</p></div>${statusCardHtml(completionStats())}</div>${utilityMenuHtml()}</aside><main class="content">
-        <div class="top-app-row">
+        <header class="app-header">
+          <div class="header-left">
+            ${utilityMenuHtml()}
+            <div class="brand-main">
+              <h1>My Life Vision</h1>
+              <p>Strategic Life OS</p>
+            </div>
+          </div>
+          ${statusCardHtml(stats)}
+        </header>
+
+        <div class="nav-workbook-row">
           ${mainNavCardHtml()}
           ${workbookCardHtml()}
-          
         </div>
+
         <div class="content-start"></div>
         ${activeView === "Dashboard" ? dashboardIntroHtml(stats) : viewTitleHtml()}
         ${main}
