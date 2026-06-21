@@ -1384,3 +1384,32 @@ body .content .view-title + .panel:empty,
 body .content .view-title + div:empty {
   display: none !important;
 }
+
+/* v30 definitive Workbook blank box removal */
+.workbook-page > .view-title + .add-form:not(:has(textarea)),
+.workbook-page > .view-title + .add-form:empty,
+.workbook-page > .view-title + .panel:empty,
+.workbook-page > .view-title + div:empty,
+.workbook-page > .view-title + section:empty,
+.workbook-page .type-note {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* If the blank shell is an add-form with only hidden/empty controls, collapse it on Workbook unless Add Goal is open. */
+.workbook-page .add-form {
+  display: none !important;
+}
+
+.workbook-page .add-form:has(textarea),
+.workbook-page .add-form:has(select),
+.workbook-page .add-form:has(button) {
+  display: block !important;
+}
+
+/* But when showAdd is false, no add form should exist; this prevents empty shells from showing. */
