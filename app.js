@@ -103,7 +103,7 @@ async function seedStarterGoalsIfEmpty() {
   if (data && data.length > 0) return;
   const rows = starterGoals.map(g => ({ 
     user_id: state.user.id, category: g.category, title: g.title, why: "", people: "", money: "", 
-    next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective: "", key_results: "", blockers: "", resources: ""
+    next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective: "", key_results: "", friction: "", resources: ""
   }));
   await supabaseClient.from("goals").insert(rows);
 }
@@ -157,7 +157,7 @@ function updateProgress(id, value) {
   const fill = document.querySelector(`[data-progress-fill="${id}"]`);
   const label = document.querySelector(`[data-progress-label="${id}"]`);
   if (fill) fill.style.width = `${value}%`;
-  if (label) label.textContent = `Progress: ${value}%`;
+  if (label) { const goal = state.goals.find(g => g.id === id); label.textContent = `${progressLabelFor(goal)}: ${value}%`; }
   updateStatsOnly();
 }
 
@@ -174,7 +174,7 @@ async function addGoal(event) {
   const title = document.getElementById("newGoalTitle").value.trim();
   const category = document.getElementById("newGoalCategory").value;
   if (!title) return;
-  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", blockers:"", resources:"" };
+  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", today_this_week:"", behavior_standard:"", goal_type:"Project", friction:"", resources:"" };
   const { error } = await supabaseClient.from("goals").insert(row);
   if (error) return alert("Could not add goal: " + error.message);
   showAdd = false;
@@ -299,7 +299,7 @@ function coachInsights() {
   const noPeople = state.goals.filter(g => !(g.people||"").trim());
   if (lowest) insights.push({title:`Under-invested area: ${lowest.cat}`, text:`This category has the lowest average progress at ${lowest.avg}%. Pick one small next action this week.`});
   if (highest && highest.avg > 0) insights.push({title:`Strongest momentum: ${highest.cat}`, text:`This category is currently leading at ${highest.avg}%. Ask what is working here that could transfer elsewhere.`});
-  if (atRisk.length) insights.push({title:`At-risk goals need attention`, text:`You marked ${atRisk.length} goal(s) as At Risk. Review blockers and resources before adding new goals.`});
+  if (atRisk.length) insights.push({title:`At-risk goals need attention`, text:`You marked ${atRisk.length} goal(s) as At Risk. Review friction and resources before adding new goals.`});
   if (noNext30.length) insights.push({title:`Next 30 Days gap`, text:`${noNext30.length} goal(s) have no next-30-day action. These are likely to stay aspirational unless you define the next move.`});
   if (noPeople.length) insights.push({title:`People strategy gap`, text:`${noPeople.length} goal(s) do not name people yet. Add collaborators, beneficiaries, or supporters.`});
   if (insights.length === 0) insights.push({title:"Solid system health", text:"Your goals have next actions, people, and progress. Use the quarterly review to choose what matters most now."});
@@ -310,19 +310,84 @@ function fieldCard(goal, key, label, className = "") {
   const color = categories[goal.category].color;
   return `<div class="field-card ${className}"><div class="field-header" style="background:${color}">${label}</div><textarea class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea></div>`;
 }
+
+function goalType(goal) {
+  return goal?.goal_type || "Project";
+}
+
+function progressLabelFor(goal) {
+  return goalType(goal) === "Behavior" ? "Consistency" : "Completion";
+}
+
+function objectiveLabelFor(goal) {
+  return goalType(goal) === "Behavior" ? "Behavior Standard" : "Objective";
+}
+
+function keyResultsLabelFor(goal) {
+  return goalType(goal) === "Behavior" ? "How I’ll Know I’m Living It" : "Key Results";
+}
+
 function goalCard(goal) {
   const color = categories[goal.category].color;
+  const type = goalType(goal);
+  const progressLabel = progressLabelFor(goal);
+
   return `<article class="goal-card">
-    <div class="goal-top"><span class="category-pill" style="background:${color}">${goal.category}</span><textarea class="goal-title" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', 'title', this.value)">${escapeHtml(goal.title)}</textarea></div>
-    <div class="grid-two"><label>Status<br><select class="status-select" onchange="updateGoalNoRender('${goal.id}','status',this.value)">${statuses.map(s=>`<option ${(goal.status||"Not Started")===s?"selected":""}>${s}</option>`).join("")}</select></label><label>Objective<br><textarea class="field-body" oninput="updateGoalNoRender('${goal.id}','objective',this.value)">${escapeHtml(goal.objective||"")}</textarea></label></div>
+    <div class="goal-top">
+      <span class="category-pill" style="background:${color}">${goal.category}</span>
+      <textarea class="goal-title" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', 'title', this.value)">${escapeHtml(goal.title)}</textarea>
+    </div>
+
+    <div class="grid-two">
+      <label>Type<br>
+        <select class="status-select" onchange="updateGoalNoRender('${goal.id}','goal_type',this.value); setTimeout(render, 300);">
+          <option ${type==="Project"?"selected":""}>Project</option>
+          <option ${type==="Behavior"?"selected":""}>Behavior</option>
+        </select>
+      </label>
+      <label>Status<br>
+        <select class="status-select" onchange="updateGoalNoRender('${goal.id}','status',this.value)">
+          ${statuses.map(s=>`<option ${(goal.status||"Not Started")===s?"selected":""}>${s}</option>`).join("")}
+        </select>
+      </label>
+    </div>
+
+    <div class="grid-two">
+      ${fieldCard(goal, "objective", objectiveLabelFor(goal))}
+      ${fieldCard(goal, "key_results", keyResultsLabelFor(goal))}
+    </div>
+
     ${fieldCard(goal, "why", "Why This Matters", "full")}
-    <div class="timeline-label">Time Horizon</div><div class="timeline">${ageBands.map(age => `<label class="age-chip"><input type="checkbox" ${goal.ages?.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />${age}</label>`).join("")}</div>
-    <div class="grid-two">${fieldCard(goal, "people", "People")}${fieldCard(goal, "money", "Resources")}</div>
-    <div class="grid-two">${fieldCard(goal, "next30", "Next 30 Days")}${fieldCard(goal, "next12", "Next 12 Months")}</div>
-    <div class="grid-two">${fieldCard(goal, "key_results", "Key Results")}${fieldCard(goal, "blockers", "Blockers")}</div>
-    <div class="card-actions"><div class="progress-wrap"><div class="progress-label" data-progress-label="${goal.id}">Progress: ${goal.progress || 0}%</div><input class="progress-slider" type="range" min="0" max="100" value="${goal.progress || 0}" oninput="updateProgress('${goal.id}', this.value)" /><div class="progress-bar"><div class="progress-fill" data-progress-fill="${goal.id}" style="width:${goal.progress || 0}%;background:${color}"></div></div></div><button class="delete" onclick="deleteGoal('${goal.id}')">Delete</button></div>
+
+    <div class="timeline-label">Time Horizon</div>
+    <div class="timeline">${ageBands.map(age => `<label class="age-chip"><input type="checkbox" ${goal.ages?.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />${age}</label>`).join("")}</div>
+
+    <div class="grid-two">
+      ${fieldCard(goal, "people", "People")}
+      ${fieldCard(goal, "money", "Resources")}
+    </div>
+
+    <div class="grid-two">
+      ${fieldCard(goal, "today_this_week", "Today / This Week")}
+      ${fieldCard(goal, "next30", "Next 30 Days")}
+    </div>
+
+    ${fieldCard(goal, "next12", "Next 12 Months", "full")}
+
+    ${type === "Behavior" ? fieldCard(goal, "behavior_standard", "Behavior Rhythm / Standard", "full") : ""}
+
+    <div class="card-actions">
+      <div class="progress-wrap">
+        <div class="progress-label" data-progress-label="${goal.id}">${progressLabel}: ${goal.progress || 0}%</div>
+        <input class="progress-slider" type="range" min="0" max="100" value="${goal.progress || 0}" oninput="updateProgress('${goal.id}', this.value)" />
+        <div class="progress-bar"><div class="progress-fill" data-progress-fill="${goal.id}" style="width:${goal.progress || 0}%;background:${color}"></div></div>
+        <div class="progress-help">${type === "Behavior" ? "Use this as consistency, not completion. 0 = not happening, 100 = fully embedded rhythm." : "Use this as project completion."}</div>
+      </div>
+      <button class="delete" onclick="deleteGoal('${goal.id}')">Delete</button>
+    </div>
   </article>`;
 }
+
 function addForm() {
   return `<form class="add-form" onsubmit="addGoal(event)"><strong>Add a New Goal</strong><textarea id="newGoalTitle" rows="3" placeholder="Write your goal..."></textarea><select id="newGoalCategory">${Object.keys(categories).map(c => `<option value="${c}">${c}</option>`).join("")}</select><button type="submit">Add Goal</button></form>`;
 }
@@ -331,7 +396,7 @@ function metricsHtml() {
 }
 function reviewsHtml() {
   const reviews = [
-    ["quarterly","Quarterly Review","Objective, key results, next 30 days, blockers, resources."],
+    ["quarterly","Quarterly Review","Objective, key results, next 30 days, friction, resources."],
     ["annual","Annual Review","What mattered most this year? What do I want next year?"],
     ["stop_doing","Stop Doing","What should I stop doing to make room for what matters?"],
     ["year_success","This Year Success","What would make this year a success?"]
@@ -377,7 +442,7 @@ function buildAIPrompt() {
       next12: g.next12,
       objective: g.objective,
       key_results: g.key_results,
-      blockers: g.blockers,
+      today_this_week: g.today_this_week,
       
       ages: g.ages
     })),
@@ -443,7 +508,7 @@ function aiCoachHtml() {
   const hasKey = !!getOpenAIKey();
   return `<section class="panel">
     <h3>AI Coach</h3>
-    <p>This uses OpenAI to review your goals, progress, reviews, metrics, vision board, blockers, people, and resources. Your OpenAI key is stored only in this browser's local storage.</p>
+    <p>This uses OpenAI to review your goals, progress, reviews, metrics, vision board, friction, people, and resources. Your OpenAI key is stored only in this browser's local storage.</p>
     <div class="ai-warning">For a stronger production version, the OpenAI key should eventually be moved to a secure Supabase Edge Function. This version is designed for your personal use.</div>
     <div class="ai-setup">
       <input id="openaiKey" type="password" placeholder="${hasKey ? "OpenAI API key saved locally" : "Paste OpenAI API key"}" />
@@ -528,7 +593,7 @@ function strategicBriefText() {
   const recent = recentGoals().slice(0,3);
 
   const highestLeverage = state.goals
-    .filter(g => (g.next30||"").trim() || (g.blockers||"").trim() || g.status === "At Risk")
+    .filter(g => (g.next30||"").trim() || (g.friction||"").trim() || g.status === "At Risk")
     .sort((a,b) => (b.status === "At Risk") - (a.status === "At Risk") || Number(b.progress||0)-Number(a.progress||0))[0];
 
   return `TODD'S STRATEGIC BRIEF
@@ -585,7 +650,7 @@ function render() {
     return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
   const dashboard = `${statusDashboardHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
-  let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Vision Board" ? visionHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
+  let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Vision Board" ? visionHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}<section class="type-note"><strong>Project vs Behavior:</strong> Use Project for discrete outcomes with an endpoint. Use Behavior for ongoing ways of living; the slider becomes consistency, not completion.</section>${grouped}`;
   document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div>${viewButtons}<hr>${navCats}<button class="add-button" onclick="activeView='Workbook';showAdd=!showAdd;render();">${showAdd ? "Close Add Goal" : "+ Add Goal"}</button><button class="utility-button" onclick="exportData()">Export Backup</button><button class="utility-button" onclick="logout()">Sign Out</button><div id="saveStatus" class="save-status">Cloud Sync On</div><div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div></aside><main class="content"><section class="hero"><div><h2>Life Portfolio</h2><p>A cloud-synced personal operating system for goals, people, money, next actions, scorecards, reviews, vision, and coaching.</p></div><div class="hero-badge"><strong>${stats.avg}%</strong><span>Average progress across ${stats.total} goals</span></div></section><section class="stats"><div class="stat"><strong id="statTotal">${stats.total}</strong><span>Total goals</span></div><div class="stat"><strong id="statAvg">${stats.avg}%</strong><span>Average progress</span></div><div class="stat"><strong id="statActive">${stats.active}</strong><span>Goals started</span></div><div class="stat"><strong id="statComplete">${stats.complete}</strong><span>Completed</span></div></section>${main}</main></div>`;
 }
 function escapeHtml(text) {
