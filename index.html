@@ -3,110 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Life Vision v33</title>
+  <title>My Life Vision v5</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body id="top">
-  <header class="hero">
-    <div class="container">
-      <p class="eyebrow">My Life Vision v33</p>
-      <h1>I live from connection, choice, courage, creativity, love, and joy.</h1>
-      <p class="vision-text">
-        I am physically strong, emotionally free, deeply connected to the people I love, and engaged in meaningful work that improves lives. I create, teach, lead, build, write, play music, explore, and contribute in ways that matter.
-      </p>
-      <p class="vision-text strong">I have already earned my worth. Now I choose how I want to show up.</p>
-    </div>
-  </header>
-
-  <main class="container">
-    <section class="status-panel" aria-label="Status">
-      <h2>Status</h2>
-      <div class="status-grid">
-        <button data-status="Health">Health <span>◯</span></button>
-        <button data-status="Relationships">Relationships <span>◯</span></button>
-        <button data-status="Impact">Impact <span>◯</span></button>
-        <button data-status="Adventure">Adventure <span>◯</span></button>
-        <button data-status="Creativity">Creativity <span>◯</span></button>
-      </div>
-    </section>
-
-    <div class="top-cards">
-      <section class="card dashboard-card">
-        <h2>Dashboard</h2>
-        <nav class="dashboard-nav" aria-label="Dashboard navigation">
-          <a href="#health">Health</a>
-          <a href="#relationships">Relationships</a>
-          <a href="#impact">Impact</a>
-          <a href="#adventure">Adventure</a>
-          <a href="#creativity">Creativity</a>
-          <a href="#life-season">Life Season</a>
-          <a href="#annual-priorities">Annual Priorities</a>
-          <a href="#quarterly-priorities">Quarterly Priorities</a>
-          <a href="#weekly-focus">Weekly Focus</a>
-          <a href="#wins-lessons">Wins & Lessons</a>
-        </nav>
-      </section>
-
-      <section class="card workbook-card">
-        <h2>Workbook</h2>
-        <p>Use each section to capture key results, people, resources, near-term actions, wins, and lessons.</p>
-        <p>The dashboard links jump each area to the top of the screen. Use the floating ↑ Top button to return here from anywhere.</p>
-      </section>
-    </div>
-
-    <section id="health" class="workbook-section">
-      <h2>Health</h2>
-      <p class="section-vision">Build strength, muscle, healthspan, energy, mobility, resilience, and vitality.</p>
-      <ul class="success-list"><li>Strong and athletic at every age</li><li>Leaner waist and lower visceral fat</li><li>Excellent VO2 fitness</li><li>High energy throughout the day</li><li>Consistent recovery and sleep</li><li>Long healthspan</li></ul>
-      <div class="field-grid"></div>
-    </section>
-
-    <section id="relationships" class="workbook-section">
-      <h2>Relationships</h2>
-      <p class="section-vision">The people I love feel supported, understood, valued, and loved.</p>
-      <ul class="success-list"><li>Strong marriage</li><li>Deep connection with Natalie, Perry, and Annie</li><li>Meaningful friendships</li><li>Presence and laughter</li><li>Honest communication</li></ul>
-      <div class="field-grid"></div>
-    </section>
-
-    <section id="impact" class="workbook-section">
-      <h2>Impact</h2>
-      <p class="section-vision">Build organizations, leaders, communities, and ideas that improve lives.</p>
-      <ul class="success-list"><li>Leadership development</li><li>Team building</li><li>Culture creation</li><li>Meaningful contribution</li><li>Durable outcomes</li></ul>
-      <div class="field-grid"></div>
-    </section>
-
-    <section id="adventure" class="workbook-section">
-      <h2>Adventure</h2>
-      <p class="section-vision">Live a life filled with wonder, beauty, exploration, movement, and memorable experiences.</p>
-      <ul class="success-list"><li>Travel</li><li>Nature</li><li>New experiences</li><li>Reading</li><li>Concerts</li><li>Shared adventures</li></ul>
-      <div class="field-grid"></div>
-    </section>
-
-    <section id="creativity" class="workbook-section">
-      <h2>Creativity</h2>
-      <p class="section-vision">Create things that move people.</p>
-      <ul class="success-list"><li>Finish songs</li><li>Write stories</li><li>Write and finish a book</li><li>Perform music</li><li>Create content</li><li>Build creative projects</li></ul>
-      <div class="field-grid"></div>
-    </section>
-
-    <section id="life-season" class="workbook-section simple-section">
-      <h2>Life Season</h2>
-      <h3>Building the next chapter intentionally.</h3>
-      <p>I am creating a life that balances health, relationships, impact, adventure, and creativity. This season is about finishing meaningful work, choosing boldly, deepening relationships, and creating a life that feels alive rather than merely productive.</p>
-      <ul><li>Connection without self-abandonment</li><li>Courage over approval</li><li>Finishing over planning</li><li>Joy and aliveness</li><li>Healthspan and vitality</li><li>Meaningful contribution</li></ul>
-    </section>
-
-    <section id="annual-priorities" class="workbook-section simple-section">
-      <h2>Annual Priorities</h2>
-      <ul><li>Build strength and muscle</li><li>Improve VO2 and healthspan</li><li>Strengthen family relationships</li><li>Launch next meaningful professional chapter</li><li>Create consistently</li><li>Complete one major creative project</li></ul>
-    </section>
-
-    <section id="quarterly-priorities" class="workbook-section"><h2>Quarterly Priorities</h2><div class="field-grid"></div></section>
-    <section id="weekly-focus" class="workbook-section"><h2>Weekly Focus</h2><div class="field-grid"></div></section>
-    <section id="wins-lessons" class="workbook-section"><h2>Wins & Lessons</h2><div class="field-grid"></div></section>
-  </main>
-
-  <a class="top-button" href="#top" aria-label="Back to top">↑ Top</a>
-  <script src="script.js"></script>
+<body>
+  <div id="app"></div>
+  <script src="app.js"></script>
 </body>
 </html>
