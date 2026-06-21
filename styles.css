@@ -474,3 +474,186 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
     grid-template-columns: 1fr;
   }
 }
+
+/* v20 layout overrides */
+.top-app-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px) !important;
+  gap: 16px !important;
+  align-items: start !important;
+  margin-bottom: 18px !important;
+}
+
+.main-nav-card {
+  grid-column: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.main-nav-card .top-card-title {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.main-nav-card button {
+  width: auto !important;
+  margin: 0 !important;
+  padding: 6px 9px !important;
+  font-size: 12px !important;
+  border-radius: 999px !important;
+  line-height: 1.1;
+}
+
+.workbook-card {
+  grid-column: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.workbook-card .top-card-title {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.workbook-card button {
+  width: auto !important;
+  margin: 0 !important;
+  padding: 6px 9px !important;
+  font-size: 12px !important;
+  border-radius: 999px !important;
+  line-height: 1.1;
+}
+
+.status-card {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  justify-self: stretch;
+}
+
+.status-mini-grid {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+.status-mini-grid div {
+  padding: 7px !important;
+}
+
+.status-mini-grid strong {
+  font-size: 18px !important;
+}
+
+.status-detail {
+  grid-template-columns: 1fr;
+}
+
+@media(max-width:950px){
+  .top-app-row {
+    grid-template-columns: 1fr !important;
+  }
+  .status-card,
+  .main-nav-card,
+  .workbook-card {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
+
+/* v21 prelaunch layout */
+.top-app-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px) !important;
+  gap: 16px !important;
+  align-items: start !important;
+  margin-bottom: 18px !important;
+}
+
+.main-nav-card {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.status-card {
+  grid-column: 2 !important;
+  grid-row: 1 / span 2 !important;
+}
+
+.workbook-card {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.main-nav-card button,
+.workbook-card button {
+  width: auto !important;
+  margin: 0 !important;
+  padding: 6px 9px !important;
+  font-size: 12px !important;
+  border-radius: 999px !important;
+  line-height: 1.1 !important;
+}
+
+.utility-menu {
+  margin: 12px 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fbfaf7;
+  padding: 8px;
+}
+
+.utility-menu summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--ink);
+  list-style: none;
+}
+
+.utility-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.utility-menu summary::after {
+  content: "▾";
+  float: right;
+  color: var(--muted);
+}
+
+.utility-menu[open] summary::after {
+  content: "▴";
+}
+
+.utility-menu button {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 12px;
+  padding: 8px 10px;
+  margin-top: 7px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+@media(max-width:950px){
+  .top-app-row {
+    grid-template-columns: 1fr !important;
+  }
+  .main-nav-card,
+  .workbook-card,
+  .status-card {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+}
