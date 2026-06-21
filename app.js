@@ -362,7 +362,7 @@ function priorityStackHtml() {
     <h3>Priority Stack</h3>
     <p>The 3–5 goals that matter most right now.</p>
     <div class="recent-list">
-      ${priorities.length ? priorities.map(g => `<div class="recent-item clickable-card" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">#${g.priority_rank} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${g.status || g.behavior_rating || ""}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
+      ${priorities.length ? priorities.map(g => `<div class="recent-item clickable-card" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">#${g.priority_rank} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${g.status || g.behavior_rating || ""}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
     </div>
   </section>`;
 }
@@ -375,7 +375,7 @@ function lifeSeasonsHtml() {
       const goals = state.goals.filter(g => (g.ages || []).includes(age));
       return `<div class="season-block">
         <h4>${age}</h4>
-        ${goals.length ? goals.map(g => `<div class="recent-item"><strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong><small>${g.category}</small></div>`).join("") : `<div class="recent-item"><small>No goals assigned to this season yet.</small></div>`}
+        ${goals.length ? goals.map(g => `<div class="recent-item"><strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)}</small></div>`).join("") : `<div class="recent-item"><small>No goals assigned to this season yet.</small></div>`}
       </div>`;
     }).join("")}
   </section>`;
@@ -765,8 +765,54 @@ function todayThisWeekHtml() {
 }
 
 
+
+
+
+
+
+function statusCardHtml(stats) {
+  const projects = state.goals.filter(g => (g.goal_type || "Project") === "Project");
+  const behaviors = state.goals.filter(g => g.goal_type === "Behavior");
+
+  const projectComplete = projects.filter(g => g.status === "Completed" || Number(g.progress || 0) >= 100).length;
+  const projectAtRisk = projects.filter(g => g.status === "At Risk").length;
+  const behaviorMeets = behaviors.filter(g => ["Meets", "Exceeds"].includes(g.behavior_rating || "")).length;
+  const behaviorNeeds = behaviors.filter(g => (g.behavior_rating || "Needs Improvement") === "Needs Improvement").length;
+
+  return `<aside class="status-card top-card">
+    <div class="top-card-title">Status</div>
+    <div class="status-mini-grid">
+      <div><strong>${stats.total}</strong><span>Total</span></div>
+      <div><strong>${stats.avg}%</strong><span>Avg</span></div>
+      <div><strong>${stats.active}</strong><span>Started</span></div>
+      <div><strong>${stats.complete}</strong><span>Done</span></div>
+    </div>
+    <div class="status-detail">
+      <div><b>Projects</b><span>${projects.length} total / ${projectComplete} complete / ${projectAtRisk} at risk</span></div>
+      <div><b>Behaviors</b><span>${behaviors.length} total / ${behaviorMeets} meets+ / ${behaviorNeeds} need work</span></div>
+    </div>
+  </aside>`;
+}
+
+function mainNavCardHtml() {
+  const views = ["Dashboard","Priority Stack","Today / This Week","Life Seasons","Weekly Review","Strategic Brief","Coach"];
+  return `<aside class="main-nav-card top-card">
+    <div class="top-card-title">Navigate</div>
+    ${views.map(v => `<button onclick="setMainView('${v}')" class="${activeView===v ? "active" : ""}">${v}</button>`).join("")}
+  </aside>`;
+}
+
+function workbookCardHtml() {
+  return `<aside class="workbook-card top-card">
+    <div class="top-card-title">Workbook</div>
+    <button onclick="activeView='Workbook';activeCategory='All';render();scrollToContentTop();" class="${activeView==='Workbook' && activeCategory==='All' ? 'active' : ''}">All</button>
+    ${Object.keys(categories).map(cat => `<button onclick="activeView='Workbook';activeCategory='${cat}';render();scrollToContentTop();" class="${activeView==='Workbook' && activeCategory===cat ? 'active' : ''}" style="${activeView==='Workbook' && activeCategory===cat ? `background:${categories[cat].color};color:#fff;border-color:${categories[cat].color}` : `color:${categories[cat].color}`}">${cat}</button>`).join("")}
+  </aside>`;
+}
+
 function viewTitleHtml() {
   const titles = {
+    "Dashboard": "Dashboard",
     "Priority Stack": "Priority Stack",
     "Today / This Week": "Today / This Week Actions",
     "Life Seasons": "Life Seasons",
@@ -776,38 +822,22 @@ function viewTitleHtml() {
     "Workbook": "Workbook"
   };
 
-  if (activeView === "Dashboard") {
-    return "";
-  }
-
-  return `<section class="view-title">
-    <h2>${titles[activeView] || activeCategory || activeView}</h2>
-  </section>`;
+  return `<section class="view-title"><h2>${titles[activeView] || activeCategory || activeView}</h2></section>`;
 }
 
 function dashboardIntroHtml(stats) {
-  return `<section class="dashboard-hero">
+  return `<section class="dashboard-hero compact-hero">
     <div>
       <h2>Dashboard</h2>
       <p>Start here: what matters now, what needs action this week, and what is moving.</p>
     </div>
-    <div class="hero-badge"><strong>${stats.avg}%</strong><span>Average progress across ${stats.total} goals</span></div>
   </section>`;
-}
-
-
-function lifeAreasHtml() {
-  return `<aside class="life-areas-card">
-    <div class="life-areas-title">Workbook</div>
-    <button onclick="activeView='Workbook';activeCategory='All';render();scrollToContentTop();" class="${activeView==='Workbook' && activeCategory==='All' ? 'active' : ''}">All</button>
-    ${Object.keys(categories).map(cat => `<button onclick="activeView='Workbook';activeCategory='${cat}';render();scrollToContentTop();" class="${activeView==='Workbook' && activeCategory===cat ? 'active' : ''}" style="${activeView==='Workbook' && activeCategory===cat ? `background:${categories[cat].color};color:#fff;border-color:${categories[cat].color}` : `color:${categories[cat].color}`}">${cat}</button>`).join("")}
-  </aside>`;
 }
 
 function render() {
   const stats = completionStats();
   const navCats = "";
-  const viewButtons = ["Dashboard","Priority Stack","Today / This Week","Life Seasons","Weekly Review","Strategic Brief","Reviews","Coach"].map(v=>`<button class="nav-button ${activeView===v?"active":""}" style="${activeView===v?"background:#111827":""}" onclick="setMainView(\'${v}\')">${v}</button>`).join("");
+  const viewButtons = "";
   const grouped = Object.keys(categories).map(cat => {
     const goals = filteredGoals().filter(g => g.category === cat);
     if (!goals.length) return "";
@@ -815,7 +845,16 @@ function render() {
   }).join("");
   const dashboard = `${priorityStackHtml()}${todayThisWeekHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
   let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Today / This Week" ? todayThisWeekHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}<section class="type-note"><strong>Project vs Behavior:</strong> Use Project for discrete outcomes with an endpoint. Use Behavior for ongoing ways of living; behaviors use Needs Improvement / Meets / Exceeds instead of completion percentage.</section>${grouped}`;
-  document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div>${viewButtons}<button class="add-button" onclick="activeView='Workbook';showAdd=!showAdd;render();">${showAdd ? "Close Add Goal" : "+ Add Goal"}</button><button class="utility-button" onclick="exportData()">Export Backup</button><button class="utility-button" onclick="logout()">Sign Out</button><div id="saveStatus" class="save-status">Cloud Sync On</div><div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div></aside><main class="content"><div class="top-row"><div class="top-row-main">${activeView === "Dashboard" ? dashboardIntroHtml(stats) : viewTitleHtml()}</div>${lifeAreasHtml()}</div><section class="stats"><div class="stat"><strong id="statTotal">${stats.total}</strong><span>Total goals</span></div><div class="stat"><strong id="statAvg">${stats.avg}%</strong><span>Average progress</span></div><div class="stat"><strong id="statActive">${stats.active}</strong><span>Goals started</span></div><div class="stat"><strong id="statComplete">${stats.complete}</strong><span>Completed</span></div></section>${main}</main></div>`;
+  document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div><button class="add-button" onclick="activeView='Workbook';showAdd=!showAdd;render();">${showAdd ? "Close Add Goal" : "+ Add Goal"}</button><button class="utility-button" onclick="exportData()">Export Backup</button><button class="utility-button" onclick="logout()">Sign Out</button><div id="saveStatus" class="save-status">Cloud Sync On</div><div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div></aside><main class="content">
+        <div class="top-app-row">
+          ${mainNavCardHtml()}
+          ${workbookCardHtml()}
+          ${statusCardHtml(stats)}
+        </div>
+        <div class="content-start"></div>
+        ${activeView === "Dashboard" ? dashboardIntroHtml(stats) : viewTitleHtml()}
+        ${main}
+      </main></div>`;
 }
 function escapeHtml(text) {
   return String(text || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
