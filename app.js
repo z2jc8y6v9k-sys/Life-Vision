@@ -175,7 +175,7 @@ async function addGoal(event) {
   const title = document.getElementById("newGoalTitle").value.trim();
   const category = document.getElementById("newGoalCategory").value;
   if (!title) return;
-  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", today_this_week:"", behavior_standard:"", goal_type:"Project", behavior_rating:"Needs Improvement", friction:"", resources:"" };
+  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", today_this_week:"", behavior_standard:"", goal_type:"Project", behavior_rating:"Needs Improvement", today_this_week:"", friction:"", resources:"" };
   const { error } = await supabaseClient.from("goals").insert(row);
   if (error) return alert("Could not add goal: " + error.message);
   showAdd = false;
@@ -321,17 +321,16 @@ function progressLabelFor(goal) {
 }
 
 function objectiveLabelFor(goal) {
-  return goalType(goal) === "Behavior" ? "Behavior Standard" : "Objective";
+  return "Objective";
 }
 
 function keyResultsLabelFor(goal) {
-  return goalType(goal) === "Behavior" ? "How I’ll Know I’m Living It" : "Key Results";
+  return "Key Results";
 }
 
 function goalCard(goal) {
   const color = categories[goal.category].color;
   const type = goalType(goal);
-  const progressLabel = progressLabelFor(goal);
 
   return `<article class="goal-card">
     <div class="goal-top">
@@ -362,13 +361,13 @@ function goalCard(goal) {
     </div>
 
     <div class="grid-two">
-      ${fieldCard(goal, "objective", objectiveLabelFor(goal))}
-      ${fieldCard(goal, "key_results", keyResultsLabelFor(goal))}
+      ${fieldCard(goal, "objective", "Objective")}
+      ${fieldCard(goal, "key_results", "Key Results")}
     </div>
 
     ${fieldCard(goal, "why", "Why This Matters", "full")}
 
-    <div class="timeline-label">Time Horizon</div>
+    <div class="timeline-label">Life Season / Time Horizon</div>
     <div class="timeline">${ageBands.map(age => `<label class="age-chip"><input type="checkbox" ${goal.ages?.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />${age}</label>`).join("")}</div>
 
     <div class="grid-two">
@@ -382,8 +381,6 @@ function goalCard(goal) {
     </div>
 
     ${fieldCard(goal, "next12", "Next 12 Months", "full")}
-
-    ${type === "Behavior" ? fieldCard(goal, "behavior_standard", "Behavior Rhythm / Standard", "full") : ""}
 
     <div class="card-actions">
       <div class="progress-wrap">
@@ -665,7 +662,7 @@ function render() {
     return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
   const dashboard = `${statusDashboardHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
-  let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Vision Board" ? visionHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}<section class="type-note"><strong>Project vs Behavior:</strong> Use Project for discrete outcomes with an endpoint. Use Behavior for ongoing ways of living; the slider becomes consistency, not completion.</section>${grouped}`;
+  let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Vision Board" ? visionHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}<section class="type-note"><strong>Project vs Behavior:</strong> Use Project for discrete outcomes with an endpoint. Use Behavior for ongoing ways of living; behaviors use Needs Improvement / Meets / Exceeds instead of completion percentage.</section>${grouped}`;
   document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div>${viewButtons}<hr>${navCats}<button class="add-button" onclick="activeView='Workbook';showAdd=!showAdd;render();">${showAdd ? "Close Add Goal" : "+ Add Goal"}</button><button class="utility-button" onclick="exportData()">Export Backup</button><button class="utility-button" onclick="logout()">Sign Out</button><div id="saveStatus" class="save-status">Cloud Sync On</div><div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div></aside><main class="content"><section class="hero"><div><h2>Life Portfolio</h2><p>A cloud-synced personal operating system for goals, people, money, next actions, scorecards, reviews, vision, and coaching.</p></div><div class="hero-badge"><strong>${stats.avg}%</strong><span>Average progress across ${stats.total} goals</span></div></section><section class="stats"><div class="stat"><strong id="statTotal">${stats.total}</strong><span>Total goals</span></div><div class="stat"><strong id="statAvg">${stats.avg}%</strong><span>Average progress</span></div><div class="stat"><strong id="statActive">${stats.active}</strong><span>Goals started</span></div><div class="stat"><strong id="statComplete">${stats.complete}</strong><span>Completed</span></div></section>${main}</main></div>`;
 }
 function escapeHtml(text) {
