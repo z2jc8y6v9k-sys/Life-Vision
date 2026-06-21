@@ -362,7 +362,7 @@ function priorityStackHtml() {
     <h3>Priority Stack</h3>
     <p>The 3–5 goals that matter most right now.</p>
     <div class="recent-list">
-      ${priorities.length ? priorities.map(g => `<div class="recent-item clickable-card" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">#${g.priority_rank} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${g.status || g.behavior_rating || ""}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
+      ${priorities.length ? priorities.map(g => `<div class="recent-item clickable-card" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">#${g.priority_rank} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${g.status || g.behavior_rating || ""}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
     </div>
   </section>`;
 }
@@ -375,7 +375,7 @@ function lifeSeasonsHtml() {
       const goals = state.goals.filter(g => (g.ages || []).includes(age));
       return `<div class="season-block">
         <h4>${age}</h4>
-        ${goals.length ? goals.map(g => `<div class="recent-item"><strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)}</small></div>`).join("") : `<div class="recent-item"><small>No goals assigned to this season yet.</small></div>`}
+        ${goals.length ? goals.map(g => `<div class="recent-item"><strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong><small>${g.category}</small></div>`).join("") : `<div class="recent-item"><small>No goals assigned to this season yet.</small></div>`}
       </div>`;
     }).join("")}
   </section>`;
@@ -795,12 +795,18 @@ function dashboardIntroHtml(stats) {
   </section>`;
 }
 
+
+function lifeAreasHtml() {
+  return `<aside class="life-areas-card">
+    <div class="life-areas-title">Workbook</div>
+    <button onclick="activeView='Workbook';activeCategory='All';render();scrollToContentTop();" class="${activeView==='Workbook' && activeCategory==='All' ? 'active' : ''}">All</button>
+    ${Object.keys(categories).map(cat => `<button onclick="activeView='Workbook';activeCategory='${cat}';render();scrollToContentTop();" class="${activeView==='Workbook' && activeCategory===cat ? 'active' : ''}" style="${activeView==='Workbook' && activeCategory===cat ? `background:${categories[cat].color};color:#fff;border-color:${categories[cat].color}` : `color:${categories[cat].color}`}">${cat}</button>`).join("")}
+  </aside>`;
+}
+
 function render() {
   const stats = completionStats();
-  const navCats = ["All", ...Object.keys(categories)].map(cat => {
-    const color = cat === "All" ? "#111827" : categories[cat].color;
-    return `<button class="nav-button ${activeCategory === cat && activeView==="Workbook" ? "active" : ""}" style="${activeCategory === cat && activeView==="Workbook" ? `background:${color}` : ""}" onclick="activeView=\'Workbook\';activeCategory=\'${cat}\';render();scrollToContentTop();">${cat}</button>`;
-  }).join("");
+  const navCats = "";
   const viewButtons = ["Dashboard","Priority Stack","Today / This Week","Life Seasons","Weekly Review","Strategic Brief","Reviews","Coach"].map(v=>`<button class="nav-button ${activeView===v?"active":""}" style="${activeView===v?"background:#111827":""}" onclick="setMainView(\'${v}\')">${v}</button>`).join("");
   const grouped = Object.keys(categories).map(cat => {
     const goals = filteredGoals().filter(g => g.category === cat);
@@ -809,7 +815,7 @@ function render() {
   }).join("");
   const dashboard = `${priorityStackHtml()}${todayThisWeekHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
   let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Today / This Week" ? todayThisWeekHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}<section class="type-note"><strong>Project vs Behavior:</strong> Use Project for discrete outcomes with an endpoint. Use Behavior for ongoing ways of living; behaviors use Needs Improvement / Meets / Exceeds instead of completion percentage.</section>${grouped}`;
-  document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div>${viewButtons}<hr>${navCats}<button class="add-button" onclick="activeView='Workbook';showAdd=!showAdd;render();">${showAdd ? "Close Add Goal" : "+ Add Goal"}</button><button class="utility-button" onclick="exportData()">Export Backup</button><button class="utility-button" onclick="logout()">Sign Out</button><div id="saveStatus" class="save-status">Cloud Sync On</div><div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div></aside><main class="content">${activeView === "Dashboard" ? dashboardIntroHtml(stats) : viewTitleHtml()}<section class="stats"><div class="stat"><strong id="statTotal">${stats.total}</strong><span>Total goals</span></div><div class="stat"><strong id="statAvg">${stats.avg}%</strong><span>Average progress</span></div><div class="stat"><strong id="statActive">${stats.active}</strong><span>Goals started</span></div><div class="stat"><strong id="statComplete">${stats.complete}</strong><span>Completed</span></div></section>${main}</main></div>`;
+  document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div>${viewButtons}<button class="add-button" onclick="activeView='Workbook';showAdd=!showAdd;render();">${showAdd ? "Close Add Goal" : "+ Add Goal"}</button><button class="utility-button" onclick="exportData()">Export Backup</button><button class="utility-button" onclick="logout()">Sign Out</button><div id="saveStatus" class="save-status">Cloud Sync On</div><div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div></aside><main class="content"><div class="top-row"><div class="top-row-main">${activeView === "Dashboard" ? dashboardIntroHtml(stats) : viewTitleHtml()}</div>${lifeAreasHtml()}</div><section class="stats"><div class="stat"><strong id="statTotal">${stats.total}</strong><span>Total goals</span></div><div class="stat"><strong id="statAvg">${stats.avg}%</strong><span>Average progress</span></div><div class="stat"><strong id="statActive">${stats.active}</strong><span>Goals started</span></div><div class="stat"><strong id="statComplete">${stats.complete}</strong><span>Completed</span></div></section>${main}</main></div>`;
 }
 function escapeHtml(text) {
   return String(text || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");

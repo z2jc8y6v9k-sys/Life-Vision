@@ -346,3 +346,74 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
   box-shadow: none;
   margin-bottom: 20px;
 }
+
+.top-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.top-row-main {
+  min-width: 0;
+}
+
+.life-areas-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 14px;
+  box-shadow: 0 8px 18px rgba(31,41,51,.05);
+  position: sticky;
+  top: 18px;
+}
+
+.life-areas-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 8px;
+}
+
+.life-areas-card button {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fbfaf7;
+  border-radius: 12px;
+  padding: 8px 10px;
+  margin: 5px 0;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.life-areas-card button.active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+
+@media(max-width:950px){
+  .top-row {
+    grid-template-columns: 1fr;
+  }
+
+  .life-areas-card {
+    position: relative;
+    top: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .life-areas-title {
+    grid-column: 1 / -1;
+  }
+
+  .life-areas-card button {
+    margin: 0;
+  }
+}
