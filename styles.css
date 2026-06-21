@@ -1457,3 +1457,277 @@ body .content .view-title + div:empty {
     grid-row: auto !important;
   }
 }
+
+/* v33 visual refresh — sharper top system, same categories/functionality */
+:root {
+  --v33-card:#ffffff;
+  --v33-soft:#fbfaf7;
+  --v33-edge:rgba(31,41,51,.10);
+  --v33-shadow:0 20px 44px rgba(31,41,51,.10);
+  --v33-shadow-soft:0 10px 24px rgba(31,41,51,.06);
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255,255,255,.80) 0, rgba(255,255,255,0) 31%),
+    linear-gradient(135deg, #f8f3ea 0%, #f2eadf 100%) !important;
+}
+
+.content {
+  max-width: 1500px !important;
+  margin: 0 auto !important;
+  padding: 26px 34px 76px !important;
+}
+
+.app-header-simple {
+  margin-bottom: 12px !important;
+  align-items: center !important;
+}
+
+.brand-main h1 {
+  font-size: clamp(34px, 4vw, 52px) !important;
+  line-height: .92 !important;
+  letter-spacing: -0.085em !important;
+}
+
+.brand-main p {
+  margin-top: 8px !important;
+  font-size: 15px !important;
+  color: #667085 !important;
+  font-weight: 650 !important;
+}
+
+.tiny-menu {
+  border-radius: 14px !important;
+  padding: 7px 10px !important;
+  box-shadow: var(--v33-shadow-soft) !important;
+}
+
+.status-ribbon {
+  width: fit-content !important;
+  max-width: 100% !important;
+  border-radius: 20px !important;
+  padding: 12px 16px !important;
+  margin: 18px 0 22px 0 !important;
+  box-shadow: var(--v33-shadow-soft) !important;
+  border-color: var(--v33-edge) !important;
+}
+
+.status-ribbon-title {
+  color: #111827 !important;
+  background: #f3f4f6 !important;
+  border: 1px solid var(--line) !important;
+  padding: 6px 9px !important;
+  border-radius: 999px !important;
+}
+
+.status-ribbon span:not(.status-ribbon-title) {
+  font-size: 13.5px !important;
+}
+
+.nav-workbook-row {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 22px !important;
+  align-items: stretch !important;
+  max-width: 1426px !important;
+  width: 100% !important;
+  margin: 0 0 28px 0 !important;
+}
+
+.workbook-box {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+}
+
+.dashboard-box {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+}
+
+.nav-workbook-row .nav-box {
+  position: relative !important;
+  overflow: hidden !important;
+  min-height: 228px !important;
+  height: 100% !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  padding: 24px 26px 22px !important;
+  border-radius: 30px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.98), rgba(255,253,248,.90)) !important;
+  border: 1px solid rgba(31,41,51,.10) !important;
+  box-shadow: var(--v33-shadow) !important;
+}
+
+.nav-workbook-row .nav-box::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 0 0 auto 0 !important;
+  height: 5px !important;
+  background: linear-gradient(90deg, #111827, rgba(17,24,39,.18)) !important;
+}
+
+.workbook-box::before {
+  background: linear-gradient(90deg, #1f4e79, #2e7d32, #0077b6, #6f42c1, #e67e22) !important;
+}
+
+.dashboard-box::before {
+  background: linear-gradient(90deg, #111827, #475467) !important;
+}
+
+.nav-workbook-row .box-title {
+  color: #111827 !important;
+  font-size: 28px !important;
+  line-height: 1 !important;
+  letter-spacing: -0.055em !important;
+  text-transform: none !important;
+  margin: 0 0 12px !important;
+  font-weight: 900 !important;
+}
+
+.workbook-box .box-title::after {
+  content: "Your current life categories";
+}
+
+.dashboard-box .box-title::after {
+  content: "Ways to review and operate the system";
+}
+
+.nav-workbook-row .box-title::after {
+  display: block;
+  margin-top: 9px;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.35;
+  letter-spacing: 0;
+  font-weight: 550;
+}
+
+.nav-workbook-row .button-wrap {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  align-content: flex-start !important;
+  align-items: flex-start !important;
+  flex: 1 1 auto !important;
+  margin-top: 14px !important;
+  padding: 0 !important;
+}
+
+.nav-workbook-row .nav-box button {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 38px !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 9px 14px !important;
+  border-radius: 999px !important;
+  background: var(--v33-soft) !important;
+  border: 1px solid rgba(31,41,51,.12) !important;
+  box-shadow: 0 2px 0 rgba(31,41,51,.03) !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  font-weight: 850 !important;
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, background .14s ease !important;
+}
+
+.nav-workbook-row .nav-box button:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 10px 22px rgba(31,41,51,.08) !important;
+  border-color: rgba(31,41,51,.22) !important;
+}
+
+.dashboard-box button.active,
+.nav-workbook-row .nav-box button.active {
+  background: #111827 !important;
+  color: #fff !important;
+  border-color: #111827 !important;
+  box-shadow: 0 10px 24px rgba(17,24,39,.16) !important;
+}
+
+.workbook-box button:not(.active) {
+  background: #fffdf8 !important;
+}
+
+.view-title,
+.dashboard-hero {
+  margin-top: 2px !important;
+  margin-bottom: 20px !important;
+}
+
+.view-title h2,
+.dashboard-hero h2 {
+  font-size: clamp(34px, 3.5vw, 48px) !important;
+  line-height: .95 !important;
+  letter-spacing: -0.075em !important;
+}
+
+.dashboard-hero {
+  border-radius: 32px !important;
+  padding: 28px 32px !important;
+  box-shadow: var(--v33-shadow) !important;
+  border-color: var(--v33-edge) !important;
+}
+
+.panel,
+.goal-card {
+  border-color: var(--v33-edge) !important;
+  box-shadow: var(--v33-shadow-soft) !important;
+}
+
+.panel {
+  border-radius: 28px !important;
+}
+
+.goal-card {
+  border-radius: 32px !important;
+}
+
+.category-title {
+  margin-top: 38px !important;
+  font-size: 28px !important;
+}
+
+.category-row {
+  grid-template-columns: 150px 1fr 56px !important;
+}
+
+.recent-item,
+.action-card,
+.metric-card,
+.review-card,
+.field-card,
+.reflection-summary {
+  border-color: rgba(31,41,51,.10) !important;
+}
+
+@media(max-width:900px) {
+  .content {
+    padding: 18px 16px 64px !important;
+  }
+
+  .nav-workbook-row {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    max-width: none !important;
+  }
+
+  .workbook-box,
+  .dashboard-box {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  .nav-workbook-row .nav-box {
+    min-height: 0 !important;
+    padding: 20px !important;
+  }
+
+  .status-ribbon {
+    width: 100% !important;
+  }
+}

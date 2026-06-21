@@ -1,9 +1,12 @@
-# My Life Vision App v32 Layout Update
+# My Life Vision App v33 Visual Refresh
 
 Changes:
-- Workbook box is on the left.
-- Dashboard box is on the right.
-- Workbook and Dashboard boxes use equal sizing.
-- Existing categories and titles are preserved.
+- Visual refresh based on the approved mockup.
+- Workbook remains on the left.
+- Dashboard remains on the right.
+- Workbook and Dashboard use the same size and stronger card styling.
+- Existing Workbook categories are preserved: Relationships, Health, Adventure, Creativity, Impact.
+- Existing Dashboard categories are preserved: Dashboard, Priority Stack, Today / This Week, Life Seasons, Weekly Review, Strategic Brief, Coach.
+- No data model, Supabase, navigation behavior, or functional logic changed.
 
 No SQL changes required.
