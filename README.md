@@ -1,27 +1,25 @@
-# My Life Vision App v10
+# My Life Vision App v11
 
 Changes:
-- Project goals keep the percentage slider as Completion.
-- Behavior goals no longer use percentage.
-- Behavior goals now use:
+- Behavior goals no longer show project-style Status.
+- For Behavior goals, Behavior Rating replaces Status:
   - Needs Improvement
   - Meets
   - Exceeds
-- Keeps Project vs Behavior type from v9.
-- Keeps Today / This Week.
-- Keeps Resources instead of Money.
-- Keeps Blockers and Support Needed removed.
+- Project goals still show:
+  - Status
+  - Completion %
+- Behavior goals no longer show a completion percentage.
+- Strategic Brief logic treats:
+  - Project Status separately from Behavior Rating.
 
-Important:
-Run `supabase_v10_migration.sql` once in Supabase SQL Editor before uploading v10 files.
+No new Supabase SQL migration is needed if v10 migration was already run.
 
 Deploy:
-1. Run the SQL migration in Supabase.
-2. Upload/replace these GitHub files:
+1. Upload/replace these GitHub files:
    - index.html
    - styles.css
    - app.js
    - README.md
-3. Do not upload the SQL file unless you want it in GitHub as documentation.
-4. Wait for GitHub Pages to redeploy.
-5. Hard refresh the site if the old version appears.
+2. Wait for GitHub Pages to redeploy.
+3. Hard refresh the site if the old version appears.

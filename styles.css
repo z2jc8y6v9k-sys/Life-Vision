@@ -134,3 +134,11 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
   font-size: 16px;
   margin-top: 4px;
 }
+
+
+.progress-help {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}

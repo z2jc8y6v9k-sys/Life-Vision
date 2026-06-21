@@ -295,7 +295,7 @@ function coachInsights() {
   const cats = categoryStats();
   const lowest = [...cats].sort((a,b)=>a.avg-b.avg)[0];
   const highest = [...cats].sort((a,b)=>b.avg-a.avg)[0];
-  const atRisk = state.goals.filter(g => g.status === "At Risk");
+  const atRisk = state.goals.filter(g => (g.goal_type || "Project") === "Project" && g.status === "At Risk");
   const noNext30 = state.goals.filter(g => !(g.next30||"").trim());
   const noPeople = state.goals.filter(g => !(g.people||"").trim());
   if (lowest) insights.push({title:`Under-invested area: ${lowest.cat}`, text:`This category has the lowest average progress at ${lowest.avg}%. Pick one small next action this week.`});
@@ -346,11 +346,19 @@ function goalCard(goal) {
           <option ${type==="Behavior"?"selected":""}>Behavior</option>
         </select>
       </label>
-      <label>Status<br>
-        <select class="status-select" onchange="updateGoalNoRender('${goal.id}','status',this.value)">
-          ${statuses.map(s=>`<option ${(goal.status||"Not Started")===s?"selected":""}>${s}</option>`).join("")}
-        </select>
-      </label>
+      ${type === "Behavior" ? `
+        <label>Behavior Rating<br>
+          <select class="status-select behavior-rating" onchange="updateGoalNoRender('${goal.id}','behavior_rating',this.value)">
+            ${behaviorRatings.map(r=>`<option ${(goal.behavior_rating||"Needs Improvement")===r?"selected":""}>${r}</option>`).join("")}
+          </select>
+        </label>
+      ` : `
+        <label>Status<br>
+          <select class="status-select" onchange="updateGoalNoRender('${goal.id}','status',this.value)">
+            ${statuses.map(s=>`<option ${(goal.status||"Not Started")===s?"selected":""}>${s}</option>`).join("")}
+          </select>
+        </label>
+      `}
     </div>
 
     <div class="grid-two">
@@ -380,11 +388,7 @@ function goalCard(goal) {
     <div class="card-actions">
       <div class="progress-wrap">
         ${type === "Behavior" ? `
-          <div class="progress-label">Behavior Rating</div>
-          <select class="status-select behavior-rating" onchange="updateGoalNoRender('${goal.id}','behavior_rating',this.value)">
-            ${behaviorRatings.map(r=>`<option ${(goal.behavior_rating||"Needs Improvement")===r?"selected":""}>${r}</option>`).join("")}
-          </select>
-          <div class="progress-help">Use this to rate the current rhythm: Needs Improvement, Meets, or Exceeds.</div>
+          <div class="progress-help">Behavior goals are rated above as Needs Improvement, Meets, or Exceeds instead of tracked by project completion.</div>
         ` : `
           <div class="progress-label" data-progress-label="${goal.id}">Completion: ${goal.progress || 0}%</div>
           <input class="progress-slider" type="range" min="0" max="100" value="${goal.progress || 0}" oninput="updateProgress('${goal.id}', this.value)" />
@@ -571,9 +575,9 @@ function weeklyReviewHtml() {
 
 function statusCounts() {
   return {
-    onTrack: state.goals.filter(g => g.status === "On Track").length,
-    atRisk: state.goals.filter(g => g.status === "At Risk").length,
-    completed: state.goals.filter(g => g.status === "Completed" || Number(g.progress||0) >= 100).length,
+    onTrack: state.goals.filter(g => (g.goal_type || "Project") === "Project" && g.status === "On Track").length,
+    atRisk: state.goals.filter(g => (g.goal_type || "Project") === "Project" && g.status === "At Risk").length,
+    completed: state.goals.filter(g => (g.goal_type || "Project") === "Project" && (g.status === "Completed" || Number(g.progress||0) >= 100)).length,
     notStarted: state.goals.filter(g => (g.status || "Not Started") === "Not Started" && Number(g.progress||0) === 0).length
   };
 }
@@ -593,9 +597,9 @@ function strategicBriefText() {
   const cats = categoryStats();
   const lowest = [...cats].sort((a,b)=>a.avg-b.avg)[0];
   const highest = [...cats].sort((a,b)=>b.avg-a.avg)[0];
-  const atRisk = state.goals.filter(g => g.status === "At Risk");
-  const onTrack = state.goals.filter(g => g.status === "On Track");
-  const completed = state.goals.filter(g => g.status === "Completed" || Number(g.progress||0) >= 100);
+  const atRisk = state.goals.filter(g => (g.goal_type || "Project") === "Project" && g.status === "At Risk");
+  const onTrack = state.goals.filter(g => (g.goal_type || "Project") === "Project" && g.status === "On Track");
+  const completed = state.goals.filter(g => (g.goal_type || "Project") === "Project" && (g.status === "Completed" || Number(g.progress||0) >= 100));
   const notStarted = state.goals.filter(g => (g.status || "Not Started") === "Not Started" && Number(g.progress||0) === 0);
   const needsImprovement = state.goals.filter(g => g.goal_type === "Behavior" && (g.behavior_rating || "Needs Improvement") === "Needs Improvement");
   const noNext30 = state.goals.filter(g => !(g.next30||"").trim());
