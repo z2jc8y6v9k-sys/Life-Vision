@@ -1,12 +1,10 @@
-# My Life Vision App v33 Visual Refresh
+# My Life Vision App v35 Top Navigation
 
 Changes:
-- Visual refresh based on the approved mockup.
-- Workbook remains on the left.
-- Dashboard remains on the right.
-- Workbook and Dashboard use the same size and stronger card styling.
-- Existing Workbook categories are preserved: Relationships, Health, Adventure, Creativity, Impact.
-- Existing Dashboard categories are preserved: Dashboard, Priority Stack, Today / This Week, Life Seasons, Weekly Review, Strategic Brief, Coach.
-- No data model, Supabase, navigation behavior, or functional logic changed.
+- Adds persistent Workbook and Dashboard quick navigation available anywhere in the document.
+- Workbook and Dashboard controls return the user to the top navigation cards.
+- Keeps the v33 visual refresh.
+- Preserves the prior label cleanup: Life Season and Resources.
+- Adds bullet continuation behavior inside workbook text areas.
 
 No SQL changes required.

@@ -309,7 +309,25 @@ function coachInsights() {
 
 function fieldCard(goal, key, label, className = "") {
   const color = categories[goal.category].color;
-  return `<div class="field-card ${className}"><div class="field-header" style="background:${color}">${label}</div><textarea class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea></div>`;
+  return `<div class="field-card ${className}"><div class="field-header" style="background:${color}">${label}</div><textarea class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" onkeydown="handleBulletKeydown(event)" oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea></div>`;
+}
+
+function handleBulletKeydown(event) {
+  if (event.key !== "Enter") return;
+  const textarea = event.target;
+  const start = textarea.selectionStart;
+  const value = textarea.value;
+  const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+  const currentLine = value.slice(lineStart, start);
+  const bulletMatch = currentLine.match(/^(\s*)([-•*])\s+/);
+  if (!bulletMatch) return;
+
+  event.preventDefault();
+  const prefix = `${bulletMatch[1]}${bulletMatch[2]} `;
+  const insert = `\n${prefix}`;
+  textarea.value = value.slice(0, start) + insert + value.slice(textarea.selectionEnd);
+  textarea.selectionStart = textarea.selectionEnd = start + insert.length;
+  textarea.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 function goalType(goal) {
@@ -370,7 +388,7 @@ function priorityStackHtml() {
 function lifeSeasonsHtml() {
   return `<section class="panel">
     <h3>Life Seasons</h3>
-    <p>See which goals belong to each stage of life. This uses your existing Life Season / Time Horizon selections.</p>
+    <p>See which goals belong to each stage of life. This uses your existing Life Season selections.</p>
     ${ageBands.map(age => {
       const goals = state.goals.filter(g => (g.ages || []).includes(age));
       return `<div class="season-block">
@@ -471,13 +489,13 @@ function goalCard(goal) {
 
     ${fieldCard(goal, "why", "Why This Matters", "full")}
 
-    <div class="timeline-label">Life Season / Time Horizon</div>
+    <div class="timeline-label">Life Season</div>
     <div class="timeline">${ageBands.map(age => `<label class="age-chip"><input type="checkbox" ${goal.ages?.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />${age}</label>`).join("")}</div>
 
     <div class="grid-two">
       ${fieldCard(goal, "people", "People")}
       <div>
-        ${fieldCard(goal, "money", "Resource Notes")}
+        ${fieldCard(goal, "money", "Resources")}
         ${resourceProfileHtml(goal)}
       </div>
     </div>
@@ -850,10 +868,36 @@ function jumpToSelectedContent() {
   });
 }
 
+function jumpToTopNavigation() {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const target = document.querySelector(".nav-workbook-row") || document.querySelector(".app-header-simple");
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
+  });
+}
+
+function openWorkbookTop() {
+  activeView = "Workbook";
+  showAdd = false;
+  render();
+  jumpToTopNavigation();
+}
+
+function openDashboardTop() {
+  activeView = "Dashboard";
+  render();
+  jumpToTopNavigation();
+}
+
 function setMainView(view) {
   activeView = view;
   render();
-  jumpToSelectedContent();
+  jumpToTopNavigation();
 }
 
 function setWorkbookView(category) {
@@ -861,7 +905,7 @@ function setWorkbookView(category) {
   activeCategory = category;
   showAdd = false;
   render();
-  jumpToSelectedContent();
+  jumpToTopNavigation();
 }
 
 function render() {
@@ -885,6 +929,11 @@ function render() {
         </header>
 
         ${statusRibbonHtml(stats)}
+
+        <div class="global-top-nav" aria-label="Quick top navigation">
+          <button onclick="openWorkbookTop()">Workbook</button>
+          <button onclick="openDashboardTop()">Dashboard</button>
+        </div>
 
         <div class="nav-workbook-row">
           ${workbookCardHtml()}

@@ -1731,3 +1731,52 @@ body {
     width: 100% !important;
   }
 }
+
+
+/* v35 Option A: persistent Workbook/Dashboard top navigation */
+.global-top-nav {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 50;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid rgba(31,41,51,.12);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, .92);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 14px 34px rgba(31,41,51,.14);
+}
+
+.global-top-nav button {
+  border: 1px solid rgba(31,41,51,.12);
+  border-radius: 999px;
+  background: #111827;
+  color: #fff;
+  padding: 9px 13px;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.global-top-nav button:first-child {
+  background: #fffdf8;
+  color: #111827;
+}
+
+.global-top-nav button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(31,41,51,.12);
+}
+
+.nav-workbook-row {
+  scroll-margin-top: 18px;
+}
+
+@media(max-width:800px) {
+  .global-top-nav {
+    right: 14px;
+    bottom: 14px;
+  }
+}
