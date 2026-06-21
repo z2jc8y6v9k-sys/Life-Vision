@@ -307,9 +307,50 @@ function coachInsights() {
   return insights;
 }
 
+
+const bulletEnabledFields = new Set(["key_results", "people", "money", "today_this_week", "next30", "next12", "wins", "lessons"]);
+
+function bulletTextareaAttrs(key) {
+  return bulletEnabledFields.has(key) ? ` data-bullet-field="true" onkeydown="handleBulletTextareaKeydown(event, this)"` : "";
+}
+
+function handleBulletTextareaKeydown(event, textarea) {
+  if (event.key !== "Enter" && event.key !== "Tab") return;
+
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const value = textarea.value;
+  const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+  const currentLine = value.slice(lineStart, start);
+  const bulletMatch = currentLine.match(/^(\s*)([-*•]\s+|\d+[.)]\s+)/);
+
+  if (event.key === "Tab") {
+    event.preventDefault();
+    const insert = event.shiftKey ? "" : "  ";
+    if (!event.shiftKey) {
+      textarea.value = value.slice(0, start) + insert + value.slice(end);
+      textarea.selectionStart = textarea.selectionEnd = start + insert.length;
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    return;
+  }
+
+  if (!bulletMatch) return;
+
+  event.preventDefault();
+  const [, indent, bullet] = bulletMatch;
+  const lineContent = currentLine.slice(bulletMatch[0].length).trim();
+  const insert = lineContent ? `\n${indent}${bullet}` : "\n";
+  textarea.value = value.slice(0, start) + insert + value.slice(end);
+  textarea.selectionStart = textarea.selectionEnd = start + insert.length;
+  textarea.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
 function fieldCard(goal, key, label, className = "") {
   const color = categories[goal.category].color;
-  return `<div class="field-card ${className}"><div class="field-header" style="background:${color}">${label}</div><textarea class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea></div>`;
+  const bulletAttrs = bulletTextareaAttrs(key);
+  const bulletPlaceholder = bulletEnabledFields.has(key) ? ` placeholder="Use bullets: - item"` : "";
+  return `<div class="field-card ${className}"><div class="field-header" style="background:${color}">${label}</div><textarea class="field-body ${className === "full" ? "large" : ""}" style="color:${color}"${bulletAttrs}${bulletPlaceholder} oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea></div>`;
 }
 
 function goalType(goal) {
@@ -370,7 +411,7 @@ function priorityStackHtml() {
 function lifeSeasonsHtml() {
   return `<section class="panel">
     <h3>Life Seasons</h3>
-    <p>See which goals belong to each stage of life. This uses your existing Life Season / Time Horizon selections.</p>
+    <p>See which goals belong to each stage of life. This uses your existing Life Season selections.</p>
     ${ageBands.map(age => {
       const goals = state.goals.filter(g => (g.ages || []).includes(age));
       return `<div class="season-block">
@@ -471,13 +512,13 @@ function goalCard(goal) {
 
     ${fieldCard(goal, "why", "Why This Matters", "full")}
 
-    <div class="timeline-label">Life Season / Time Horizon</div>
+    <div class="timeline-label">Life Season</div>
     <div class="timeline">${ageBands.map(age => `<label class="age-chip"><input type="checkbox" ${goal.ages?.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />${age}</label>`).join("")}</div>
 
     <div class="grid-two">
       ${fieldCard(goal, "people", "People")}
       <div>
-        ${fieldCard(goal, "money", "Resource Notes")}
+        ${fieldCard(goal, "money", "Resources")}
         ${resourceProfileHtml(goal)}
       </div>
     </div>

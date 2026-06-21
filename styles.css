@@ -1413,3 +1413,19 @@ body .content .view-title + div:empty {
 }
 
 /* But when showAdd is false, no add form should exist; this prevents empty shells from showing. */
+
+
+/* v31 requested-only updates: equal Dashboard/Workbook boxes + bullet-friendly fields */
+.nav-workbook-row {
+  align-items: stretch !important;
+}
+
+.nav-box.dashboard-box,
+.nav-box.workbook-box {
+  width: 100% !important;
+  min-height: 96px !important;
+}
+
+.field-body[data-bullet-field="true"] {
+  white-space: pre-wrap;
+}
