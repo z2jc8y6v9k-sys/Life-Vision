@@ -1,8 +1,8 @@
-# My Life Vision App v27 Flip Nav
+# My Life Vision App v28 Navigation Fix
 
-Changes:
-- Workbook card appears first/left.
-- Navigate card appears second/right.
-- Navigate card heading renamed to Dashboard.
-- Keeps v26 status ribbon and direct-jump behavior.
+Fixes:
+- Removes the extra white box/empty space under Workbook by changing the actual Workbook HTML structure.
+- Clicking Dashboard/Navigate items brings the selected page to the top.
+- Clicking Workbook areas brings that area to the top.
+- Keeps Workbook on the left and Dashboard navigation on the right.
 - No new Supabase SQL migration required.

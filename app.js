@@ -383,19 +383,9 @@ function lifeSeasonsHtml() {
 
 
 
-function scrollToContentTop() {
-  setTimeout(() => {
-    const main = document.querySelector(".content");
-    if (main) main.scrollIntoView({ behavior: "smooth", block: "start" });
-    else window.scrollTo({ top: 0, behavior: "smooth" });
-  }, 50);
-}
 
-function setMainView(view) {
-  activeView = view;
-  render();
-  scrollToContentTop();
-}
+
+
 
 function openGoal(goalId) {
   const goal = state.goals.find(g => g.id === goalId);
@@ -776,17 +766,21 @@ function statusCardHtml(stats) {
 
 function mainNavCardHtml() {
   const views = ["Dashboard","Priority Stack","Today / This Week","Life Seasons","Weekly Review","Strategic Brief","Coach"];
-  return `<aside class="nav-box">
+  return `<aside class="nav-box dashboard-box">
     <div class="box-title">Dashboard</div>
-    ${views.map(v => `<button onclick="setMainView('${v}')" class="${activeView===v ? "active" : ""}">${v}</button>`).join("")}
+    <div class="button-wrap">
+      ${views.map(v => `<button onclick="setMainView('${v}')" class="${activeView===v ? "active" : ""}">${v}</button>`).join("")}
+    </div>
   </aside>`;
 }
 
 function workbookCardHtml() {
-  return `<aside class="nav-box">
+  return `<aside class="nav-box workbook-box">
     <div class="box-title">Workbook</div>
-    <button onclick="activeView='Workbook';activeCategory='All';render();scrollToContentTop();" class="${activeView==='Workbook' && activeCategory==='All' ? 'active' : ''}">All</button>
-    ${Object.keys(categories).map(cat => `<button onclick="activeView='Workbook';activeCategory='${cat}';render();scrollToContentTop();" class="${activeView==='Workbook' && activeCategory===cat ? 'active' : ''}" style="${activeView==='Workbook' && activeCategory===cat ? `background:${categories[cat].color};color:#fff;border-color:${categories[cat].color}` : `color:${categories[cat].color}`}">${cat}</button>`).join("")}
+    <div class="button-wrap">
+      <button onclick="setWorkbookView('All')" class="${activeView==='Workbook' && activeCategory==='All' ? 'active' : ''}">All</button>
+      ${Object.keys(categories).map(cat => `<button onclick="setWorkbookView('${cat}')" class="${activeView==='Workbook' && activeCategory===cat ? 'active' : ''}" style="${activeView==='Workbook' && activeCategory===cat ? `background:${categories[cat].color};color:#fff;border-color:${categories[cat].color}` : `color:${categories[cat].color}`}">${cat}</button>`).join("")}
+    </div>
   </aside>`;
 }
 
@@ -819,7 +813,7 @@ function utilityMenuHtml() {
   return `<details class="tiny-menu">
     <summary>☰</summary>
     <div id="saveStatus" class="menu-save-status">Cloud Sync On</div>
-    <button onclick="activeView='Workbook';showAdd=!showAdd;render();scrollToContentTop();">${showAdd ? "Close Add Goal" : "Add Goal"}</button>
+    <button onclick="activeView='Workbook';showAdd=!showAdd;render();jumpToSelectedContent();">${showAdd ? "Close Add Goal" : "Add Goal"}</button>
     <button onclick="exportData()">Export Backup</button>
     <button onclick="logout()">Sign Out</button>
   </details>`;
@@ -842,6 +836,34 @@ function statusRibbonHtml(stats) {
     <span><b>Behaviors</b> ${behaviorStarted}/${behaviors.length} started • ${behaviorMeets} meet+</span>
   </section>`;
 }
+
+function jumpToSelectedContent() {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const target = document.querySelector(".content-start");
+      if (target) {
+        target.scrollIntoView({ behavior: "auto", block: "start" });
+      } else {
+        window.scrollTo(0, 0);
+      }
+    });
+  });
+}
+
+function setMainView(view) {
+  activeView = view;
+  render();
+  jumpToSelectedContent();
+}
+
+function setWorkbookView(category) {
+  activeView = "Workbook";
+  activeCategory = category;
+  showAdd = false;
+  render();
+  jumpToSelectedContent();
+}
+
 function render() {
   const stats = completionStats();
   const navCats = "";

@@ -1312,3 +1312,56 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
     width: 100%;
   }
 }
+
+/* v28 workbook whitespace + navigation jump fix */
+.nav-workbook-row {
+  align-items: start !important;
+}
+
+.nav-box {
+  align-self: start !important;
+  height: fit-content !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 10px !important;
+  overflow: visible !important;
+}
+
+.workbook-box,
+.dashboard-box {
+  display: block !important;
+  height: fit-content !important;
+  min-height: 0 !important;
+}
+
+.button-wrap {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 5px !important;
+  align-items: flex-start !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.button-wrap button {
+  width: auto !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.workbook-box::after,
+.dashboard-box::after,
+.nav-box::after {
+  display: none !important;
+  content: none !important;
+}
+
+.workbook-box .box-title,
+.dashboard-box .box-title {
+  margin-bottom: 7px !important;
+}
+
+.content-start {
+  scroll-margin-top: 0;
+}
