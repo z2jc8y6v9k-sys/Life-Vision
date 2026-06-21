@@ -320,10 +320,6 @@ function progressLabelFor(goal) {
   return goalType(goal) === "Behavior" ? "Consistency" : "Completion";
 }
 
-function objectiveLabelFor(goal) {
-  return "Objective";
-}
-
 function keyResultsLabelFor(goal) {
   return "Key Results";
 }
@@ -360,10 +356,7 @@ function goalCard(goal) {
       `}
     </div>
 
-    <div class="grid-two">
-      ${fieldCard(goal, "objective", "Objective")}
-      ${fieldCard(goal, "key_results", "Key Results")}
-    </div>
+    ${fieldCard(goal, "key_results", "Key Results", "full")}
 
     ${fieldCard(goal, "why", "Why This Matters", "full")}
 
@@ -451,7 +444,7 @@ function buildAIPrompt() {
       resources: g.money,
       next30: g.next30,
       next12: g.next12,
-      objective: g.objective,
+      
       key_results: g.key_results,
       today_this_week: g.today_this_week,
       

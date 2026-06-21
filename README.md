@@ -1,30 +1,24 @@
-# My Life Vision App v12 Real
+# My Life Vision App v13
 
 Implemented changes:
-- Behavior goals now use the same planning structure as Projects:
-  - Objective
-  - Key Results
+- Removed Objective from the visible goal card.
+- Goal Title now carries the "what do I want?" function.
+- Key Results remains as the success-measure field.
+- Keeps:
   - Why This Matters
+  - Key Results
   - People
   - Resources
   - Today / This Week
   - Next 30 Days
   - Next 12 Months
   - Life Season / Time Horizon
+  - Project Status + Completion %
+  - Behavior Rating for behavior goals
 
-Removed from the UI:
-- Behavior Standard
-- How I'll Know I'm Living It
-- Behavior Rhythm / Standard
-
-Difference between types:
-- Project goals show Status + Completion %.
-- Behavior goals show Behavior Rating:
-  - Needs Improvement
-  - Meets
-  - Exceeds
-
-No new Supabase SQL migration is needed if v10 migration was already run.
+Database note:
+- The old objective column remains in Supabase, but the app no longer shows it.
+- No new Supabase SQL migration is needed.
 
 Deploy:
 1. Upload/replace these GitHub files:
