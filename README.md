@@ -1,9 +1,8 @@
-# My Life Vision App v25 Exact Layout
+# My Life Vision App v27 Flip Nav
 
 Changes:
-- Header left: tiny menu + My Life Vision / Strategic Life OS.
-- Header upper-right: small square Status box.
-- Below header: Navigate and Workbook side-by-side.
-- Removed empty Workbook whitespace caused by older card layout.
-- Hidden old sidebar entirely.
+- Workbook card appears first/left.
+- Navigate card appears second/right.
+- Navigate card heading renamed to Dashboard.
+- Keeps v26 status ribbon and direct-jump behavior.
 - No new Supabase SQL migration required.

@@ -771,26 +771,13 @@ function todayThisWeekHtml() {
 
 
 function statusCardHtml(stats) {
-  const projects = state.goals.filter(g => (g.goal_type || "Project") === "Project");
-  const behaviors = state.goals.filter(g => g.goal_type === "Behavior");
-
-  const projectStarted = projects.filter(g => Number(g.progress || 0) > 0 || !["Not Started", "", null, undefined].includes(g.status)).length;
-  const projectDone = projects.filter(g => g.status === "Completed" || Number(g.progress || 0) >= 100).length;
-
-  const behaviorStarted = behaviors.filter(g => (g.behavior_rating || "Needs Improvement") !== "Needs Improvement" || (g.today_this_week || "").trim() || (g.key_results || "").trim()).length;
-  const behaviorMeets = behaviors.filter(g => ["Meets", "Exceeds"].includes(g.behavior_rating || "")).length;
-
-  return `<aside class="status-square">
-    <div class="status-title">Status</div>
-    <div class="status-line"><b>Projects</b><span>${projectStarted}/${projects.length} started</span><span>${projectDone} done</span></div>
-    <div class="status-line"><b>Behaviors</b><span>${behaviorStarted}/${behaviors.length} started</span><span>${behaviorMeets} meet+</span></div>
-  </aside>`;
+  return statusRibbonHtml(stats);
 }
 
 function mainNavCardHtml() {
   const views = ["Dashboard","Priority Stack","Today / This Week","Life Seasons","Weekly Review","Strategic Brief","Coach"];
   return `<aside class="nav-box">
-    <div class="box-title">Navigate</div>
+    <div class="box-title">Dashboard</div>
     ${views.map(v => `<button onclick="setMainView('${v}')" class="${activeView===v ? "active" : ""}">${v}</button>`).join("")}
   </aside>`;
 }
@@ -839,6 +826,22 @@ function utilityMenuHtml() {
 }
 
 
+function statusRibbonHtml(stats) {
+  const projects = state.goals.filter(g => (g.goal_type || "Project") === "Project");
+  const behaviors = state.goals.filter(g => g.goal_type === "Behavior");
+
+  const projectStarted = projects.filter(g => Number(g.progress || 0) > 0 || !["Not Started", "", null, undefined].includes(g.status)).length;
+  const projectDone = projects.filter(g => g.status === "Completed" || Number(g.progress || 0) >= 100).length;
+
+  const behaviorStarted = behaviors.filter(g => (g.behavior_rating || "Needs Improvement") !== "Needs Improvement" || (g.today_this_week || "").trim() || (g.key_results || "").trim()).length;
+  const behaviorMeets = behaviors.filter(g => ["Meets", "Exceeds"].includes(g.behavior_rating || "")).length;
+
+  return `<section class="status-ribbon">
+    <span class="status-ribbon-title">Status</span>
+    <span><b>Projects</b> ${projectStarted}/${projects.length} started • ${projectDone} done</span>
+    <span><b>Behaviors</b> ${behaviorStarted}/${behaviors.length} started • ${behaviorMeets} meet+</span>
+  </section>`;
+}
 function render() {
   const stats = completionStats();
   const navCats = "";
@@ -851,20 +854,19 @@ function render() {
   const dashboard = `${priorityStackHtml()}${todayThisWeekHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
   let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Today / This Week" ? todayThisWeekHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}<section class="type-note"><strong></section>${grouped}`;
   document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand-row"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS</p></div>${statusCardHtml(completionStats())}</div>${utilityMenuHtml()}</aside><main class="content">
-        <header class="app-header">
-          <div class="header-left">
-            ${utilityMenuHtml()}
-            <div class="brand-main">
-              <h1>My Life Vision</h1>
-              <p>Strategic Life OS</p>
-            </div>
+        <header class="app-header-simple">
+          ${utilityMenuHtml()}
+          <div class="brand-main">
+            <h1>My Life Vision</h1>
+            <p>Strategic Life OS</p>
           </div>
-          ${statusCardHtml(stats)}
         </header>
 
+        ${statusRibbonHtml(stats)}
+
         <div class="nav-workbook-row">
-          ${mainNavCardHtml()}
           ${workbookCardHtml()}
+          ${mainNavCardHtml()}
         </div>
 
         <div class="content-start"></div>

@@ -1093,3 +1093,222 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
     max-width: none;
   }
 }
+
+/* v25 whitespace fix */
+.nav-workbook-row {
+  align-items: start !important;
+}
+
+.nav-box,
+.workbook-card,
+.main-nav-card {
+  align-self: start !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.workbook-card {
+  display: inline-block !important;
+  width: 100% !important;
+  padding-bottom: 8px !important;
+}
+
+.workbook-card::after,
+.nav-box::after {
+  content: none !important;
+}
+
+.workbook-card .box-title,
+.workbook-card .top-card-title {
+  margin-bottom: 6px !important;
+}
+
+.workbook-card button {
+  margin-bottom: 0 !important;
+}
+
+/* v26 status ribbon layout */
+.app-shell {
+  display: block !important;
+  min-height: 100vh;
+}
+
+.sidebar,
+.status-square,
+.brand-row,
+.top-app-row,
+.top-control-row {
+  display: none !important;
+}
+
+.content {
+  padding: 18px 28px 64px !important;
+}
+
+.app-header-simple {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.brand-main h1 {
+  margin: 0;
+  font-size: 30px;
+  letter-spacing: -0.07em;
+}
+
+.brand-main p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.status-ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 9px 12px;
+  box-shadow: 0 8px 18px rgba(31,41,51,.05);
+  margin: 0 0 14px 0;
+}
+
+.status-ribbon-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.status-ribbon span {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.status-ribbon b {
+  color: var(--ink);
+}
+
+.nav-workbook-row {
+  display: grid !important;
+  grid-template-columns: minmax(260px, 1fr) minmax(240px, 1fr) !important;
+  gap: 14px !important;
+  align-items: start !important;
+  margin-bottom: 18px !important;
+  max-width: 760px !important;
+}
+
+.nav-box {
+  align-self: start !important;
+  height: auto !important;
+  min-height: 0 !important;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 10px 10px 8px !important;
+  box-shadow: 0 8px 18px rgba(31,41,51,.05);
+}
+
+.nav-box button {
+  display: inline-block !important;
+  width: auto !important;
+  border: 1px solid var(--line);
+  background: #fbfaf7;
+  border-radius: 999px;
+  padding: 5px 8px;
+  margin: 3px 2px;
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.nav-box button.active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+
+.box-title,
+.status-title,
+.top-card-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 6px !important;
+}
+
+.tiny-menu {
+  position: relative;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  padding: 4px 7px;
+  box-shadow: 0 4px 10px rgba(31,41,51,.04);
+}
+
+.tiny-menu summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.tiny-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.tiny-menu[open] {
+  min-width: 150px;
+  z-index: 10;
+}
+
+.tiny-menu button {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fbfaf7;
+  border-radius: 10px;
+  padding: 7px 9px;
+  margin-top: 6px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.menu-save-status {
+  margin-top: 7px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  background: #ecfdf3;
+  color: #027a48;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+@media(max-width:800px) {
+  .content {
+    padding: 14px 16px 56px !important;
+  }
+
+  .nav-workbook-row {
+    grid-template-columns: 1fr !important;
+    max-width: none !important;
+  }
+
+  .status-ribbon {
+    width: 100%;
+  }
+}
