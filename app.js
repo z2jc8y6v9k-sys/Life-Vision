@@ -307,80 +307,131 @@ function coachInsights() {
   return insights;
 }
 
-
-function isBulletField(key) {
-  return ["key_results", "people", "money", "today_this_week", "next30", "next12", "wins", "lessons"].includes(key);
-}
-
-function bulletPlaceholder(label) {
-  return `• ${label} item`;
-}
-
-function handleBulletKeydown(event) {
-  const textarea = event.target;
-
-  if (event.key === "Enter") {
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const value = textarea.value;
-    const lineStart = value.lastIndexOf("\n", start - 1) + 1;
-    const currentLine = value.slice(lineStart, start);
-
-    if (currentLine.trim().startsWith("•")) {
-      event.preventDefault();
-
-      if (currentLine.trim() === "•") {
-        const before = value.slice(0, lineStart);
-        const after = value.slice(end);
-        textarea.value = before + after;
-        textarea.selectionStart = textarea.selectionEnd = lineStart;
-      } else {
-        const insert = "\n• ";
-        textarea.value = value.slice(0, start) + insert + value.slice(end);
-        textarea.selectionStart = textarea.selectionEnd = start + insert.length;
-      }
-
-      textarea.dispatchEvent(new Event("input", { bubbles: true }));
-    }
-  }
-}
-
-function formatBullets(id, key) {
-  const el = document.querySelector(`[data-field-id="${id}-${key}"]`);
-  if (!el) return;
-
-  const lines = el.value.split("\n").map(line => {
-    const trimmed = line.trim();
-    if (!trimmed) return "";
-    if (trimmed.startsWith("•")) return trimmed;
-    if (trimmed.startsWith("-")) return "• " + trimmed.slice(1).trim();
-    return "• " + trimmed;
-  });
-
-  el.value = lines.join("\n");
-  updateGoalNoRender(id, key, el.value);
-}
-
-function backToTop() {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
 function fieldCard(goal, key, label, className = "") {
   const color = categories[goal.category].color;
-  const bullet = isBulletField(key);
-  return `
-    <div class="field-card ${className}">
-      <div class="field-header" style="background:${color}">
-        <span>${label}</span>
-        ${bullet ? `<button class="bullet-button" type="button" onclick="formatBullets('${goal.id}', '${key}')">Bullets</button>` : ""}
-      </div>
-      <textarea
-        data-field-id="${goal.id}-${key}"
-        class="field-body ${className === "full" ? "large" : ""} ${bullet ? "bullet-area" : ""}"
-        style="color:${color}"
-        ${bullet ? `placeholder="${bulletPlaceholder(label)}" onkeydown="handleBulletKeydown(event)"` : ""}
-        oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea>
-    </div>`;
+  return `<div class="field-card ${className}"><div class="field-header" style="background:${color}">${label}</div><textarea class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea></div>`;
+}
+
+function goalType(goal) {
+  return goal?.goal_type || "Project";
+}
+
+function progressLabelFor(goal) {
+  return goalType(goal) === "Behavior" ? "Consistency" : "Completion";
+}
+
+function keyResultsLabelFor(goal) {
+  return "Key Results";
+}
+
+
+function priorityOptions(goal) {
+  const current = goal.priority_rank ?? "";
+  return `<select class="status-select" onchange="updateGoalNoRender('${goal.id}','priority_rank', this.value ? Number(this.value) : null); setTimeout(render, 300);">
+    <option value="" ${current==="" ? "selected" : ""}>None</option>
+    ${[1,2,3,4,5].map(n => `<option value="${n}" ${Number(current)===n ? "selected" : ""}>${n}</option>`).join("")}
+  </select>`;
+}
+
+function resourceProfileHtml(goal) {
+  return `<div class="resource-profile">
+    <label>Time Required
+      <select onchange="updateGoalNoRender('${goal.id}','resource_time',this.value)">
+        ${["","Low","Medium","High"].map(v=>`<option value="${v}" ${(goal.resource_time||"")===v?"selected":""}>${v || "Select"}</option>`).join("")}
+      </select>
+    </label>
+    <label>Money Required
+      <select onchange="updateGoalNoRender('${goal.id}','resource_money',this.value)">
+        ${["","$","$$","$$$","$$$$"].map(v=>`<option value="${v}" ${(goal.resource_money||"")===v?"selected":""}>${v || "Select"}</option>`).join("")}
+      </select>
+    </label>
+    <label>Physical Demand
+      <select onchange="updateGoalNoRender('${goal.id}','resource_physical',this.value)">
+        ${["","Low","Medium","High"].map(v=>`<option value="${v}" ${(goal.resource_physical||"")===v?"selected":""}>${v || "Select"}</option>`).join("")}
+      </select>
+    </label>
+  </div>`;
+}
+
+function priorityStackHtml() {
+  const priorities = state.goals
+    .filter(g => g.priority_rank)
+    .sort((a,b) => Number(a.priority_rank)-Number(b.priority_rank));
+
+  return `<section class="panel">
+    <h3>Priority Stack</h3>
+    <p>The 3–5 goals that matter most right now.</p>
+    <div class="recent-list">
+      ${priorities.length ? priorities.map(g => `<div class="recent-item clickable-card" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">#${g.priority_rank} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${g.status || g.behavior_rating || ""}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
+    </div>
+  </section>`;
+}
+
+function lifeSeasonsHtml() {
+  return `<section class="panel">
+    <h3>Life Seasons</h3>
+    <p>See which goals belong to each stage of life. This uses your existing Life Season / Time Horizon selections.</p>
+    ${ageBands.map(age => {
+      const goals = state.goals.filter(g => (g.ages || []).includes(age));
+      return `<div class="season-block">
+        <h4>${age}</h4>
+        ${goals.length ? goals.map(g => `<div class="recent-item"><strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)}</small></div>`).join("") : `<div class="recent-item"><small>No goals assigned to this season yet.</small></div>`}
+      </div>`;
+    }).join("")}
+  </section>`;
+}
+
+
+
+
+
+
+
+function openGoal(goalId) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal) return;
+  activeView = "Workbook";
+  activeCategory = goal.category;
+  showAdd = false;
+  render();
+  setTimeout(() => {
+    const el = document.getElementById(`goal-${goalId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.classList.add("goal-highlight");
+      setTimeout(() => el.classList.remove("goal-highlight"), 1800);
+    }
+  }, 100);
+}
+
+
+function reflectionHtml(goal) {
+  const color = categories[goal.category].color;
+  const hasReflection = (goal.wins || "").trim() || (goal.lessons || "").trim();
+
+  return `<details class="reflection-drawer" ${hasReflection ? "open" : ""}>
+    <summary style="color:${color}">Wins & Lessons ${hasReflection ? "•" : ""}</summary>
+    <div class="grid-two reflection-grid">
+      ${fieldCard(goal, "wins", "Wins")}
+      ${fieldCard(goal, "lessons", "Lessons")}
+    </div>
+  </details>`;
+}
+
+function weeklyGoalReflectionsHtml() {
+  const withReflections = state.goals.filter(g => (g.wins || "").trim() || (g.lessons || "").trim());
+
+  if (!withReflections.length) {
+    return `<div class="recent-item"><strong>No goal-level wins or lessons yet.</strong><small>Add Wins or Lessons inside any goal card.</small></div>`;
+  }
+
+  return withReflections.map(g => `
+    <div class="reflection-summary">
+      <strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong>
+      ${(g.wins || "").trim() ? `<div><b>Wins:</b><br>${escapeHtml(g.wins).replaceAll("\\n","<br>")}</div>` : ""}
+      ${(g.lessons || "").trim() ? `<div><b>Lessons:</b><br>${escapeHtml(g.lessons).replaceAll("\\n","<br>")}</div>` : ""}
+    </div>
+  `).join("");
 }
 
 function goalCard(goal) {
@@ -420,7 +471,7 @@ function goalCard(goal) {
 
     ${fieldCard(goal, "why", "Why This Matters", "full")}
 
-    <div class="timeline-label">Life Season</div>
+    <div class="timeline-label">Life Season / Time Horizon</div>
     <div class="timeline">${ageBands.map(age => `<label class="age-chip"><input type="checkbox" ${goal.ages?.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />${age}</label>`).join("")}</div>
 
     <div class="grid-two">
@@ -840,7 +891,7 @@ function render() {
           ${mainNavCardHtml()}
         </div>
 
-        <div class="content-start"></div><button class="back-to-top" onclick="backToTop()">↑ Top</button>
+        <div class="content-start"></div>
         ${activeView === "Dashboard" ? dashboardIntroHtml(stats) : viewTitleHtml()}
         ${main}
       </main></div>`;

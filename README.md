@@ -1,8 +1,9 @@
-# My Life Vision App v32 Life Season + Equal Boxes
+# My Life Vision App v30 Workbook Box Removed
 
-Changes:
-- Renamed Life Season / Time Horizon to Life Season.
-- Workbook and Dashboard boxes are equal size.
-- Keeps v31 bullet support and Back to Top.
+Fix:
+- Removes the blank rounded box under the Workbook title at the source.
+- Workbook category clicks now force Add Goal closed.
+- Removes old Project/Behavior type-note shell entirely.
+- Keeps Add Goal available from Menu.
 
-No new Supabase SQL migration required.
+No new SQL required.
