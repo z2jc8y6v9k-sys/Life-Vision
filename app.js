@@ -307,7 +307,10 @@ function coachInsights() {
   return insights;
 }
 
-
+function fieldCard(goal, key, label, className = "") {
+  const color = categories[goal.category].color;
+  return `<div class="field-card ${className}"><div class="field-header" style="background:${color}">${label}</div><textarea class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea></div>`;
+}
 
 function goalType(goal) {
   return goal?.goal_type || "Project";
@@ -316,6 +319,11 @@ function goalType(goal) {
 function progressLabelFor(goal) {
   return goalType(goal) === "Behavior" ? "Consistency" : "Completion";
 }
+
+function keyResultsLabelFor(goal) {
+  return "Key Results";
+}
+
 
 function priorityOptions(goal) {
   const current = goal.priority_rank ?? "";
@@ -354,7 +362,7 @@ function priorityStackHtml() {
     <h3>Priority Stack</h3>
     <p>The 3–5 goals that matter most right now.</p>
     <div class="recent-list">
-      ${priorities.length ? priorities.map(g => `<div class="recent-item"><strong style="color:${categories[g.category].color}">#${g.priority_rank} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${g.status || g.behavior_rating || ""}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
+      ${priorities.length ? priorities.map(g => `<div class="recent-item clickable-card" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">#${g.priority_rank} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${g.status || g.behavior_rating || ""}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
     </div>
   </section>`;
 }
@@ -373,78 +381,44 @@ function lifeSeasonsHtml() {
   </section>`;
 }
 
-function isBulletField(key) {
-  return ["key_results", "people", "money", "today_this_week", "next30", "next12"].includes(key);
+
+
+function scrollToContentTop() {
+  setTimeout(() => {
+    const main = document.querySelector(".content");
+    if (main) main.scrollIntoView({ behavior: "smooth", block: "start" });
+    else window.scrollTo({ top: 0, behavior: "smooth" });
+  }, 50);
 }
 
-function bulletPlaceholder(label) {
-  return `• ${label} item`;
+function setMainView(view) {
+  activeView = view;
+  render();
+  scrollToContentTop();
 }
 
-function handleBulletKeydown(event) {
-  const textarea = event.target;
-
-  if (event.key === "Enter") {
-    const start = textarea.selectionStart;
-    const value = textarea.value;
-    const lineStart = value.lastIndexOf("\n", start - 1) + 1;
-    const currentLine = value.slice(lineStart, start);
-
-    if (currentLine.trim().startsWith("•")) {
-      event.preventDefault();
-
-      if (currentLine.trim() === "•") {
-        const before = value.slice(0, lineStart);
-        const after = value.slice(start);
-        textarea.value = before + after;
-        textarea.selectionStart = textarea.selectionEnd = lineStart;
-      } else {
-        const insert = "\n• ";
-        textarea.value = value.slice(0, start) + insert + value.slice(textarea.selectionEnd);
-        textarea.selectionStart = textarea.selectionEnd = start + insert.length;
-      }
-
-      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+function openGoal(goalId) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal) return;
+  activeView = "Workbook";
+  activeCategory = goal.category;
+  showAdd = false;
+  render();
+  setTimeout(() => {
+    const el = document.getElementById(`goal-${goalId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.classList.add("goal-highlight");
+      setTimeout(() => el.classList.remove("goal-highlight"), 1800);
     }
-  }
-}
-
-function formatBullets(id, key) {
-  const el = document.querySelector(`[data-field-id="${id}-${key}"]`);
-  if (!el) return;
-  const lines = el.value.split("\n").map(line => {
-    const trimmed = line.trim();
-    if (!trimmed) return "";
-    if (trimmed.startsWith("•") || trimmed.startsWith("-")) return trimmed.startsWith("-") ? "• " + trimmed.slice(1).trim() : trimmed;
-    return "• " + trimmed;
-  });
-  el.value = lines.join("\n");
-  updateGoalNoRender(id, key, el.value);
-}
-
-function fieldCard(goal, key, label, className = "") {
-  const color = categories[goal.category].color;
-  const bullet = isBulletField(key);
-  return `
-    <div class="field-card ${className}">
-      <div class="field-header" style="background:${color}">
-        <span>${label}</span>
-        ${bullet ? `<button class="bullet-button" type="button" onclick="formatBullets('${goal.id}', '${key}')">Bullets</button>` : ""}
-      </div>
-      <textarea
-        data-field-id="${goal.id}-${key}"
-        class="field-body ${className === "full" ? "large" : ""} ${bullet ? "bullet-area" : ""}"
-        style="color:${color}"
-        ${bullet ? `placeholder="${bulletPlaceholder(label)}" onkeydown="handleBulletKeydown(event)"` : ""}
-        oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea>
-    </div>`;
+  }, 100);
 }
 
 function goalCard(goal) {
   const color = categories[goal.category].color;
   const type = goalType(goal);
 
-  return `<article class="goal-card">
+  return `<article class="goal-card" id="goal-${goal.id}">
     <div class="goal-top">
       <span class="category-pill" style="background:${color}">${goal.category}</span>
       <textarea class="goal-title" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', 'title', this.value)">${escapeHtml(goal.title)}</textarea>
@@ -766,20 +740,53 @@ function strategicBriefHtml() {
   </section>`;
 }
 
+
+function todayThisWeekHtml() {
+  const actionGoals = state.goals
+    .filter(g => (g.today_this_week || "").trim())
+    .sort((a,b) => {
+      const pa = a.priority_rank || 99;
+      const pb = b.priority_rank || 99;
+      if (pa !== pb) return pa - pb;
+      return (a.category || "").localeCompare(b.category || "");
+    });
+
+  const grouped = Object.keys(categories).map(cat => {
+    const goals = actionGoals.filter(g => g.category === cat);
+    if (!goals.length) return "";
+    return `<div class="action-category">
+      <h4 style="color:${categories[cat].color}">${cat}</h4>
+      ${goals.map(g => `<div class="action-card clickable-card" onclick="openGoal('${g.id}')">
+        <div class="action-top">
+          <strong style="color:${categories[g.category].color}">${g.priority_rank ? "#" + g.priority_rank + " — " : ""}${escapeHtml(g.title)}</strong>
+          <small>${goalType(g)}${g.goal_type === "Behavior" ? " • " + (g.behavior_rating || "Needs Improvement") : " • " + (g.status || "Not Started")}</small>
+        </div>
+        <div class="action-body">${escapeHtml(g.today_this_week).replaceAll("\\n", "<br>")}</div>
+      </div>`).join("")}
+    </div>`;
+  }).join("");
+
+  return `<section class="panel">
+    <h3>Today / This Week Actions</h3>
+    <p>All current action steps pulled from every goal, sorted by priority first and then category.</p>
+    ${actionGoals.length ? grouped : `<div class="recent-item"><strong>No actions entered yet.</strong><small>Add Today / This Week items inside any goal card.</small></div>`}
+  </section>`;
+}
+
 function render() {
   const stats = completionStats();
   const navCats = ["All", ...Object.keys(categories)].map(cat => {
     const color = cat === "All" ? "#111827" : categories[cat].color;
-    return `<button class="nav-button ${activeCategory === cat && activeView==="Workbook" ? "active" : ""}" style="${activeCategory === cat && activeView==="Workbook" ? `background:${color}` : ""}" onclick="activeView='Workbook';activeCategory='${cat}';render();">${cat}</button>`;
+    return `<button class="nav-button ${activeCategory === cat && activeView==="Workbook" ? "active" : ""}" style="${activeCategory === cat && activeView==="Workbook" ? `background:${color}` : ""}" onclick="activeView=\'Workbook\';activeCategory=\'${cat}\';render();scrollToContentTop();">${cat}</button>`;
   }).join("");
-  const viewButtons = ["Dashboard","Priority Stack","Life Seasons","Weekly Review","Strategic Brief","Reviews","Vision Board","Coach"].map(v=>`<button class="nav-button ${activeView===v?"active":""}" style="${activeView===v?"background:#111827":""}" onclick="activeView='${v}';render();">${v}</button>`).join("");
+  const viewButtons = ["Dashboard","Priority Stack","Today / This Week","Life Seasons","Weekly Review","Strategic Brief","Reviews","Vision Board","Coach"].map(v=>`<button class="nav-button ${activeView===v?"active":""}" style="${activeView===v?"background:#111827":""}" onclick="setMainView(\'${v}\')">${v}</button>`).join("");
   const grouped = Object.keys(categories).map(cat => {
     const goals = filteredGoals().filter(g => g.category === cat);
     if (!goals.length) return "";
     return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
-  const dashboard = `${statusDashboardHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${priorityStackHtml()}${metricsHtml()}${coachHtml()}`;
-  let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Vision Board" ? visionHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}<section class="type-note"><strong>Project vs Behavior:</strong> Use Project for discrete outcomes with an endpoint. Use Behavior for ongoing ways of living; behaviors use Needs Improvement / Meets / Exceeds instead of completion percentage.</section>${grouped}`;
+  const dashboard = `${statusDashboardHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${priorityStackHtml()}${todayThisWeekHtml()}${metricsHtml()}${coachHtml()}`;
+  let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Today / This Week" ? todayThisWeekHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Vision Board" ? visionHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}<section class="type-note"><strong>Project vs Behavior:</strong> Use Project for discrete outcomes with an endpoint. Use Behavior for ongoing ways of living; behaviors use Needs Improvement / Meets / Exceeds instead of completion percentage.</section>${grouped}`;
   document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div>${viewButtons}<hr>${navCats}<button class="add-button" onclick="activeView='Workbook';showAdd=!showAdd;render();">${showAdd ? "Close Add Goal" : "+ Add Goal"}</button><button class="utility-button" onclick="exportData()">Export Backup</button><button class="utility-button" onclick="logout()">Sign Out</button><div id="saveStatus" class="save-status">Cloud Sync On</div><div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div></aside><main class="content"><section class="hero"><div><h2>Life Portfolio</h2><p>A cloud-synced personal operating system for goals, people, money, next actions, scorecards, reviews, vision, and coaching.</p></div><div class="hero-badge"><strong>${stats.avg}%</strong><span>Average progress across ${stats.total} goals</span></div></section><section class="stats"><div class="stat"><strong id="statTotal">${stats.total}</strong><span>Total goals</span></div><div class="stat"><strong id="statAvg">${stats.avg}%</strong><span>Average progress</span></div><div class="stat"><strong id="statActive">${stats.active}</strong><span>Goals started</span></div><div class="stat"><strong id="statComplete">${stats.complete}</strong><span>Completed</span></div></section>${main}</main></div>`;
 }
 function escapeHtml(text) {

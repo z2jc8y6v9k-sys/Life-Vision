@@ -1,27 +1,27 @@
-# My Life Vision App v14 Bullets FIXED
+# My Life Vision App v15 Launch
 
-This fixes the blank-page issue from the prior v14 Bullets package.
+Changes:
+- Priority Stack items are clickable.
+- Today / This Week Actions items are clickable.
+- Clicking either jumps to the full goal card.
+- The goal briefly highlights after the jump.
+- Sidebar navigation now scrolls to the top of the selected section.
 
-Includes:
+Keeps:
+- Today / This Week Actions consolidated view
 - Priority Stack
 - Life Seasons
 - Resource Profile
-- Bullet support for:
-  - Key Results
-  - People
-  - Resource Notes
-  - Today / This Week
-  - Next 30 Days
-  - Next 12 Months
+- Project vs Behavior
+- Supabase sync
 
-Important:
-Run `supabase_v14_migration.sql` once in Supabase if you have not already run it.
+No new Supabase SQL migration is needed if v14 migration already ran.
 
 Deploy:
-1. Upload/replace:
+1. Upload/replace these GitHub files:
    - index.html
    - styles.css
    - app.js
    - README.md
 2. Wait for GitHub Pages to redeploy.
-3. Hard refresh the site.
+3. Hard refresh the site if the old version appears.
