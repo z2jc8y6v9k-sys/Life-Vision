@@ -175,7 +175,7 @@ async function addGoal(event) {
   const title = document.getElementById("newGoalTitle").value.trim();
   const category = document.getElementById("newGoalCategory").value;
   if (!title) return;
-  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", today_this_week:"", behavior_standard:"", goal_type:"Project", behavior_rating:"Needs Improvement", priority_rank:null, resource_time:"", resource_money:"", resource_physical:"", today_this_week:"", friction:"", resources:"" };
+  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", today_this_week:"", behavior_standard:"", goal_type:"Project", behavior_rating:"Needs Improvement", priority_rank:null, resource_time:"", resource_money:"", resource_physical:"", wins:"", lessons:"", today_this_week:"", friction:"", resources:"" };
   const { error } = await supabaseClient.from("goals").insert(row);
   if (error) return alert("Could not add goal: " + error.message);
   showAdd = false;
@@ -414,6 +414,36 @@ function openGoal(goalId) {
   }, 100);
 }
 
+
+function reflectionHtml(goal) {
+  const color = categories[goal.category].color;
+  const hasReflection = (goal.wins || "").trim() || (goal.lessons || "").trim();
+
+  return `<details class="reflection-drawer" ${hasReflection ? "open" : ""}>
+    <summary style="color:${color}">Wins & Lessons ${hasReflection ? "•" : ""}</summary>
+    <div class="grid-two reflection-grid">
+      ${fieldCard(goal, "wins", "Wins")}
+      ${fieldCard(goal, "lessons", "Lessons")}
+    </div>
+  </details>`;
+}
+
+function weeklyGoalReflectionsHtml() {
+  const withReflections = state.goals.filter(g => (g.wins || "").trim() || (g.lessons || "").trim());
+
+  if (!withReflections.length) {
+    return `<div class="recent-item"><strong>No goal-level wins or lessons yet.</strong><small>Add Wins or Lessons inside any goal card.</small></div>`;
+  }
+
+  return withReflections.map(g => `
+    <div class="reflection-summary">
+      <strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong>
+      ${(g.wins || "").trim() ? `<div><b>Wins:</b><br>${escapeHtml(g.wins).replaceAll("\\n","<br>")}</div>` : ""}
+      ${(g.lessons || "").trim() ? `<div><b>Lessons:</b><br>${escapeHtml(g.lessons).replaceAll("\\n","<br>")}</div>` : ""}
+    </div>
+  `).join("");
+}
+
 function goalCard(goal) {
   const color = categories[goal.category].color;
   const type = goalType(goal);
@@ -468,6 +498,8 @@ function goalCard(goal) {
     </div>
 
     ${fieldCard(goal, "next12", "Next 12 Months", "full")}
+
+    ${reflectionHtml(goal)}
 
     <div class="card-actions">
       <div class="progress-wrap">
@@ -540,6 +572,8 @@ function buildAIPrompt() {
       resource_money: g.resource_money,
       resource_physical: g.resource_physical,
       priority_rank: g.priority_rank,
+      wins: g.wins,
+      lessons: g.lessons,
       next30: g.next30,
       next12: g.next12,
       
@@ -628,15 +662,22 @@ function aiCoachHtml() {
 function weeklyReviewHtml() {
   return `<section class="panel weekly-review-box">
     <h3>Weekly Review</h3>
-    <p>Use this once a week to decide what deserves attention now.</p>
+    <p>This view combines your manual weekly review with Wins and Lessons captured inside individual goals.</p>
+
+    <section class="panel compact-panel">
+      <h3>Goal Wins & Lessons</h3>
+      <p>Automatically pulled from each goal card.</p>
+      ${weeklyGoalReflectionsHtml()}
+    </section>
+
     <div class="review-grid">
       <div class="review-card">
         <div class="field-header" style="background:#111827">Wins</div>
-        <textarea placeholder="What worked this week? What gave you energy?" oninput="updateReview('weekly_wins', this.value)">${escapeHtml(state.reviews.weekly_wins || "")}</textarea>
+        <textarea placeholder="Overall wins this week" oninput="updateReview('weekly_wins', this.value)">${escapeHtml(state.reviews.weekly_wins || "")}</textarea>
       </div>
       <div class="review-card">
         <div class="field-header" style="background:#111827">Lessons</div>
-        <textarea placeholder="What did you learn? What pattern do you notice?" oninput="updateReview('weekly_lessons', this.value)">${escapeHtml(state.reviews.weekly_lessons || "")}</textarea>
+        <textarea placeholder="Overall lessons learned" oninput="updateReview('weekly_lessons', this.value)">${escapeHtml(state.reviews.weekly_lessons || "")}</textarea>
       </div>
       <div class="review-card">
         <div class="field-header" style="background:#111827">What Mattered Most</div>
@@ -648,35 +689,13 @@ function weeklyReviewHtml() {
       </div>
       <div class="review-card">
         <div class="field-header" style="background:#111827">Top 3 Priorities Next Week</div>
-        <textarea placeholder="1.
-2.
-3." oninput="updateReview('weekly_priorities', this.value)">${escapeHtml(state.reviews.weekly_priorities || "")}</textarea>
+        <textarea placeholder="1.\n2.\n3." oninput="updateReview('weekly_priorities', this.value)">${escapeHtml(state.reviews.weekly_priorities || "")}</textarea>
       </div>
       <div class="review-card">
         <div class="field-header" style="background:#111827">What To Stop Doing</div>
         <textarea placeholder="What should you stop doing, pause, or decline?" oninput="updateReview('weekly_stop', this.value)">${escapeHtml(state.reviews.weekly_stop || "")}</textarea>
       </div>
     </div>
-  </section>`;
-}
-
-
-function statusCounts() {
-  return {
-    onTrack: state.goals.filter(g => (g.goal_type || "Project") === "Project" && g.status === "On Track").length,
-    atRisk: state.goals.filter(g => (g.goal_type || "Project") === "Project" && g.status === "At Risk").length,
-    completed: state.goals.filter(g => (g.goal_type || "Project") === "Project" && (g.status === "Completed" || Number(g.progress||0) >= 100)).length,
-    notStarted: state.goals.filter(g => (g.status || "Not Started") === "Not Started" && Number(g.progress||0) === 0).length
-  };
-}
-
-function statusDashboardHtml() {
-  const s = statusCounts();
-  return `<section class="stats">
-    <div class="stat"><strong>${s.onTrack}</strong><span>Goals On Track</span></div>
-    <div class="stat"><strong>${s.atRisk}</strong><span>Goals At Risk</span></div>
-    <div class="stat"><strong>${s.completed}</strong><span>Goals Completed</span></div>
-    <div class="stat"><strong>${s.notStarted}</strong><span>Goals Not Started</span></div>
   </section>`;
 }
 

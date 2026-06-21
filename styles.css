@@ -286,3 +286,63 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
 @media(max-width:950px){
   .dashboard-hero { grid-template-columns: 1fr; }
 }
+
+.reflection-drawer {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #fbfaf7;
+  margin: 16px 0 20px;
+  overflow: hidden;
+}
+
+.reflection-drawer summary {
+  padding: 13px 15px;
+  font-weight: 900;
+  cursor: pointer;
+  list-style: none;
+}
+
+.reflection-drawer summary::-webkit-details-marker {
+  display: none;
+}
+
+.reflection-drawer summary::after {
+  content: "Open";
+  float: right;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.reflection-drawer[open] summary::after {
+  content: "Close";
+}
+
+.reflection-grid {
+  padding: 0 14px 14px;
+  margin-bottom: 0;
+}
+
+.reflection-summary {
+  background: #fbfaf7;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.reflection-summary strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.reflection-summary div {
+  margin-top: 8px;
+}
+
+.compact-panel {
+  box-shadow: none;
+  margin-bottom: 20px;
+}

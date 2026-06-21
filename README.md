@@ -1,28 +1,28 @@
-# My Life Vision App v16
+# My Life Vision App v17
 
 Changes:
-- Removed Vision Board from navigation.
-- Dashboard is now action-oriented:
-  - Priority Stack first
-  - Today / This Week Actions second
-  - Progress / recently updated / metrics after that
-- Dedicated pages no longer start with the Life Portfolio hero:
-  - Priority Stack opens directly at Priority Stack
-  - Today / This Week opens directly at actions
-  - Life Seasons opens directly at Life Seasons
-  - Weekly Review opens directly at Weekly Review
-  - Strategic Brief opens directly at Strategic Brief
-  - Coach opens directly at Coach
-- Keeps clickable Priority Stack and Today / This Week items.
-- Keeps Supabase sync.
+- Adds per-goal Wins and Lessons.
+- Wins and Lessons live inside a collapsible Reflection drawer on each goal card so the card does not get too long.
+- Weekly Review automatically pulls together all goal-level Wins and Lessons.
+- Keeps v16 changes:
+  - Action-oriented Dashboard
+  - Priority Stack
+  - Today / This Week Actions
+  - Life Seasons
+  - Resource Profile
+  - Click-through goal navigation
+  - Vision Board removed
 
-No new Supabase SQL migration is needed if v14 migration already ran.
+Important:
+Run `supabase_v17_migration.sql` once in Supabase SQL Editor before uploading v17 files.
 
 Deploy:
-1. Upload/replace these GitHub files:
+1. Run the v17 SQL migration.
+2. Upload/replace these GitHub files:
    - index.html
    - styles.css
    - app.js
    - README.md
-2. Wait for GitHub Pages to redeploy.
-3. Hard refresh the site if the old version appears.
+3. Do not upload the SQL file unless you want it as documentation.
+4. Wait for GitHub Pages to redeploy.
+5. Hard refresh the site if the old version appears.
