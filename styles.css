@@ -142,3 +142,69 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
   font-size: 13px;
   line-height: 1.35;
 }
+
+.resource-profile {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+  background: #fbfaf7;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.resource-profile label {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.resource-profile select {
+  width: 100%;
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px;
+  background: white;
+}
+
+.season-block {
+  margin: 18px 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.season-block h4 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+}
+
+@media(max-width:950px){
+  .resource-profile { grid-template-columns: 1fr; }
+}
+
+.field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bullet-button {
+  border: 1px solid rgba(255,255,255,.55);
+  background: rgba(255,255,255,.18);
+  color: #fff;
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.bullet-area {
+  line-height: 1.55;
+}

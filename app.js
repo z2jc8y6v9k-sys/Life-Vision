@@ -175,7 +175,7 @@ async function addGoal(event) {
   const title = document.getElementById("newGoalTitle").value.trim();
   const category = document.getElementById("newGoalCategory").value;
   if (!title) return;
-  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", today_this_week:"", behavior_standard:"", goal_type:"Project", behavior_rating:"Needs Improvement", today_this_week:"", friction:"", resources:"" };
+  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", today_this_week:"", behavior_standard:"", goal_type:"Project", behavior_rating:"Needs Improvement", priority_rank:null, resource_time:"", resource_money:"", resource_physical:"", today_this_week:"", friction:"", resources:"" };
   const { error } = await supabaseClient.from("goals").insert(row);
   if (error) return alert("Could not add goal: " + error.message);
   showAdd = false;
@@ -307,21 +307,72 @@ function coachInsights() {
   return insights;
 }
 
+
+function isBulletField(key) {
+  return ["key_results", "people", "money", "today_this_week", "next30", "next12"].includes(key);
+}
+
+function bulletPlaceholder(label) {
+  return `• ${label} item\n• Another item`;
+}
+
+function handleBulletKeydown(event) {
+  const textarea = event.target;
+
+  if (event.key === "Enter") {
+    const start = textarea.selectionStart;
+    const value = textarea.value;
+    const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+    const currentLine = value.slice(lineStart, start);
+
+    if (currentLine.trim().startsWith("•")) {
+      event.preventDefault();
+
+      if (currentLine.trim() === "•") {
+        const before = value.slice(0, lineStart);
+        const after = value.slice(start);
+        textarea.value = before + after;
+        textarea.selectionStart = textarea.selectionEnd = lineStart;
+      } else {
+        const insert = "\n• ";
+        textarea.value = value.slice(0, start) + insert + value.slice(textarea.selectionEnd);
+        textarea.selectionStart = textarea.selectionEnd = start + insert.length;
+      }
+
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+}
+
+function formatBullets(id, key) {
+  const el = document.querySelector(`[data-field-id="${id}-${key}"]`);
+  if (!el) return;
+  const lines = el.value.split("\n").map(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return "";
+    if (trimmed.startsWith("•") || trimmed.startsWith("-")) return trimmed.startsWith("-") ? "• " + trimmed.slice(1).trim() : trimmed;
+    return "• " + trimmed;
+  });
+  el.value = lines.join("\n");
+  updateGoalNoRender(id, key, el.value);
+}
+
 function fieldCard(goal, key, label, className = "") {
   const color = categories[goal.category].color;
-  return `<div class="field-card ${className}"><div class="field-header" style="background:${color}">${label}</div><textarea class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea></div>`;
-}
-
-function goalType(goal) {
-  return goal?.goal_type || "Project";
-}
-
-function progressLabelFor(goal) {
-  return goalType(goal) === "Behavior" ? "Consistency" : "Completion";
-}
-
-function keyResultsLabelFor(goal) {
-  return "Key Results";
+  const bullet = isBulletField(key);
+  return `
+    <div class="field-card ${className}">
+      <div class="field-header" style="background:${color}">
+        <span>${label}</span>
+        ${bullet ? `<button class="bullet-button" type="button" onclick="formatBullets('${goal.id}', '${key}')">Bullets</button>` : ""}
+      </div>
+      <textarea
+        data-field-id="${goal.id}-${key}"
+        class="field-body ${className === "full" ? "large" : ""} ${bullet ? "bullet-area" : ""}"
+        style="color:${color}"
+        ${bullet ? `placeholder="${bulletPlaceholder(label)}" onkeydown="handleBulletKeydown(event)"` : ""}
+        oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea>
+    </div>`;
 }
 
 function goalCard(goal) {
@@ -334,7 +385,7 @@ function goalCard(goal) {
       <textarea class="goal-title" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', 'title', this.value)">${escapeHtml(goal.title)}</textarea>
     </div>
 
-    <div class="grid-two">
+    <div class="grid-three">
       <label>Type<br>
         <select class="status-select" onchange="updateGoalNoRender('${goal.id}','goal_type',this.value); setTimeout(render, 300);">
           <option ${type==="Project"?"selected":""}>Project</option>
@@ -354,6 +405,7 @@ function goalCard(goal) {
           </select>
         </label>
       `}
+      <label>Priority<br>${priorityOptions(goal)}</label>
     </div>
 
     ${fieldCard(goal, "key_results", "Key Results", "full")}
@@ -365,7 +417,10 @@ function goalCard(goal) {
 
     <div class="grid-two">
       ${fieldCard(goal, "people", "People")}
-      ${fieldCard(goal, "money", "Resources")}
+      <div>
+        ${fieldCard(goal, "money", "Resource Notes")}
+        ${resourceProfileHtml(goal)}
+      </div>
     </div>
 
     <div class="grid-two">
@@ -442,6 +497,10 @@ function buildAIPrompt() {
       why: g.why,
       people: g.people,
       resources: g.money,
+      resource_time: g.resource_time,
+      resource_money: g.resource_money,
+      resource_physical: g.resource_physical,
+      priority_rank: g.priority_rank,
       next30: g.next30,
       next12: g.next12,
       
@@ -648,14 +707,14 @@ function render() {
     const color = cat === "All" ? "#111827" : categories[cat].color;
     return `<button class="nav-button ${activeCategory === cat && activeView==="Workbook" ? "active" : ""}" style="${activeCategory === cat && activeView==="Workbook" ? `background:${color}` : ""}" onclick="activeView='Workbook';activeCategory='${cat}';render();">${cat}</button>`;
   }).join("");
-  const viewButtons = ["Dashboard","Weekly Review","Strategic Brief","Reviews","Vision Board","Coach"].map(v=>`<button class="nav-button ${activeView===v?"active":""}" style="${activeView===v?"background:#111827":""}" onclick="activeView='${v}';render();">${v}</button>`).join("");
+  const viewButtons = ["Dashboard","Priority Stack","Life Seasons","Weekly Review","Strategic Brief","Reviews","Vision Board","Coach"].map(v=>`<button class="nav-button ${activeView===v?"active":""}" style="${activeView===v?"background:#111827":""}" onclick="activeView='${v}';render();">${v}</button>`).join("");
   const grouped = Object.keys(categories).map(cat => {
     const goals = filteredGoals().filter(g => g.category === cat);
     if (!goals.length) return "";
     return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
-  const dashboard = `${statusDashboardHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
-  let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Vision Board" ? visionHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}<section class="type-note"><strong>Project vs Behavior:</strong> Use Project for discrete outcomes with an endpoint. Use Behavior for ongoing ways of living; behaviors use Needs Improvement / Meets / Exceeds instead of completion percentage.</section>${grouped}`;
+  const dashboard = `${statusDashboardHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${priorityStackHtml()}${metricsHtml()}${coachHtml()}`;
+  let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Vision Board" ? visionHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}<section class="type-note"><strong>Project vs Behavior:</strong> Use Project for discrete outcomes with an endpoint. Use Behavior for ongoing ways of living; behaviors use Needs Improvement / Meets / Exceeds instead of completion percentage.</section>${grouped}`;
   document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div>${viewButtons}<hr>${navCats}<button class="add-button" onclick="activeView='Workbook';showAdd=!showAdd;render();">${showAdd ? "Close Add Goal" : "+ Add Goal"}</button><button class="utility-button" onclick="exportData()">Export Backup</button><button class="utility-button" onclick="logout()">Sign Out</button><div id="saveStatus" class="save-status">Cloud Sync On</div><div class="user-box">Signed in as:<br>${escapeHtml(state.user.email || "")}</div></aside><main class="content"><section class="hero"><div><h2>Life Portfolio</h2><p>A cloud-synced personal operating system for goals, people, money, next actions, scorecards, reviews, vision, and coaching.</p></div><div class="hero-badge"><strong>${stats.avg}%</strong><span>Average progress across ${stats.total} goals</span></div></section><section class="stats"><div class="stat"><strong id="statTotal">${stats.total}</strong><span>Total goals</span></div><div class="stat"><strong id="statAvg">${stats.avg}%</strong><span>Average progress</span></div><div class="stat"><strong id="statActive">${stats.active}</strong><span>Goals started</span></div><div class="stat"><strong id="statComplete">${stats.complete}</strong><span>Completed</span></div></section>${main}</main></div>`;
 }
 function escapeHtml(text) {
