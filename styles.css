@@ -1365,3 +1365,22 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
 .content-start {
   scroll-margin-top: 0;
 }
+
+/* v29 remove empty Workbook box */
+.view-title + .add-form:empty,
+.view-title + .type-note:empty,
+.add-form:empty,
+.type-note:empty {
+  display: none !important;
+}
+
+/* Hide an empty add-goal shell if it renders without visible controls */
+.add-form:not(:has(textarea)):not(:has(select)):not(:has(button)) {
+  display: none !important;
+}
+
+/* If a blank field/card remains directly under the Workbook title, remove the visual shell */
+body .content .view-title + .panel:empty,
+body .content .view-title + div:empty {
+  display: none !important;
+}
