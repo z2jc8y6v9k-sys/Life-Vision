@@ -253,3 +253,36 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
   outline: 4px solid rgba(17,24,39,.18);
   box-shadow: 0 0 0 8px rgba(17,24,39,.08), var(--shadow);
 }
+
+.dashboard-hero {
+  background: linear-gradient(135deg,rgba(255,255,255,.96),rgba(255,255,255,.70));
+  border: 1px solid var(--line);
+  border-radius: 32px;
+  padding: 24px 28px;
+  box-shadow: var(--shadow);
+  margin-bottom: 22px;
+  display: grid;
+  grid-template-columns: 1.5fr .8fr;
+  gap: 22px;
+  align-items: center;
+}
+
+.dashboard-hero h2,
+.view-title h2 {
+  margin: 0;
+  font-size: 34px;
+  letter-spacing: -0.06em;
+}
+
+.dashboard-hero p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.view-title {
+  margin-bottom: 18px;
+}
+
+@media(max-width:950px){
+  .dashboard-hero { grid-template-columns: 1fr; }
+}

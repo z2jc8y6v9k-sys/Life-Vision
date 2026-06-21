@@ -1,19 +1,20 @@
-# My Life Vision App v15 Launch
+# My Life Vision App v16
 
 Changes:
-- Priority Stack items are clickable.
-- Today / This Week Actions items are clickable.
-- Clicking either jumps to the full goal card.
-- The goal briefly highlights after the jump.
-- Sidebar navigation now scrolls to the top of the selected section.
-
-Keeps:
-- Today / This Week Actions consolidated view
-- Priority Stack
-- Life Seasons
-- Resource Profile
-- Project vs Behavior
-- Supabase sync
+- Removed Vision Board from navigation.
+- Dashboard is now action-oriented:
+  - Priority Stack first
+  - Today / This Week Actions second
+  - Progress / recently updated / metrics after that
+- Dedicated pages no longer start with the Life Portfolio hero:
+  - Priority Stack opens directly at Priority Stack
+  - Today / This Week opens directly at actions
+  - Life Seasons opens directly at Life Seasons
+  - Weekly Review opens directly at Weekly Review
+  - Strategic Brief opens directly at Strategic Brief
+  - Coach opens directly at Coach
+- Keeps clickable Priority Stack and Today / This Week items.
+- Keeps Supabase sync.
 
 No new Supabase SQL migration is needed if v14 migration already ran.
 
