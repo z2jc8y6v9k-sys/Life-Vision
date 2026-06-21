@@ -774,22 +774,31 @@ function statusCardHtml(stats) {
   const projects = state.goals.filter(g => (g.goal_type || "Project") === "Project");
   const behaviors = state.goals.filter(g => g.goal_type === "Behavior");
 
-  const projectComplete = projects.filter(g => g.status === "Completed" || Number(g.progress || 0) >= 100).length;
+  const projectStarted = projects.filter(g => Number(g.progress || 0) > 0 || !["Not Started", "", null, undefined].includes(g.status)).length;
+  const projectDone = projects.filter(g => g.status === "Completed" || Number(g.progress || 0) >= 100).length;
   const projectAtRisk = projects.filter(g => g.status === "At Risk").length;
+
+  const behaviorStarted = behaviors.filter(g => (g.behavior_rating || "Needs Improvement") !== "Needs Improvement" || (g.today_this_week || "").trim() || (g.key_results || "").trim()).length;
+  const behaviorDone = behaviors.filter(g => (g.behavior_rating || "") === "Exceeds").length;
   const behaviorMeets = behaviors.filter(g => ["Meets", "Exceeds"].includes(g.behavior_rating || "")).length;
-  const behaviorNeeds = behaviors.filter(g => (g.behavior_rating || "Needs Improvement") === "Needs Improvement").length;
 
   return `<aside class="status-card top-card">
     <div class="top-card-title">Status</div>
-    <div class="status-mini-grid">
-      <div><strong>${stats.total}</strong><span>Total</span></div>
-      <div><strong>${stats.avg}%</strong><span>Avg</span></div>
-      <div><strong>${stats.active}</strong><span>Started</span></div>
-      <div><strong>${stats.complete}</strong><span>Done</span></div>
-    </div>
-    <div class="status-detail">
-      <div><b>Projects</b><span>${projects.length} total / ${projectComplete} complete / ${projectAtRisk} at risk</span></div>
-      <div><b>Behaviors</b><span>${behaviors.length} total / ${behaviorMeets} meets+ / ${behaviorNeeds} need work</span></div>
+    <div class="status-compact-row">
+      <div>
+        <b>Projects</b>
+        <span>${projects.length} total</span>
+        <span>${projectStarted} started</span>
+        <span>${projectDone} done</span>
+        <span>${projectAtRisk} at risk</span>
+      </div>
+      <div>
+        <b>Behaviors</b>
+        <span>${behaviors.length} total</span>
+        <span>${behaviorStarted} started</span>
+        <span>${behaviorMeets} meet+</span>
+        <span>${behaviorDone} exceed</span>
+      </div>
     </div>
   </aside>`;
 }
@@ -857,11 +866,11 @@ function render() {
   }).join("");
   const dashboard = `${priorityStackHtml()}${todayThisWeekHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
   let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Today / This Week" ? todayThisWeekHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}<section class="type-note"><strong></section>${grouped}`;
-  document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS | Ages 53–93</p></div>${utilityMenuHtml()}</aside><main class="content">
+  document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand-row"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS</p></div>${statusCardHtml(completionStats())}</div>${utilityMenuHtml()}</aside><main class="content">
         <div class="top-app-row">
           ${mainNavCardHtml()}
           ${workbookCardHtml()}
-          ${statusCardHtml(stats)}
+          
         </div>
         <div class="content-start"></div>
         ${activeView === "Dashboard" ? dashboardIntroHtml(stats) : viewTitleHtml()}

@@ -1,10 +1,10 @@
-# My Life Vision App v23 Layout Clean
+# My Life Vision App v24 Header Layout
 
 Changes:
-- Cloud Sync moved under Menu.
-- Menu button made smaller.
-- Removed signed-in email from the visible top/sidebar area.
-- Navigate buttons are stacked in a compact left column.
-- Workbook buttons are stacked below Navigate.
-- Status is side-by-side to the right of Navigate/Workbook.
+- Status is now a small top-right box across from My Life Vision.
+- Removed Total / Avg / Started / Done mini boxes.
+- Status now keeps only Projects and Behaviors, with started/done incorporated.
+- Removed "Ages 53–93" after Strategic Life OS.
+- Navigate and Workbook boxes are side by side.
+- Buttons are smaller so they visually fit on the same row.
 - No new Supabase SQL migration required.

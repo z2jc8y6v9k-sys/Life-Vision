@@ -771,3 +771,127 @@ button,textarea,select,input{font-family:inherit}button{cursor:pointer}
     grid-row: auto !important;
   }
 }
+
+/* v24 final header/layout overrides */
+.sidebar {
+  height: auto !important;
+  min-height: auto !important;
+  position: relative !important;
+}
+
+.brand-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 10px;
+}
+
+.brand-row .brand h1 {
+  font-size: 26px;
+}
+
+.brand-row .brand p {
+  margin: 5px 0 0;
+  font-size: 13px;
+}
+
+.brand-row .status-card {
+  justify-self: end;
+  width: 210px;
+  padding: 10px !important;
+  border-radius: 16px !important;
+  box-shadow: 0 6px 14px rgba(31,41,51,.05) !important;
+}
+
+.status-mini-grid,
+.status-grid,
+.status-detail {
+  display: none !important;
+}
+
+.status-compact-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.status-compact-row div {
+  background: #fbfaf7;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 7px;
+}
+
+.status-compact-row b {
+  display: block;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.status-compact-row span {
+  display: block;
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.25;
+}
+
+.top-app-row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px !important;
+  align-items: start !important;
+  justify-content: stretch !important;
+  margin-bottom: 16px !important;
+}
+
+.main-nav-card {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  display: block !important;
+}
+
+.workbook-card {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  display: block !important;
+}
+
+.main-nav-card,
+.workbook-card {
+  padding: 10px !important;
+  border-radius: 18px !important;
+}
+
+.main-nav-card button,
+.workbook-card button {
+  width: auto !important;
+  display: inline-block !important;
+  margin: 3px 2px !important;
+  padding: 5px 7px !important;
+  font-size: 11px !important;
+  border-radius: 999px !important;
+  line-height: 1 !important;
+  text-align: left !important;
+}
+
+.utility-menu {
+  margin-top: 6px !important;
+}
+
+@media(max-width:950px){
+  .brand-row {
+    grid-template-columns: 1fr;
+  }
+  .brand-row .status-card {
+    justify-self: stretch;
+    width: auto;
+  }
+  .top-app-row {
+    grid-template-columns: 1fr !important;
+  }
+  .main-nav-card,
+  .workbook-card {
+    grid-column: auto !important;
+  }
+}
