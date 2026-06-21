@@ -662,40 +662,12 @@ function aiCoachHtml() {
 function weeklyReviewHtml() {
   return `<section class="panel weekly-review-box">
     <h3>Weekly Review</h3>
-    <p>This view combines your manual weekly review with Wins and Lessons captured inside individual goals.</p>
+    <p>Automatically pulled from Wins and Lessons captured inside individual goals.</p>
 
     <section class="panel compact-panel">
       <h3>Goal Wins & Lessons</h3>
-      <p>Automatically pulled from each goal card.</p>
       ${weeklyGoalReflectionsHtml()}
     </section>
-
-    <div class="review-grid">
-      <div class="review-card">
-        <div class="field-header" style="background:#111827">Wins</div>
-        <textarea placeholder="Overall wins this week" oninput="updateReview('weekly_wins', this.value)">${escapeHtml(state.reviews.weekly_wins || "")}</textarea>
-      </div>
-      <div class="review-card">
-        <div class="field-header" style="background:#111827">Lessons</div>
-        <textarea placeholder="Overall lessons learned" oninput="updateReview('weekly_lessons', this.value)">${escapeHtml(state.reviews.weekly_lessons || "")}</textarea>
-      </div>
-      <div class="review-card">
-        <div class="field-header" style="background:#111827">What Mattered Most</div>
-        <textarea placeholder="What mattered most this week?" oninput="updateReview('weekly_mattered', this.value)">${escapeHtml(state.reviews.weekly_mattered || "")}</textarea>
-      </div>
-      <div class="review-card">
-        <div class="field-header" style="background:#111827">What Drained Energy</div>
-        <textarea placeholder="What drained energy or pulled you out of alignment?" oninput="updateReview('weekly_drained', this.value)">${escapeHtml(state.reviews.weekly_drained || "")}</textarea>
-      </div>
-      <div class="review-card">
-        <div class="field-header" style="background:#111827">Top 3 Priorities Next Week</div>
-        <textarea placeholder="1.\n2.\n3." oninput="updateReview('weekly_priorities', this.value)">${escapeHtml(state.reviews.weekly_priorities || "")}</textarea>
-      </div>
-      <div class="review-card">
-        <div class="field-header" style="background:#111827">What To Stop Doing</div>
-        <textarea placeholder="What should you stop doing, pause, or decline?" oninput="updateReview('weekly_stop', this.value)">${escapeHtml(state.reviews.weekly_stop || "")}</textarea>
-      </div>
-    </div>
   </section>`;
 }
 
