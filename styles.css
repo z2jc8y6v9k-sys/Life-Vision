@@ -1589,22 +1589,12 @@ body {
   font-weight: 900 !important;
 }
 
-.workbook-box .box-title::after {
-  content: "Your current life categories";
-}
-
-.dashboard-box .box-title::after {
-  content: "Ways to review and operate the system";
-}
-
+/* v37: remove descriptive subtitles under Workbook and Dashboard */
+.workbook-box .box-title::after,
+.dashboard-box .box-title::after,
 .nav-workbook-row .box-title::after {
-  display: block;
-  margin-top: 9px;
-  color: #667085;
-  font-size: 14px;
-  line-height: 1.35;
-  letter-spacing: 0;
-  font-weight: 550;
+  content: none !important;
+  display: none !important;
 }
 
 .nav-workbook-row .button-wrap {
