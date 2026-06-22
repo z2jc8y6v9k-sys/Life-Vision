@@ -1,10 +1,10 @@
-# My Life Vision App v35 Top Navigation
+# My Life Vision App v36 Bullet Controls
 
 Changes:
-- Adds persistent Workbook and Dashboard quick navigation available anywhere in the document.
-- Workbook and Dashboard controls return the user to the top navigation cards.
-- Keeps the v33 visual refresh.
-- Preserves the prior label cleanup: Life Season and Resources.
-- Adds bullet continuation behavior inside workbook text areas.
+- Adds visible bullet controls to the requested workbook text boxes.
+- Bullet controls appear on: Key Results, People, Resources, Today / This Week, Next 30 Days, Next 12 Months, Wins, and Lessons.
+- Pressing Enter inside a bullet continues the bullet list.
+- Pressing Enter on an empty bullet exits/removes that empty bullet.
+- Preserves v35 top navigation, v33 visual refresh, Life Season label, and Resources label.
 
 No SQL changes required.

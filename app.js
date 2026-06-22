@@ -307,25 +307,68 @@ function coachInsights() {
   return insights;
 }
 
+const bulletFieldKeys = new Set(["key_results", "people", "money", "today_this_week", "next30", "next12", "wins", "lessons"]);
+
 function fieldCard(goal, key, label, className = "") {
   const color = categories[goal.category].color;
-  return `<div class="field-card ${className}"><div class="field-header" style="background:${color}">${label}</div><textarea class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" onkeydown="handleBulletKeydown(event)" oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea></div>`;
+  const textareaId = `field-${goal.id}-${key}`;
+  const bulletTools = bulletFieldKeys.has(key)
+    ? `<button type="button" class="bullet-tool" onclick="insertBullet('${textareaId}')" title="Add bullet point">• Bullet</button>`
+    : "";
+  return `<div class="field-card ${className}"><div class="field-header field-header-with-tool" style="background:${color}"><span>${label}</span>${bulletTools}</div><textarea id="${textareaId}" class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" onkeydown="handleBulletKeydown(event)" oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea></div>`;
+}
+
+function insertBullet(textareaId) {
+  const textarea = document.getElementById(textareaId);
+  if (!textarea) return;
+
+  const start = textarea.selectionStart || 0;
+  const end = textarea.selectionEnd || start;
+  const value = textarea.value || "";
+  const selected = value.slice(start, end);
+
+  let insert;
+  if (selected.trim()) {
+    insert = selected
+      .split("\n")
+      .map(line => line.trim() ? (line.match(/^\s*[-•*]\s+/) ? line : `- ${line}`) : line)
+      .join("\n");
+  } else {
+    const needsNewLine = start > 0 && value[start - 1] !== "\n";
+    insert = `${needsNewLine ? "\n" : ""}- `;
+  }
+
+  textarea.value = value.slice(0, start) + insert + value.slice(end);
+  const cursor = start + insert.length;
+  textarea.focus();
+  textarea.selectionStart = textarea.selectionEnd = cursor;
+  textarea.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 function handleBulletKeydown(event) {
   if (event.key !== "Enter") return;
   const textarea = event.target;
   const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
   const value = textarea.value;
   const lineStart = value.lastIndexOf("\n", start - 1) + 1;
   const currentLine = value.slice(lineStart, start);
-  const bulletMatch = currentLine.match(/^(\s*)([-•*])\s+/);
+  const bulletMatch = currentLine.match(/^(\s*)([-•*])\s*(.*)$/);
   if (!bulletMatch) return;
 
   event.preventDefault();
+
+  // If the current bullet is empty, pressing Enter removes the bullet instead of creating another one.
+  if (!bulletMatch[3].trim()) {
+    textarea.value = value.slice(0, lineStart) + value.slice(end);
+    textarea.selectionStart = textarea.selectionEnd = lineStart;
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    return;
+  }
+
   const prefix = `${bulletMatch[1]}${bulletMatch[2]} `;
   const insert = `\n${prefix}`;
-  textarea.value = value.slice(0, start) + insert + value.slice(textarea.selectionEnd);
+  textarea.value = value.slice(0, start) + insert + value.slice(end);
   textarea.selectionStart = textarea.selectionEnd = start + insert.length;
   textarea.dispatchEvent(new Event("input", { bubbles: true }));
 }

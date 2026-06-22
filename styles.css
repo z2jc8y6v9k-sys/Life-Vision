@@ -1780,3 +1780,28 @@ body {
     bottom: 14px;
   }
 }
+
+
+/* v36 real bullet controls for selected workbook text boxes */
+.field-header-with-tool {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+
+.bullet-tool {
+  border: 1px solid rgba(255,255,255,.38) !important;
+  background: rgba(255,255,255,.18) !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.bullet-tool:hover {
+  background: rgba(255,255,255,.28) !important;
+}
