@@ -846,6 +846,8 @@ function workbookCardHtml() {
 }
 
 function viewTitleHtml() {
+  if (activeView === "Workbook") return "";
+
   const titles = {
     "Dashboard": "Dashboard",
     "Priority Stack": "Priority Stack",
@@ -853,8 +855,7 @@ function viewTitleHtml() {
     "Life Seasons": "Life Seasons",
     "Weekly Review": "Weekly Review",
     "Strategic Brief": "Strategic Brief",
-    "Coach": "Coach",
-    "Workbook": "Workbook"
+    "Coach": "Coach"
   };
 
   return `<section class="view-title"><h2>${titles[activeView] || activeCategory || activeView}</h2></section>`;
