@@ -495,6 +495,105 @@ function weeklyGoalReflectionsHtml() {
   `).join("");
 }
 
+
+function parseWeeklyArchive() {
+  try {
+    const raw = state.reviews.weekly_archive || "[]";
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function weekOfMonday(date = new Date()) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+}
+
+async function startNewWeek() {
+  const items = state.goals
+    .filter(g => (g.wins || "").trim() || (g.lessons || "").trim())
+    .map(g => ({
+      goal_id: g.id,
+      category: g.category,
+      title: g.title,
+      wins: g.wins || "",
+      lessons: g.lessons || ""
+    }));
+
+  if (!items.length) {
+    alert("There are no Wins or Lessons to archive yet.");
+    return;
+  }
+
+  if (!confirm("Archive this week's Wins & Lessons and clear the current Wins/Lessons fields for a fresh week?")) return;
+
+  const archive = parseWeeklyArchive();
+  const entry = {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    week_of: weekOfMonday(),
+    archived_at: new Date().toISOString(),
+    items
+  };
+
+  const nextArchive = [entry, ...archive];
+  const archiveText = JSON.stringify(nextArchive);
+
+  const { error: archiveError } = await supabaseClient.from("life_reviews").upsert({
+    user_id: state.user.id,
+    review_type: "weekly_archive",
+    content: archiveText,
+    updated_at: new Date().toISOString()
+  }, { onConflict: "user_id,review_type" });
+
+  if (archiveError) {
+    alert("Could not archive weekly review: " + archiveError.message);
+    return;
+  }
+
+  const results = await Promise.all(items.map(item =>
+    supabaseClient.from("goals").update({ wins: "", lessons: "", updated_at: new Date().toISOString() }).eq("id", item.goal_id)
+  ));
+  const failed = results.find(r => r.error);
+  if (failed) {
+    alert("Archive was saved, but Wins/Lessons could not be cleared: " + failed.error.message);
+    return;
+  }
+
+  state.reviews.weekly_archive = archiveText;
+  state.goals = state.goals.map(g => items.some(item => item.goal_id === g.id) ? { ...g, wins: "", lessons: "" } : g);
+  showSaved("Week archived");
+  render();
+}
+
+function weeklyArchiveHtml() {
+  const archive = parseWeeklyArchive();
+  if (!archive.length) {
+    return `<div class="recent-item"><strong>No archived weekly reviews yet.</strong><small>Use Start New Week after you finish your review to save this week's Wins & Lessons.</small></div>`;
+  }
+
+  return archive.map(entry => `
+    <details class="weekly-archive-entry">
+      <summary>Week of ${escapeHtml(entry.week_of || "Archived Week")}</summary>
+      <div class="weekly-archive-body">
+        ${(entry.items || []).map(item => `
+          <div class="reflection-summary">
+            <strong style="color:${categories[item.category]?.color || '#111827'}">${escapeHtml(item.title || "Untitled Goal")}</strong>
+            <small>${escapeHtml(item.category || "")}</small>
+            ${(item.wins || "").trim() ? `<div><b>Wins:</b><br>${escapeHtml(item.wins).replaceAll("\n","<br>")}</div>` : ""}
+            ${(item.lessons || "").trim() ? `<div><b>Lessons:</b><br>${escapeHtml(item.lessons).replaceAll("\n","<br>")}</div>` : ""}
+          </div>
+        `).join("")}
+      </div>
+    </details>
+  `).join("");
+}
+
 function goalCard(goal) {
   const color = categories[goal.category].color;
   const type = goalType(goal);
@@ -713,11 +812,21 @@ function aiCoachHtml() {
 function weeklyReviewHtml() {
   return `<section class="panel weekly-review-box">
     <h3>Weekly Review</h3>
-    <p>Automatically pulled from Wins and Lessons captured inside individual goals.</p>
+    <p>Current week Wins and Lessons are pulled from individual goals. When your review is complete, use Start New Week to archive them and clear the working fields.</p>
+
+    <div class="weekly-review-actions">
+      <button type="button" class="primary" onclick="startNewWeek()">Start New Week</button>
+      <span>Archives current Wins & Lessons, then clears them for the new week.</span>
+    </div>
 
     <section class="panel compact-panel">
-      <h3>Goal Wins & Lessons</h3>
+      <h3>Current Goal Wins & Lessons</h3>
       ${weeklyGoalReflectionsHtml()}
+    </section>
+
+    <section class="panel compact-panel">
+      <h3>Previous Weekly Reviews</h3>
+      ${weeklyArchiveHtml()}
     </section>
   </section>`;
 }
