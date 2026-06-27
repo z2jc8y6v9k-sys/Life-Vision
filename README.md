@@ -1,10 +1,10 @@
-# My Life Vision App v39 Weekly Archive
+# My Life Vision App v40 Category Priority Sorting
 
 Changes:
-- Adds a deliberate Start New Week action on Weekly Review.
-- Start New Week archives current goal Wins and Lessons into Previous Weekly Reviews.
-- After archiving, current Wins and Lessons fields are cleared for a fresh week.
-- Archive is stored in the existing life_reviews table under review_type `weekly_archive`.
-- No categories, core layout, Supabase credentials, or existing goal structure changed.
+- Goals now sort within each Workbook category by priority from highest to lowest.
+- Changing a goal priority immediately re-sorts the goals in that category.
+- Added a new Priority option: Inventory.
+- Priority Stack continues to show only numbered priorities, not Inventory.
+- Existing v39 weekly archive, bullet controls, navigation, labels, and visual styling are preserved.
 
 No SQL changes required.

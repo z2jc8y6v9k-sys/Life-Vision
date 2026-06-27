@@ -386,11 +386,41 @@ function keyResultsLabelFor(goal) {
 }
 
 
+function priorityValue(goal) {
+  const value = goal?.priority_rank;
+  if (value === null || value === undefined || value === "") return null;
+  const num = Number(value);
+  return Number.isNaN(num) ? null : num;
+}
+
+function priorityLabel(goal) {
+  const value = priorityValue(goal);
+  if (value === -1) return "Inventory";
+  if (value !== null) return `#${value}`;
+  return "No Priority";
+}
+
+function prioritySortValue(goal) {
+  const value = priorityValue(goal);
+  if (value === null) return 999;
+  if (value === -1) return 500;
+  return value;
+}
+
+function sortGoalsByCategoryPriority(goals) {
+  return [...goals].sort((a, b) => {
+    const priorityDiff = prioritySortValue(a) - prioritySortValue(b);
+    if (priorityDiff !== 0) return priorityDiff;
+    return new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0);
+  });
+}
+
 function priorityOptions(goal) {
-  const current = goal.priority_rank ?? "";
-  return `<select class="status-select" onchange="updateGoalNoRender('${goal.id}','priority_rank', this.value ? Number(this.value) : null); setTimeout(render, 300);">
-    <option value="" ${current==="" ? "selected" : ""}>None</option>
-    ${[1,2,3,4,5].map(n => `<option value="${n}" ${Number(current)===n ? "selected" : ""}>${n}</option>`).join("")}
+  const current = priorityValue(goal);
+  return `<select class="status-select" onchange="updateGoalNoRender('${goal.id}','priority_rank', this.value ? Number(this.value) : null); setTimeout(render, 150);">
+    <option value="" ${current===null ? "selected" : ""}>None</option>
+    ${[1,2,3,4,5].map(n => `<option value="${n}" ${current===n ? "selected" : ""}>${n}</option>`).join("")}
+    <option value="-1" ${current===-1 ? "selected" : ""}>Inventory</option>
   </select>`;
 }
 
@@ -416,14 +446,17 @@ function resourceProfileHtml(goal) {
 
 function priorityStackHtml() {
   const priorities = state.goals
-    .filter(g => g.priority_rank)
-    .sort((a,b) => Number(a.priority_rank)-Number(b.priority_rank));
+    .filter(g => {
+      const value = priorityValue(g);
+      return value !== null && value > 0;
+    })
+    .sort((a,b) => prioritySortValue(a)-prioritySortValue(b));
 
   return `<section class="panel">
     <h3>Priority Stack</h3>
     <p>The 3–5 goals that matter most right now.</p>
     <div class="recent-list">
-      ${priorities.length ? priorities.map(g => `<div class="recent-item clickable-card" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">#${g.priority_rank} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${g.status || g.behavior_rating || ""}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
+      ${priorities.length ? priorities.map(g => `<div class="recent-item clickable-card" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">${priorityLabel(g)} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${g.status || g.behavior_rating || ""}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
     </div>
   </section>`;
 }
@@ -896,8 +929,8 @@ function todayThisWeekHtml() {
   const actionGoals = state.goals
     .filter(g => (g.today_this_week || "").trim())
     .sort((a,b) => {
-      const pa = a.priority_rank || 99;
-      const pb = b.priority_rank || 99;
+      const pa = prioritySortValue(a);
+      const pb = prioritySortValue(b);
       if (pa !== pb) return pa - pb;
       return (a.category || "").localeCompare(b.category || "");
     });
@@ -909,7 +942,7 @@ function todayThisWeekHtml() {
       <h4 style="color:${categories[cat].color}">${cat}</h4>
       ${goals.map(g => `<div class="action-card clickable-card" onclick="openGoal('${g.id}')">
         <div class="action-top">
-          <strong style="color:${categories[g.category].color}">${g.priority_rank ? "#" + g.priority_rank + " — " : ""}${escapeHtml(g.title)}</strong>
+          <strong style="color:${categories[g.category].color}">${priorityValue(g) !== null ? priorityLabel(g) + " — " : ""}${escapeHtml(g.title)}</strong>
           <small>${goalType(g)}${g.goal_type === "Behavior" ? " • " + (g.behavior_rating || "Needs Improvement") : " • " + (g.status || "Not Started")}</small>
         </div>
         <div class="action-body">${escapeHtml(g.today_this_week).replaceAll("\\n", "<br>")}</div>
@@ -1066,7 +1099,7 @@ function render() {
   const navCats = "";
   const viewButtons = "";
   const grouped = Object.keys(categories).map(cat => {
-    const goals = filteredGoals().filter(g => g.category === cat);
+    const goals = sortGoalsByCategoryPriority(filteredGoals().filter(g => g.category === cat));
     if (!goals.length) return "";
     return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
