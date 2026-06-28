@@ -1978,3 +1978,44 @@ body {
     width: 100%;
   }
 }
+
+
+/* v44: move action summary from Workbook to Dashboard Today / This Week */
+.dashboard-action-summary {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0 22px;
+}
+
+.dashboard-action-summary div {
+  background: #fbfaf7;
+  border: 1px solid rgba(31,41,51,.10);
+  border-radius: 16px;
+  padding: 13px 14px;
+  box-shadow: 0 6px 14px rgba(31,41,51,.04);
+}
+
+.dashboard-action-summary b {
+  display: block;
+  font-size: 21px;
+  letter-spacing: -0.04em;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.dashboard-action-summary span {
+  display: block;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+@media(max-width:1050px) {
+  .dashboard-action-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media(max-width:650px) {
+  .dashboard-action-summary { grid-template-columns: 1fr 1fr; }
+}

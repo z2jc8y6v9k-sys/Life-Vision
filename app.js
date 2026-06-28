@@ -1082,6 +1082,30 @@ function strategicBriefHtml() {
 }
 
 
+function todayThisWeekSummaryHtml(actionGoals) {
+  const high = actionGoals.filter(g => priorityValue(g) === 1).length;
+  const noTime = actionGoals.filter(g => !metaValue(g, "today_this_week_time")).length;
+  const quickWins = actionGoals.filter(g => {
+    const mins = metaTimeMinutes(g, "today_this_week_time");
+    return mins > 0 && mins <= 30;
+  }).length;
+  const deepWork = actionGoals.filter(g => metaTimeMinutes(g, "today_this_week_time") >= 60 && metaTimeMinutes(g, "today_this_week_time") < 9999).length;
+  const total = actionGoals.reduce((sum, g) => {
+    const mins = metaTimeMinutes(g, "today_this_week_time");
+    return mins >= 9999 ? sum : sum + mins;
+  }, 0);
+  const ongoing = actionGoals.some(g => metaTimeMinutes(g, "today_this_week_time") >= 9999);
+
+  return `<div class="dashboard-action-summary">
+    <div><b>${actionGoals.length}</b><span>Actions</span></div>
+    <div><b>${high}</b><span>High Priority</span></div>
+    <div><b>${formatMinutes(total)}${ongoing ? " + ongoing" : ""}</b><span>Today / This Week Time</span></div>
+    <div><b>${quickWins}</b><span>Quick Wins (&lt;30 min)</span></div>
+    <div><b>${deepWork}</b><span>Deep Work (&gt;60 min)</span></div>
+    <div><b>${noTime}</b><span>No Time Set</span></div>
+  </div>`;
+}
+
 function todayThisWeekHtml() {
   const actionGoals = state.goals
     .filter(g => (g.today_this_week || "").trim())
@@ -1104,7 +1128,7 @@ function todayThisWeekHtml() {
           <strong style="color:${categories[g.category].color}">${priorityValue(g) !== null ? priorityLabel(g) + " — " : ""}${escapeHtml(g.title)}</strong>
           <small>${goalType(g)}${g.goal_type === "Behavior" ? " • " + autoBehaviorRating(g) : " • " + (g.status || "Not Started")}${metaValue(g, "today_this_week_time") ? " • " + metaValue(g, "today_this_week_time") : ""}</small>
         </div>
-        <div class="action-body">${escapeHtml(g.today_this_week).replaceAll("\\n", "<br>")}</div>
+        <div class="action-body">${escapeHtml(g.today_this_week).replaceAll("\n", "<br>")}</div>
       </div>`).join("")}
     </div>`;
   }).join("");
@@ -1112,10 +1136,9 @@ function todayThisWeekHtml() {
   return `<section class="panel">
     <h3>Today / This Week Actions</h3>
     <p>All current action steps pulled from every goal, sorted by priority first, then Today / This Week time low → high.</p>
-    ${actionGoals.length ? grouped : `<div class="recent-item"><strong>No actions entered yet.</strong><small>Add Today / This Week items inside any goal card.</small></div>`}
+    ${actionGoals.length ? todayThisWeekSummaryHtml(actionGoals) + grouped : `<div class="recent-item"><strong>No actions entered yet.</strong><small>Add Today / This Week items inside any goal card.</small></div>`}
   </section>`;
 }
-
 
 
 
@@ -1260,7 +1283,7 @@ function render() {
   const grouped = Object.keys(categories).map(cat => {
     const goals = sortGoalsByCategoryPriority(filteredGoals().filter(g => g.category === cat));
     if (!goals.length) return "";
-    return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${categoryEffortSummaryHtml(goals)}${goals.map(goalCard).join("")}`;
+    return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
   const dashboard = `${priorityStackHtml()}${todayThisWeekHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
   let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Today / This Week" ? todayThisWeekHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
