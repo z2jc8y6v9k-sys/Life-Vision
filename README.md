@@ -1,11 +1,15 @@
-# My Life Vision App v48 Dashboard Cleanup
+# My Life Vision App v49 Workplan
 
 Changes:
-- Removed the top status ribbon.
-- Preserved the existing Workbook and Dashboard cards/layout.
-- Dashboard navigation now includes Resources.
-- Workplan remains the renamed Today / This Week view from v47.
-- Added a lightweight Resources placeholder dashboard page.
-- No Workbook, goal-card, Supabase, or data-model changes.
+- Workplan is now centered around actions, not categories.
+- Page heading is now Your Action Plan.
+- Adds Today's Focus.
+- Adds Recommended First Action.
+- Replaces Capacity Meter with Today's Work.
+- Adds one-sentence Recommendation.
+- Adds one unified Action Queue.
+- Adds Quick Wins, Deep Work, and Waiting on Others.
+- Adds per-action Time and Owner controls in the Workplan.
+- Adds completion checkboxes; completed actions are removed from Today / This Week and moved into Wins.
 
 No SQL changes required.
