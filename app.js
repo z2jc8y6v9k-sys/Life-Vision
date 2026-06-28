@@ -1183,19 +1183,22 @@ function actionMetadataEditorHtml(goal, field, label) {
 }
 
 function workplanActionItems() {
+  const fields = ["today_this_week", "next30"];
   return state.goals
-    .flatMap(goal => actionLines(goal, "today_this_week").map(item => {
-      const timeValue = actionTimeValue(goal, "today_this_week", item.text) || "";
+    .flatMap(goal => fields.flatMap(field => actionLines(goal, field).map(item => {
+      const timeValue = actionTimeValue(goal, field, item.text) || "";
       const minutes = optionMinutes(timeValue);
-      const owner = actionOwnerValue(goal, "today_this_week", item.text);
+      const owner = actionOwnerValue(goal, field, item.text);
       return {
         goal,
         goalId: goal.id,
-        actionKey: actionHash(goal.id + "|today_this_week|" + item.text),
-        field: "today_this_week",
+        actionKey: actionHash(goal.id + "|" + field + "|" + item.text),
+        field,
+        fieldLabel: field === "today_this_week" ? "Today / This Week" : "Next 30 Days",
         lineIndex: item.index,
         title: goal.title || "Untitled Goal",
         action: item.text,
+        category: goal.category || "",
         priority: prioritySortValue(goal),
         priorityRaw: priorityValue(goal),
         priorityLabel: priorityLabel(goal),
@@ -1205,10 +1208,12 @@ function workplanActionItems() {
         type: goalType(goal),
         rating: goalType(goal) === "Behavior" ? effectiveBehaviorRating(goal) : (goal.status || "Not Started")
       };
-    }))
+    })))
     .sort((a,b) => {
-      if (a.owner === "Waiting" && b.owner !== "Waiting") return 1;
-      if (a.owner !== "Waiting" && b.owner === "Waiting") return -1;
+      const ownerRank = ownerSortValue(a.owner) - ownerSortValue(b.owner);
+      if (ownerRank) return ownerRank;
+      const fieldRank = fieldSortValue(a.field) - fieldSortValue(b.field);
+      if (fieldRank) return fieldRank;
       if (a.priority !== b.priority) return a.priority - b.priority;
       const at = a.minutes || 9998;
       const bt = b.minutes || 9998;
@@ -1217,8 +1222,17 @@ function workplanActionItems() {
     });
 }
 
+function ownerSortValue(owner) {
+  const order = {"Me": 1, "Scheduled": 2, "Delegated": 3, "Waiting": 4};
+  return order[owner] || 9;
+}
+
+function fieldSortValue(field) {
+  return field === "today_this_week" ? 1 : 2;
+}
+
 function workplanTotals(items) {
-  const active = items.filter(i => i.owner !== "Waiting");
+  const active = items.filter(i => !["Waiting", "Delegated"].includes(i.owner));
   const timed = active.filter(i => i.minutes && i.minutes < 9999);
   const total = timed.reduce((sum, i) => sum + i.minutes, 0);
   return {
@@ -1226,54 +1240,52 @@ function workplanTotals(items) {
     actions: items.length,
     activeActions: active.length,
     noTime: active.filter(i => !i.minutes).length,
-    quickWins: active.filter(i => i.minutes > 0 && i.minutes <= 15).length,
-    deepWork: active.filter(i => i.minutes >= 60 && i.minutes < 9999).length,
     waiting: items.filter(i => i.owner === "Waiting").length,
     delegated: items.filter(i => i.owner === "Delegated").length,
     scheduled: items.filter(i => i.owner === "Scheduled").length
   };
 }
 
-function workloadLabel(total, count) {
-  if (!count) return "No actions";
-  if (total === 0) return "Needs time";
-  if (total <= 240) return "Realistic";
-  if (total <= 420) return "Full";
-  return "Overcommitted";
-}
-
-function workloadClass(total, count) {
-  if (!count || total === 0) return "neutral";
-  if (total <= 240) return "healthy";
-  if (total <= 420) return "full";
-  return "overloaded";
-}
-
 function recommendedFirstAction(items) {
-  return items.find(i => i.owner === "Me" && i.minutes && i.minutes < 9999) ||
-    items.find(i => i.owner !== "Waiting" && i.minutes && i.minutes < 9999) ||
-    items.find(i => i.owner !== "Waiting") ||
+  return items.find(i => i.owner === "Me" && i.field === "today_this_week" && i.minutes && i.minutes < 9999) ||
+    items.find(i => i.owner === "Me" && i.minutes && i.minutes < 9999) ||
+    items.find(i => !["Waiting", "Delegated"].includes(i.owner) && i.minutes && i.minutes < 9999) ||
+    items.find(i => !["Waiting", "Delegated"].includes(i.owner)) ||
     items[0] || null;
 }
 
-function todaysFocusText(items, totals) {
-  if (!items.length) return "Add actions to Today / This Week inside your goals, then come here to decide what to attack first.";
+function workplanFocusText(items, totals) {
+  if (!items.length) return "Add actions inside Today / This Week or Next 30 Days. Workplan will organize them automatically.";
   const highGoals = state.goals.filter(g => priorityValue(g) === 1);
   const actionGoalIds = new Set(items.map(i => i.goalId));
   const highWithoutActions = highGoals.filter(g => !actionGoalIds.has(g.id)).length;
-  const timePart = totals.total ? `${formatMinutes(totals.total)} planned` : `${totals.noTime} action${totals.noTime===1?"":"s"} need time`;
-  const waitPart = totals.waiting ? ` ${totals.waiting} waiting on someone else.` : "";
-  const priorityPart = highWithoutActions ? ` ${highWithoutActions} top-priority goal${highWithoutActions===1?"":"s"} have no action scheduled.` : "";
-  return `You have ${totals.actions} action${totals.actions===1?"":"s"}. ${timePart}.${waitPart}${priorityPart}`;
+  const timePart = totals.total ? `${formatMinutes(totals.total)} active work` : `${totals.noTime} active action${totals.noTime===1?"":"s"} need time`;
+  const waitPart = totals.waiting ? ` ${totals.waiting} waiting.` : "";
+  const delegatedPart = totals.delegated ? ` ${totals.delegated} delegated.` : "";
+  const priorityPart = highWithoutActions ? ` ${highWithoutActions} top-priority goal${highWithoutActions===1?"":"s"} have no action.` : "";
+  return `${items.length} action${items.length===1?"":"s"} found. ${timePart}.${waitPart}${delegatedPart}${priorityPart}`;
+}
+
+function actionRecommendationReason(item) {
+  if (!item) return "Add one action to a high-priority goal.";
+  if (item.owner === "Waiting") return "This is waiting on someone else. Follow up if needed.";
+  if (item.owner === "Delegated") return "This is delegated. Check whether the next move is yours.";
+  if (!item.minutes) return "This needs a time estimate before the Workplan can fully prioritize it.";
+  if (item.priorityRaw === 1 && item.minutes <= 15) return "Highest-priority goal + shortest completion.";
+  if (item.priorityRaw === 1) return "Highest-priority goal with a clear next action.";
+  if (item.minutes <= 15) return "Quick win that creates momentum.";
+  return "Best next action based on priority, timing, and ownership.";
 }
 
 function workplanRecommendation(items, totals) {
   if (!items.length) return "Add one action to the highest-priority goal that matters most this week.";
-  if (totals.noTime) return "Set time estimates first, then the Workplan can give you a smarter attack order.";
-  if (totals.total > 420) return "You are overcommitted. Complete quick wins, then cut or defer lower-leverage work.";
-  if (totals.quickWins >= 3) return "Finish the quick wins first, then protect one block for the deepest work.";
+  if (totals.noTime) return "Set time estimates for active actions so the Workplan can guide the right order.";
   const first = recommendedFirstAction(items);
-  return first ? `Start with ${first.action}.` : "Choose one action and start small.";
+  return first ? actionRecommendationReason(first) : "Choose one action and start small.";
+}
+
+function todayString() {
+  return new Date().toLocaleDateString();
 }
 
 function completeWorkplanAction(goalId, field, actionKey) {
@@ -1284,8 +1296,7 @@ function completeWorkplanAction(goalId, field, actionKey) {
   if (matchIndex < 0) return;
   const actionText = cleanActionLine(lines[matchIndex]);
   const remaining = lines.filter((_, idx) => idx !== matchIndex).join("\n").trim();
-  const today = new Date().toLocaleDateString();
-  const winLine = `• ${actionText} (${today})`;
+  const winLine = `• ${actionText} (${todayString()})`;
   const wins = String(goal.wins || "").trim();
   goal[field] = remaining;
   goal.wins = wins ? `${wins}\n${winLine}` : winLine;
@@ -1295,30 +1306,32 @@ function completeWorkplanAction(goalId, field, actionKey) {
   });
 }
 
-function actionQueueRow(item) {
-  return `<div class="action-queue-row clickable-card" onclick="openGoal('${item.goalId}')">
-    <div class="action-check" onclick="event.stopPropagation(); completeWorkplanAction('${item.goalId}','${item.field}','${item.actionKey}')" title="Complete and move to Wins">✓</div>
+function actionBadgesHtml(item) {
+  const ownerClass = `owner-${String(item.owner || "Me").toLowerCase().replace(/\s+/g,"-")}`;
+  const timeClass = item.minutes && item.minutes <= 15 ? "tag-quick" : item.minutes >= 60 && item.minutes < 9999 ? "tag-deep" : "tag-time";
+  const tag = item.minutes && item.minutes <= 15 ? "Quick Win" : item.minutes >= 60 && item.minutes < 9999 ? "Deep Work" : item.fieldLabel;
+  return `<div class="action-meta-pills">
+    <span class="${timeClass}">${escapeHtml(item.timeLabel)}</span>
+    <span class="${ownerClass}">${escapeHtml(item.owner)}</span>
+    <span>${escapeHtml(tag)}</span>
+  </div>`;
+}
+
+function actionQueueRow(item, opts = {}) {
+  const compact = opts.compact ? " compact" : "";
+  return `<div class="action-queue-row${compact} clickable-card" onclick="openGoal('${item.goalId}')">
+    <button class="action-check" onclick="event.stopPropagation(); completeWorkplanAction('${item.goalId}','${item.field}','${item.actionKey}')" title="Complete and move to Wins">✓</button>
     <div class="action-main">
       <strong>${escapeHtml(item.action)}</strong>
-      <small>${escapeHtml(item.title)} • ${escapeHtml(item.priorityLabel)}</small>
+      <small>${escapeHtml(item.title)} • ${escapeHtml(item.priorityLabel)}${item.category ? " • " + escapeHtml(item.category) : ""}</small>
     </div>
-    <div class="action-meta-pills">
-      <span>${escapeHtml(item.timeLabel)}</span>
-      <span>${escapeHtml(item.owner)}</span>
-    </div>
+    ${actionBadgesHtml(item)}
   </div>`;
 }
 
 function actionQueueHtml(items) {
-  if (!items.length) return `<div class="recent-item"><strong>No actions yet.</strong><small>Add Today / This Week bullets inside goals.</small></div>`;
-  return items.map(actionQueueRow).join("");
-}
-
-function simpleActionList(items) {
-  if (!items.length) return `<div class="recent-item"><strong>None right now.</strong><small>This will update as actions are added.</small></div>`;
-  return items.map(i => `<div class="mini-action-row clickable-card" onclick="openGoal('${i.goalId}')">
-    <span>${escapeHtml(i.action)}</span><b>${escapeHtml(i.timeLabel)}</b>
-  </div>`).join("");
+  if (!items.length) return `<div class="recent-item"><strong>No actions yet.</strong><small>Add bullets inside Today / This Week or Next 30 Days.</small></div>`;
+  return items.map(i => actionQueueRow(i, { compact: true })).join("");
 }
 
 function waitingListHtml(items) {
@@ -1329,58 +1342,56 @@ function waitingListHtml(items) {
   </div>`).join("");
 }
 
+function completedTodayItems() {
+  const today = todayString();
+  return state.goals.flatMap(goal => String(goal.wins || "").split(/\n+/).map(line => cleanActionLine(line)).filter(line => line && line.includes(`(${today})`)).map(line => ({
+    goalId: goal.id,
+    title: goal.title || "Untitled Goal",
+    action: line.replace(`(${today})`, "").trim(),
+    category: goal.category || ""
+  })));
+}
+
+function completedTodayHtml(items) {
+  if (!items.length) return `<div class="recent-item"><strong>Nothing completed yet today.</strong><small>Completed actions will collect here.</small></div>`;
+  return items.map(i => `<div class="completed-action-row clickable-card" onclick="openGoal('${i.goalId}')">
+    <span>✓</span><strong>${escapeHtml(i.action)}</strong><small>${escapeHtml(i.title)}${i.category ? " • " + escapeHtml(i.category) : ""}</small>
+  </div>`).join("");
+}
+
 function workplanHtml() {
   const items = workplanActionItems();
   const totals = workplanTotals(items);
   const first = recommendedFirstAction(items);
-  const load = workloadLabel(totals.total, totals.activeActions);
-  const loadClass = workloadClass(totals.total, totals.activeActions);
-  const quickWins = items.filter(i => i.owner !== "Waiting" && i.minutes > 0 && i.minutes <= 15);
-  const deepWork = items.filter(i => i.owner !== "Waiting" && i.minutes >= 60 && i.minutes < 9999);
-  const pct = totals.total ? Math.min(100, Math.round((totals.total / 480) * 100)) : 8;
+  const activeItems = items.filter(i => i !== first && !["Waiting", "Delegated"].includes(i.owner));
+  const waitingItems = items.filter(i => i.owner === "Waiting" || i.owner === "Delegated");
+  const completed = completedTodayItems();
 
-  return `<section class="workplan-page action-plan-page">
+  return `<section class="workplan-page action-plan-page single-source-workplan">
     <div class="workplan-focus-card">
       <span class="workplan-eyebrow">Today's Focus</span>
-      <p>${escapeHtml(todaysFocusText(items, totals))}</p>
+      <p>${escapeHtml(workplanFocusText(items, totals))}</p>
     </div>
 
-    <div class="action-plan-top-grid">
-      <div class="workplan-card start-card">
-        <span class="workplan-eyebrow">Recommended First Action</span>
-        <h3>${first ? escapeHtml(first.action) : "Add one action"}</h3>
-        <p>${first ? `${escapeHtml(first.timeLabel)} • ${escapeHtml(first.title)} • ${escapeHtml(first.priorityLabel)}` : "Start by adding a Today / This Week bullet to one high-priority goal."}</p>
+    <div class="workplan-main-grid action-plan-grid single-source-grid">
+      <div class="workplan-card start-here-card">
+        <span class="workplan-eyebrow">Start Here</span>
+        ${first ? actionQueueRow(first) + `<p class="start-reason">${escapeHtml(actionRecommendationReason(first))}</p>` : `<div class="recent-item"><strong>Add one action.</strong><small>Use Today / This Week or Next 30 Days inside a goal.</small></div>`}
       </div>
-      <div class="workplan-card today-work-card">
-        <span class="workplan-eyebrow">Today's Work</span>
-        <h3 class="load-${loadClass}">${load}</h3>
-        <div class="workplan-meter"><span class="load-${loadClass}" style="width:${pct}%"></span></div>
-        <p>${totals.activeActions} active action${totals.activeActions===1?"":"s"} • ${formatMinutes(totals.total)}${totals.waiting ? ` • ${totals.waiting} waiting` : ""}</p>
-      </div>
-      <div class="workplan-card recommendation-card">
-        <span class="workplan-eyebrow">Recommendation</span>
-        <p>${escapeHtml(workplanRecommendation(items, totals))}</p>
-      </div>
-    </div>
 
-    <div class="workplan-main-grid action-plan-grid">
       <div class="workplan-card action-queue-card">
-        <span class="workplan-eyebrow">Action Queue</span>
-        ${actionQueueHtml(items)}
+        <span class="workplan-eyebrow">Next Up</span>
+        ${actionQueueHtml(activeItems)}
       </div>
-      <div class="workplan-side-stack">
-        <div class="workplan-card">
-          <span class="workplan-eyebrow">Quick Wins</span>
-          ${simpleActionList(quickWins)}
-        </div>
-        <div class="workplan-card">
-          <span class="workplan-eyebrow">Deep Work</span>
-          ${simpleActionList(deepWork)}
-        </div>
-        <div class="workplan-card">
-          <span class="workplan-eyebrow">Waiting on Others</span>
-          ${waitingListHtml(items)}
-        </div>
+
+      <div class="workplan-card waiting-card">
+        <span class="workplan-eyebrow">Waiting</span>
+        ${waitingListHtml(waitingItems)}
+      </div>
+
+      <div class="workplan-card completed-card">
+        <span class="workplan-eyebrow">Completed Today</span>
+        ${completedTodayHtml(completed)}
       </div>
     </div>
   </section>`;
@@ -1389,6 +1400,7 @@ function workplanHtml() {
 function todayThisWeekHtml() {
   return workplanHtml();
 }
+
 
 
 

@@ -2467,3 +2467,129 @@ body {
   .action-queue-row { grid-template-columns: 34px minmax(0, 1fr) !important; }
   .action-meta-pills { grid-column: 2; justify-content: flex-start; flex-wrap: wrap; }
 }
+
+
+/* v52 Single Source Workplan: Workbook actions drive Workplan */
+.today-work-card,
+.workplan-side-stack,
+.action-plan-top-grid,
+.workplan-card:has(.workplan-eyebrow):has(+ .workplan-side-stack) {
+  display: none !important;
+}
+
+.single-source-workplan {
+  display: grid;
+  gap: 18px;
+}
+
+.single-source-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, .8fr) !important;
+  gap: 18px !important;
+  align-items: start !important;
+}
+
+.start-here-card {
+  grid-column: 1 / -1;
+  border-color: rgba(17,24,39,.18) !important;
+  background: linear-gradient(135deg, #ffffff, #fffdf8) !important;
+}
+
+.start-here-card .action-queue-row {
+  margin-bottom: 10px;
+  border-color: rgba(17,24,39,.16);
+  background: #fff;
+}
+
+.start-here-card .action-main strong {
+  font-size: 22px;
+  letter-spacing: -0.035em;
+}
+
+.start-reason {
+  margin: 4px 0 0 !important;
+  color: #475467 !important;
+  font-weight: 750;
+}
+
+.single-source-grid .action-queue-card {
+  grid-column: 1;
+}
+
+.waiting-card,
+.completed-card {
+  grid-column: 2;
+}
+
+.action-check {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  font-size: 0;
+}
+
+.action-check::after {
+  content: "";
+}
+
+.action-check:hover::after {
+  content: "✓";
+  font-size: 15px;
+}
+
+.action-queue-row.compact .action-main strong {
+  font-size: 15px;
+}
+
+.action-meta-pills span.owner-me { background: #ecfdf3; color: #027a48; border-color: #bbf7d0; }
+.action-meta-pills span.owner-waiting { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+.action-meta-pills span.owner-delegated { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.action-meta-pills span.owner-scheduled { background: #f8fafc; color: #475467; border-color: #e5e7eb; }
+.action-meta-pills span.tag-quick { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+.action-meta-pills span.tag-deep { background: #faf5ff; color: #7e22ce; border-color: #e9d5ff; }
+
+.completed-action-row {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  gap: 8px 10px;
+  align-items: center;
+  background: #fbfaf7;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 11px 12px;
+  margin-bottom: 8px;
+}
+
+.completed-action-row span {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #ecfdf3;
+  color: #027a48;
+  font-weight: 900;
+}
+
+.completed-action-row strong,
+.completed-action-row small {
+  display: block;
+}
+
+.completed-action-row small {
+  grid-column: 2;
+  margin-top: -4px;
+  color: #667085;
+  font-size: 12px;
+}
+
+@media(max-width:1000px) {
+  .single-source-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .single-source-grid .action-queue-card,
+  .waiting-card,
+  .completed-card {
+    grid-column: auto;
+  }
+}
