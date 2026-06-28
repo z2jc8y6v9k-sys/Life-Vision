@@ -2394,3 +2394,76 @@ body {
   .action-queue-row { grid-template-columns: 34px minmax(0, 1fr); }
   .action-controls { grid-column: 2; flex-wrap: wrap; }
 }
+
+
+/* v50 Action metadata belongs inside goal planning sections */
+.action-meta-panel {
+  margin: 10px 0 18px;
+  background: #fffdf8;
+  border: 1px solid rgba(31,41,51,.10);
+  border-radius: 18px;
+  padding: 10px;
+}
+.action-meta-panel.empty {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 750;
+  padding: 12px 14px;
+}
+.action-meta-title {
+  color: #667085;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  margin: 2px 4px 8px;
+}
+.action-meta-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid rgba(31,41,51,.09);
+  border-radius: 14px;
+  padding: 9px 10px;
+  margin-bottom: 8px;
+}
+.action-meta-row:last-child { margin-bottom: 0; }
+.action-meta-text {
+  color: #1f2933;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+.action-meta-controls {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+.action-meta-pills {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  justify-content: flex-end;
+}
+.action-meta-pills span {
+  border: 1px solid rgba(31,41,51,.10);
+  background: #fff;
+  color: #475467;
+  border-radius: 999px;
+  padding: 7px 9px;
+  font-size: 12px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.action-queue-row {
+  grid-template-columns: 34px minmax(0, 1fr) auto !important;
+}
+@media(max-width:900px) {
+  .action-meta-row { grid-template-columns: 1fr; }
+  .action-meta-controls { flex-wrap: wrap; }
+  .action-meta-controls .action-mini-select { flex: 1 1 125px; }
+  .action-queue-row { grid-template-columns: 34px minmax(0, 1fr) !important; }
+  .action-meta-pills { grid-column: 2; justify-content: flex-start; flex-wrap: wrap; }
+}

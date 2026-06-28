@@ -1,15 +1,10 @@
-# My Life Vision App v49 Workplan
+# My Life Vision App v50 Action Metadata in Goal Sections
 
 Changes:
-- Workplan is now centered around actions, not categories.
-- Page heading is now Your Action Plan.
-- Adds Today's Focus.
-- Adds Recommended First Action.
-- Replaces Capacity Meter with Today's Work.
-- Adds one-sentence Recommendation.
-- Adds one unified Action Queue.
-- Adds Quick Wins, Deep Work, and Waiting on Others.
-- Adds per-action Time and Owner controls in the Workplan.
-- Adds completion checkboxes; completed actions are removed from Today / This Week and moved into Wins.
+- Moves Time and Owner controls into each goal card under Today / This Week and Next 30 Days.
+- Each bullet/action now has its own Time and Owner dropdown.
+- Workplan reads those per-action settings and displays them in the Action Queue.
+- Workplan no longer asks you to set Time/Owner inside the dashboard; it displays the answers from the goal sections.
+- Preserves v49 Workplan, checkboxes, quick wins, deep work, waiting on others, and completion-to-Wins behavior.
 
 No SQL changes required.

@@ -857,11 +857,11 @@ function goalCard(goal) {
     <div class="grid-two">
       <div>
         ${fieldCard(goal, "today_this_week", "Today / This Week")}
-        ${actionTimeControlHtml(goal, "today_this_week_time", "Today / This Week Time")}
+        ${actionMetadataEditorHtml(goal, "today_this_week", "Today / This Week")}
       </div>
       <div>
         ${fieldCard(goal, "next30", "Next 30 Days")}
-        ${actionTimeControlHtml(goal, "next30_time", "Next 30 Days Time")}
+        ${actionMetadataEditorHtml(goal, "next30", "Next 30 Days")}
       </div>
     </div>
 
@@ -1165,10 +1165,27 @@ function actionOwnerSelect(goal, field, lineText) {
   </select>`;
 }
 
+function actionMetadataEditorHtml(goal, field, label) {
+  const items = actionLines(goal, field);
+  if (!items.length) {
+    return `<div class="action-meta-panel empty"><span>Add bullets above to set time and owner for each action.</span></div>`;
+  }
+  return `<div class="action-meta-panel">
+    <div class="action-meta-title">${label} action details</div>
+    ${items.map(item => `<div class="action-meta-row">
+      <div class="action-meta-text">${escapeHtml(item.text)}</div>
+      <div class="action-meta-controls">
+        ${actionTimeSelect(goal, field, item.text)}
+        ${actionOwnerSelect(goal, field, item.text)}
+      </div>
+    </div>`).join("")}
+  </div>`;
+}
+
 function workplanActionItems() {
   return state.goals
     .flatMap(goal => actionLines(goal, "today_this_week").map(item => {
-      const timeValue = actionTimeValue(goal, "today_this_week", item.text) || metaValue(goal, "today_this_week_time") || "";
+      const timeValue = actionTimeValue(goal, "today_this_week", item.text) || "";
       const minutes = optionMinutes(timeValue);
       const owner = actionOwnerValue(goal, "today_this_week", item.text);
       return {
@@ -1285,9 +1302,9 @@ function actionQueueRow(item) {
       <strong>${escapeHtml(item.action)}</strong>
       <small>${escapeHtml(item.title)} • ${escapeHtml(item.priorityLabel)}</small>
     </div>
-    <div class="action-controls">
-      ${actionTimeSelect(item.goal, item.field, item.action)}
-      ${actionOwnerSelect(item.goal, item.field, item.action)}
+    <div class="action-meta-pills">
+      <span>${escapeHtml(item.timeLabel)}</span>
+      <span>${escapeHtml(item.owner)}</span>
     </div>
   </div>`;
 }
