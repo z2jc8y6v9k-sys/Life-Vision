@@ -2019,3 +2019,218 @@ body {
 @media(max-width:650px) {
   .dashboard-action-summary { grid-template-columns: 1fr 1fr; }
 }
+
+
+/* v47 Workplan + streamlined behavior rating */
+.behavior-rating-control,
+.behavior-rating-select,
+.goal-controls-grid .status-select,
+.inventory-row .status-select {
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+}
+
+.auto-behavior-rating span {
+  display: none !important;
+}
+
+.workplan-page {
+  display: grid;
+  gap: 20px;
+}
+
+.workplan-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr 1fr;
+  gap: 18px;
+}
+
+.workplan-main-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 0.9fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.workplan-card {
+  background: #fff;
+  border: 1px solid rgba(31,41,51,.10);
+  border-radius: 28px;
+  padding: 22px;
+  box-shadow: 0 10px 24px rgba(31,41,51,.06);
+}
+
+.workplan-one-thing {
+  background: #111827;
+  color: #fff;
+}
+
+.workplan-one-thing p,
+.workplan-one-thing .workplan-eyebrow {
+  color: #d1d5db;
+}
+
+.workplan-eyebrow {
+  display: block;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.workplan-card h3 {
+  margin: 0 0 10px;
+  font-size: 28px;
+  letter-spacing: -0.05em;
+}
+
+.workplan-card p {
+  margin: 0;
+  color: #667085;
+  line-height: 1.45;
+}
+
+.workplan-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.workplan-stat-grid div {
+  background: #fbfaf7;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.workplan-stat-grid b {
+  display: block;
+  font-size: 24px;
+  letter-spacing: -0.04em;
+}
+
+.workplan-stat-grid span {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.workplan-meter {
+  height: 14px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 14px 0 10px;
+}
+
+.workplan-meter span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.load-healthy { color: #2e7d32 !important; background-color: #2e7d32 !important; }
+.load-full { color: #b45309 !important; background-color: #b45309 !important; }
+.load-overloaded { color: #9f1239 !important; background-color: #9f1239 !important; }
+.load-neutral { color: #667085 !important; background-color: #667085 !important; }
+
+.workplan-order-section {
+  margin-top: 18px;
+}
+
+.workplan-order-section h4 {
+  margin: 0 0 10px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.workplan-action-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  background: #fbfaf7;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 13px 15px;
+  margin-bottom: 10px;
+}
+
+.workplan-action-row strong,
+.workplan-action-row small {
+  display: block;
+}
+
+.workplan-action-row small {
+  margin-top: 4px;
+  color: #667085;
+  font-size: 12px;
+}
+
+.workplan-action-row b {
+  white-space: nowrap;
+}
+
+.workplan-breakdown {
+  display: grid;
+  gap: 10px;
+}
+
+.workplan-breakdown div,
+.coverage-row {
+  background: #fbfaf7;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 13px;
+}
+
+.workplan-breakdown strong,
+.workplan-breakdown span,
+.coverage-row strong,
+.coverage-row small {
+  display: block;
+}
+
+.workplan-breakdown span,
+.coverage-row small {
+  color: #667085;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.coverage-list {
+  display: grid;
+  gap: 10px;
+}
+
+.coverage-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: start;
+}
+
+.coverage-row span {
+  font-weight: 900;
+}
+
+.coverage-row.covered span { color: #2e7d32; }
+.coverage-row.gap span { color: #b45309; }
+
+.recommendation-card {
+  background: linear-gradient(135deg, #fff, #fffdf8);
+  border-color: rgba(17,24,39,.16);
+}
+
+@media(max-width:1000px) {
+  .workplan-grid,
+  .workplan-main-grid {
+    grid-template-columns: 1fr;
+  }
+}

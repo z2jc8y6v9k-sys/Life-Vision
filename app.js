@@ -405,9 +405,37 @@ function autoBehaviorRating(goal) {
   return "Needs Improvement";
 }
 
+function isBehaviorRatingManual(goal) {
+  return metaValue(goal, "behavior_rating_manual") === "true";
+}
+
+function effectiveBehaviorRating(goal) {
+  if (goalType(goal) !== "Behavior") return goal.status || "Not Started";
+  if (isBehaviorRatingManual(goal) && goal.behavior_rating) return goal.behavior_rating;
+  return autoBehaviorRating(goal);
+}
+
+function setBehaviorRating(goalId, value) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal) return;
+  if (value === "__auto__") {
+    updateGoalNoRender(goalId, "behavior_rating", autoBehaviorRating(goal));
+    updateGoalMeta(goalId, "behavior_rating_manual", "false");
+    return;
+  }
+  updateGoalNoRender(goalId, "behavior_rating", value);
+  updateGoalMeta(goalId, "behavior_rating_manual", "true");
+}
+
 function behaviorRatingPill(goal) {
-  const rating = autoBehaviorRating(goal);
-  return `<div class="auto-behavior-rating"><strong>${rating}</strong><span>Auto-rated from Wins, Today / This Week, Key Results, and Next 30 Days.</span></div>`;
+  const rating = effectiveBehaviorRating(goal);
+  const manual = isBehaviorRatingManual(goal);
+  return `<div class="behavior-rating-control">
+    <select class="status-select behavior-rating-select" onchange="setBehaviorRating('${goal.id}', this.value)">
+      <option value="__auto__" ${manual ? "" : "selected"}>Auto: ${autoBehaviorRating(goal)}</option>
+      ${behaviorRatings.map(r=>`<option value="${r}" ${manual && rating===r ? "selected" : ""}>${r}</option>`).join("")}
+    </select>
+  </div>`;
 }
 
 
@@ -750,7 +778,7 @@ function weeklyArchiveHtml() {
 }
 
 function goalStatusLabel(goal) {
-  return goalType(goal) === "Behavior" ? autoBehaviorRating(goal) : (goal.status || "Not Started");
+  return goalType(goal) === "Behavior" ? effectiveBehaviorRating(goal) : (goal.status || "Not Started");
 }
 
 function goalCard(goal) {
@@ -1082,62 +1110,200 @@ function strategicBriefHtml() {
 }
 
 
-function todayThisWeekSummaryHtml(actionGoals) {
-  const high = actionGoals.filter(g => priorityValue(g) === 1).length;
-  const noTime = actionGoals.filter(g => !metaValue(g, "today_this_week_time")).length;
-  const quickWins = actionGoals.filter(g => {
-    const mins = metaTimeMinutes(g, "today_this_week_time");
-    return mins > 0 && mins <= 30;
-  }).length;
-  const deepWork = actionGoals.filter(g => metaTimeMinutes(g, "today_this_week_time") >= 60 && metaTimeMinutes(g, "today_this_week_time") < 9999).length;
-  const total = actionGoals.reduce((sum, g) => {
-    const mins = metaTimeMinutes(g, "today_this_week_time");
-    return mins >= 9999 ? sum : sum + mins;
-  }, 0);
-  const ongoing = actionGoals.some(g => metaTimeMinutes(g, "today_this_week_time") >= 9999);
+function workplanActionItems() {
+  return state.goals
+    .filter(g => (g.today_this_week || "").trim())
+    .map(g => ({
+      goal: g,
+      title: g.title || "Untitled Goal",
+      category: g.category,
+      text: g.today_this_week || "",
+      priority: prioritySortValue(g),
+      priorityLabel: priorityLabel(g),
+      minutes: metaTimeMinutes(g, "today_this_week_time"),
+      timeLabel: metaValue(g, "today_this_week_time") || "No time set",
+      type: goalType(g),
+      rating: goalType(g) === "Behavior" ? effectiveBehaviorRating(g) : (g.status || "Not Started")
+    }))
+    .sort((a,b) => {
+      if (a.priority !== b.priority) return a.priority - b.priority;
+      const at = a.minutes || 9998;
+      const bt = b.minutes || 9998;
+      if (at !== bt) return at - bt;
+      return (a.category || "").localeCompare(b.category || "");
+    });
+}
 
-  return `<div class="dashboard-action-summary">
-    <div><b>${actionGoals.length}</b><span>Actions</span></div>
-    <div><b>${high}</b><span>High Priority</span></div>
-    <div><b>${formatMinutes(total)}${ongoing ? " + ongoing" : ""}</b><span>Today / This Week Time</span></div>
-    <div><b>${quickWins}</b><span>Quick Wins (&lt;30 min)</span></div>
-    <div><b>${deepWork}</b><span>Deep Work (&gt;60 min)</span></div>
-    <div><b>${noTime}</b><span>No Time Set</span></div>
-  </div>`;
+function workplanTotals(items) {
+  const timed = items.filter(i => i.minutes && i.minutes < 9999);
+  const total = timed.reduce((sum, i) => sum + i.minutes, 0);
+  const ongoing = items.some(i => i.minutes >= 9999);
+  return {
+    total,
+    ongoing,
+    timedCount: timed.length,
+    noTime: items.filter(i => !i.minutes).length,
+    quickWins: items.filter(i => i.minutes > 0 && i.minutes <= 30).length,
+    deepWork: items.filter(i => i.minutes >= 60 && i.minutes < 9999).length,
+    highPriority: items.filter(i => i.priority === 1).length
+  };
+}
+
+function workplanLoadLabel(total) {
+  if (total === 0) return "Needs time estimates";
+  if (total <= 180) return "Light";
+  if (total <= 360) return "Healthy";
+  if (total <= 540) return "Full";
+  return "Overloaded";
+}
+
+function workplanLoadClass(total) {
+  if (total === 0) return "neutral";
+  if (total <= 360) return "healthy";
+  if (total <= 540) return "full";
+  return "overloaded";
+}
+
+function workplanOneThing(items) {
+  const timed = items.filter(i => i.minutes && i.minutes < 9999);
+  const pool = timed.length ? timed : items;
+  return pool[0] || null;
+}
+
+function workplanTimeBreakdown(items) {
+  const groups = [
+    ["Quick Wins", items.filter(i => i.minutes > 0 && i.minutes <= 30)],
+    ["Focused Work", items.filter(i => i.minutes > 30 && i.minutes < 120)],
+    ["Deep Work", items.filter(i => i.minutes >= 120 && i.minutes < 9999)],
+    ["Ongoing", items.filter(i => i.minutes >= 9999)],
+    ["No Time Set", items.filter(i => !i.minutes)]
+  ];
+  return groups.filter(([,list]) => list.length).map(([label, list]) => {
+    const total = list.reduce((sum, i) => i.minutes && i.minutes < 9999 ? sum + i.minutes : sum, 0);
+    return { label, count: list.length, total };
+  });
+}
+
+function workplanRecommendation(items, totals) {
+  if (!items.length) return "Add Today / This Week actions inside your highest-priority goals, then return here to decide what to attack first.";
+  if (totals.noTime) return `${totals.noTime} action${totals.noTime === 1 ? "" : "s"} need time estimates. Set those first so the Workplan can tell you what is realistic.`;
+  if (totals.total > 540) return `You have ${formatMinutes(totals.total)} planned. This is overloaded. Cut or defer lower-priority work before you start.`;
+  if (totals.quickWins >= 3) return `Start with the ${totals.quickWins} quick wins first. Then protect time for the highest-priority focused work.`;
+  const one = workplanOneThing(items);
+  return one ? `Start with ${one.title}. It is the highest-priority action with a clear time estimate.` : "Pick one high-priority action and give it a time estimate.";
+}
+
+function workplanCoverageHtml(items) {
+  const highGoals = state.goals.filter(g => priorityValue(g) === 1 && priorityValue(g) !== -1);
+  const activeIds = new Set(items.map(i => i.goal.id));
+  if (!highGoals.length) return `<div class="recent-item"><strong>No #1 priority goals set.</strong><small>Set priority on goals to activate coverage.</small></div>`;
+  return highGoals.map(g => {
+    const covered = activeIds.has(g.id);
+    return `<div class="coverage-row ${covered ? "covered" : "gap"}">
+      <span>${covered ? "✓" : "!"}</span>
+      <strong style="color:${categories[g.category]?.color || "#111827"}">${escapeHtml(g.title)}</strong>
+      <small>${g.category}${covered ? " • action planned" : " • no action this week"}</small>
+    </div>`;
+  }).join("");
+}
+
+function workplanSuggestedOrderHtml(items) {
+  if (!items.length) return "";
+  const quick = items.filter(i => i.minutes > 0 && i.minutes <= 30);
+  const focus = items.filter(i => i.minutes > 30 && i.minutes < 120);
+  const deep = items.filter(i => i.minutes >= 120 && i.minutes < 9999);
+  const noTime = items.filter(i => !i.minutes || i.minutes >= 9999);
+  const sections = [
+    ["Start Here", quick],
+    ["Focused Work", focus],
+    ["Deep Work", deep],
+    ["Clarify / Ongoing", noTime]
+  ].filter(([,list]) => list.length);
+
+  return sections.map(([label, list]) => `<div class="workplan-order-section">
+    <h4>${label}</h4>
+    ${list.map(i => `<div class="workplan-action-row clickable-card" onclick="openGoal('${i.goal.id}')">
+      <div>
+        <strong style="color:${categories[i.category]?.color || "#111827"}">${escapeHtml(i.title)}</strong>
+        <small>${i.category} • ${i.priorityLabel} • ${i.type} • ${i.rating}</small>
+      </div>
+      <b>${escapeHtml(i.timeLabel)}</b>
+    </div>`).join("")}
+  </div>`).join("");
+}
+
+function workplanHtml() {
+  const items = workplanActionItems();
+  const totals = workplanTotals(items);
+  const one = workplanOneThing(items);
+  const load = workplanLoadLabel(totals.total);
+  const loadClass = workplanLoadClass(totals.total);
+  const breakdown = workplanTimeBreakdown(items);
+  const rec = workplanRecommendation(items, totals);
+  const pct = totals.total ? Math.min(100, Math.round((totals.total / 540) * 100)) : 8;
+
+  if (!items.length) {
+    return `<section class="panel">
+      <h3>Workplan</h3>
+      <p>Your Workplan turns Today / This Week actions into a clear attack plan.</p>
+      <div class="recent-item"><strong>No actions entered yet.</strong><small>Add Today / This Week items inside any goal card.</small></div>
+    </section>`;
+  }
+
+  return `<section class="workplan-page">
+    <div class="workplan-grid">
+      <div class="workplan-card workplan-one-thing">
+        <span class="workplan-eyebrow">Today's One Thing</span>
+        <h3>${one ? escapeHtml(one.title) : "Set a time estimate"}</h3>
+        <p>${one ? `${escapeHtml(one.timeLabel)} • ${escapeHtml(one.category)} • ${escapeHtml(one.priorityLabel)}` : "Add a time estimate to make this useful."}</p>
+      </div>
+
+      <div class="workplan-card">
+        <span class="workplan-eyebrow">Today's Briefing</span>
+        <div class="workplan-stat-grid">
+          <div><b>${items.length}</b><span>Actions</span></div>
+          <div><b>${formatMinutes(totals.total)}${totals.ongoing ? " +" : ""}</b><span>Planned</span></div>
+          <div><b>${totals.quickWins}</b><span>Quick Wins</span></div>
+          <div><b>${totals.deepWork}</b><span>Deep Work</span></div>
+        </div>
+      </div>
+
+      <div class="workplan-card">
+        <span class="workplan-eyebrow">Capacity Meter</span>
+        <h3 class="load-${loadClass}">${load}</h3>
+        <div class="workplan-meter"><span class="load-${loadClass}" style="width:${pct}%"></span></div>
+        <p>${formatMinutes(totals.total)} planned${totals.noTime ? ` • ${totals.noTime} without time` : ""}</p>
+      </div>
+    </div>
+
+    <div class="workplan-main-grid">
+      <div class="workplan-card">
+        <span class="workplan-eyebrow">Suggested Order</span>
+        ${workplanSuggestedOrderHtml(items)}
+      </div>
+
+      <div class="workplan-card">
+        <span class="workplan-eyebrow">Time Breakdown</span>
+        <div class="workplan-breakdown">
+          ${breakdown.map(b => `<div><strong>${b.label}</strong><span>${b.count} item${b.count===1 ? "" : "s"}${b.total ? " • " + formatMinutes(b.total) : ""}</span></div>`).join("")}
+        </div>
+      </div>
+
+      <div class="workplan-card">
+        <span class="workplan-eyebrow">High Priority Goal Coverage</span>
+        <div class="coverage-list">${workplanCoverageHtml(items)}</div>
+      </div>
+
+      <div class="workplan-card recommendation-card">
+        <span class="workplan-eyebrow">Recommendation</span>
+        <p>${escapeHtml(rec)}</p>
+      </div>
+    </div>
+  </section>`;
 }
 
 function todayThisWeekHtml() {
-  const actionGoals = state.goals
-    .filter(g => (g.today_this_week || "").trim())
-    .sort((a,b) => {
-      const pa = prioritySortValue(a);
-      const pb = prioritySortValue(b);
-      if (pa !== pb) return pa - pb;
-      const timeDiff = metaTimeMinutes(a, "today_this_week_time") - metaTimeMinutes(b, "today_this_week_time");
-      if (timeDiff !== 0) return timeDiff;
-      return (a.category || "").localeCompare(b.category || "");
-    });
-
-  const grouped = Object.keys(categories).map(cat => {
-    const goals = actionGoals.filter(g => g.category === cat);
-    if (!goals.length) return "";
-    return `<div class="action-category">
-      <h4 style="color:${categories[cat].color}">${cat}</h4>
-      ${goals.map(g => `<div class="action-card clickable-card" onclick="openGoal('${g.id}')">
-        <div class="action-top">
-          <strong style="color:${categories[g.category].color}">${priorityValue(g) !== null ? priorityLabel(g) + " — " : ""}${escapeHtml(g.title)}</strong>
-          <small>${goalType(g)}${g.goal_type === "Behavior" ? " • " + autoBehaviorRating(g) : " • " + (g.status || "Not Started")}${metaValue(g, "today_this_week_time") ? " • " + metaValue(g, "today_this_week_time") : ""}</small>
-        </div>
-        <div class="action-body">${escapeHtml(g.today_this_week).replaceAll("\n", "<br>")}</div>
-      </div>`).join("")}
-    </div>`;
-  }).join("");
-
-  return `<section class="panel">
-    <h3>Today / This Week Actions</h3>
-    <p>All current action steps pulled from every goal, sorted by priority first, then Today / This Week time low → high.</p>
-    ${actionGoals.length ? todayThisWeekSummaryHtml(actionGoals) + grouped : `<div class="recent-item"><strong>No actions entered yet.</strong><small>Add Today / This Week items inside any goal card.</small></div>`}
-  </section>`;
+  return workplanHtml();
 }
 
 
@@ -1150,7 +1316,7 @@ function statusCardHtml(stats) {
 }
 
 function mainNavCardHtml() {
-  const views = ["Dashboard","Priority Stack","Today / This Week","Life Seasons","Weekly Review","Strategic Brief","Coach"];
+  const views = ["Dashboard","Priority Stack","Workplan","Life Seasons","Weekly Review","Strategic Brief","Coach"];
   return `<aside class="nav-box dashboard-box">
     <div class="box-title">Dashboard</div>
     <div class="button-wrap">
@@ -1175,7 +1341,7 @@ function viewTitleHtml() {
   const titles = {
     "Dashboard": "Dashboard",
     "Priority Stack": "Priority Stack",
-    "Today / This Week": "Today / This Week Actions",
+    "Workplan": "Workplan",
     "Life Seasons": "Life Seasons",
     "Weekly Review": "Weekly Review",
     "Strategic Brief": "Strategic Brief",
@@ -1213,8 +1379,8 @@ function statusRibbonHtml(stats) {
   const projectStarted = projects.filter(g => Number(g.progress || 0) > 0 || !["Not Started", "", null, undefined].includes(g.status)).length;
   const projectDone = projects.filter(g => g.status === "Completed" || Number(g.progress || 0) >= 100).length;
 
-  const behaviorStarted = behaviors.filter(g => autoBehaviorRating(g) !== "Needs Improvement" || (g.today_this_week || "").trim() || (g.key_results || "").trim()).length;
-  const behaviorMeets = behaviors.filter(g => ["Meets", "Exceeds"].includes(autoBehaviorRating(g))).length;
+  const behaviorStarted = behaviors.filter(g => effectiveBehaviorRating(g) !== "Needs Improvement" || (g.today_this_week || "").trim() || (g.key_results || "").trim()).length;
+  const behaviorMeets = behaviors.filter(g => ["Meets", "Exceeds"].includes(effectiveBehaviorRating(g))).length;
 
   return `<section class="status-ribbon">
     <span class="status-ribbon-title">Status</span>
@@ -1285,8 +1451,8 @@ function render() {
     if (!goals.length) return "";
     return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
-  const dashboard = `${priorityStackHtml()}${todayThisWeekHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
-  let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Today / This Week" ? todayThisWeekHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
+  const dashboard = `${priorityStackHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
+  let main = activeView === "Dashboard" ? dashboard : activeView === "Today / This Week" ? workplanHtml() : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Workplan" ? workplanHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
   document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand-row"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS</p></div>${statusCardHtml(completionStats())}</div>${utilityMenuHtml()}</aside><main class="content ${activeView==='Workbook' ? 'workbook-page' : ''}">
         <header class="app-header-simple">
           ${utilityMenuHtml()}

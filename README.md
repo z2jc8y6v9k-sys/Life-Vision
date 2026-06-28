@@ -1,9 +1,19 @@
-# My Life Vision App v44 Dashboard Action Summary
+# My Life Vision App v47 Workplan + Editable Auto Behavior Rating
 
 Changes:
-- Removes the category effort summary language from Workbook category pages.
-- Keeps Resources Time Required inside the Resources section.
-- Keeps Workbook goals sorted by priority, then resource time low → high.
-- Adds the action summary to Dashboard → Today / This Week.
-- Today / This Week summary includes Actions, High Priority, Today / This Week Time, Quick Wins, Deep Work, and No Time Set.
-- No SQL changes required.
+- Dashboard button renamed from Today / This Week to Workplan.
+- The main Dashboard stays clean; Workplan is its own Dashboard view.
+- Workplan adds:
+  - Today's One Thing
+  - Today's Briefing
+  - Capacity Meter
+  - Suggested Order
+  - Time Breakdown
+  - High Priority Goal Coverage
+  - Recommendation card
+- Workplan uses the parent goal priority automatically; actions only need time estimates.
+- Behavior Rating is auto-selected but can be manually changed.
+- Removed the explanatory “auto-rated from…” text.
+- Type, Priority, and Behavior Rating controls now use matching font sizing.
+
+No SQL changes required.
