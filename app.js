@@ -407,10 +407,46 @@ function prioritySortValue(goal) {
   return value;
 }
 
+const timeOptions = [
+  ["", "Select", 0],
+  ["5 min", "5 min", 5],
+  ["15 min", "15 min", 15],
+  ["30 min", "30 min", 30],
+  ["1 hour", "1 hour", 60],
+  ["2–4 hours", "2–4 hours", 180],
+  ["1 day", "1 day", 480],
+  ["Multi-day", "Multi-day", 1440],
+  ["Ongoing", "Ongoing", 9999],
+  ["Low", "Low", 30],
+  ["Medium", "Medium", 180],
+  ["High", "High", 1440]
+];
+
+function timeMinutes(goal) {
+  const value = goal?.resource_time || "";
+  const match = timeOptions.find(opt => opt[0] === value);
+  return match ? match[2] : 0;
+}
+
+function timeLabel(goal) {
+  return goal?.resource_time || "No time set";
+}
+
+function timeOptionsHtml(goal) {
+  const current = goal.resource_time || "";
+  const primary = timeOptions.filter(opt => !["Low","Medium","High"].includes(opt[0]));
+  return `<select class="status-select" onchange="updateGoalNoRender('${goal.id}','resource_time',this.value); setTimeout(render, 150);">
+    ${primary.map(([value,label]) => `<option value="${value}" ${current===value ? "selected" : ""}>${label}</option>`).join("")}
+    ${["Low","Medium","High"].includes(current) ? `<option value="${current}" selected>${current}</option>` : ""}
+  </select>`;
+}
+
 function sortGoalsByCategoryPriority(goals) {
   return [...goals].sort((a, b) => {
     const priorityDiff = prioritySortValue(a) - prioritySortValue(b);
     if (priorityDiff !== 0) return priorityDiff;
+    const timeDiff = timeMinutes(b) - timeMinutes(a);
+    if (timeDiff !== 0) return timeDiff;
     return new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0);
   });
 }
@@ -425,12 +461,7 @@ function priorityOptions(goal) {
 }
 
 function resourceProfileHtml(goal) {
-  return `<div class="resource-profile">
-    <label>Time Required
-      <select onchange="updateGoalNoRender('${goal.id}','resource_time',this.value)">
-        ${["","Low","Medium","High"].map(v=>`<option value="${v}" ${(goal.resource_time||"")===v?"selected":""}>${v || "Select"}</option>`).join("")}
-      </select>
-    </label>
+  return `<div class="resource-profile resource-profile-compact">
     <label>Money Required
       <select onchange="updateGoalNoRender('${goal.id}','resource_money',this.value)">
         ${["","$","$$","$$$","$$$$"].map(v=>`<option value="${v}" ${(goal.resource_money||"")===v?"selected":""}>${v || "Select"}</option>`).join("")}
@@ -441,6 +472,31 @@ function resourceProfileHtml(goal) {
         ${["","Low","Medium","High"].map(v=>`<option value="${v}" ${(goal.resource_physical||"")===v?"selected":""}>${v || "Select"}</option>`).join("")}
       </select>
     </label>
+  </div>`;
+}
+
+function formatMinutes(total) {
+  if (!total) return "No time set";
+  if (total >= 9999) return "Ongoing included";
+  if (total < 60) return `${total} min`;
+  const hours = Math.round((total / 60) * 10) / 10;
+  return `${hours} hr${hours === 1 ? "" : "s"}`;
+}
+
+function categoryEffortSummaryHtml(goals) {
+  const active = goals.filter(g => priorityValue(g) !== -1);
+  const high = active.filter(g => priorityValue(g) === 1);
+  const quickWins = active.filter(g => timeMinutes(g) > 0 && timeMinutes(g) <= 30).length;
+  const total = active.reduce((sum, g) => {
+    const mins = timeMinutes(g);
+    return mins >= 9999 ? sum : sum + mins;
+  }, 0);
+  const ongoing = active.some(g => timeMinutes(g) >= 9999);
+  return `<div class="category-effort-summary">
+    <span><b>${high.length}</b> high priority</span>
+    <span><b>${formatMinutes(total)}</b>${ongoing ? " + ongoing" : ""}</span>
+    <span><b>${quickWins}</b> quick wins (&lt;30 min)</span>
+    <span>Sorted by priority, then time high → low</span>
   </div>`;
 }
 
@@ -627,9 +683,42 @@ function weeklyArchiveHtml() {
   `).join("");
 }
 
+function goalStatusLabel(goal) {
+  return goalType(goal) === "Behavior" ? (goal.behavior_rating || "Needs Improvement") : (goal.status || "Not Started");
+}
+
 function goalCard(goal) {
   const color = categories[goal.category].color;
   const type = goalType(goal);
+  const isInventory = priorityValue(goal) === -1;
+
+  if (isInventory) {
+    return `<article class="goal-card inventory-card" id="goal-${goal.id}">
+      <div class="inventory-row">
+        <textarea class="goal-title inventory-title" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', 'title', this.value)">${escapeHtml(goal.title)}</textarea>
+        <label>Type<br>
+          <select class="status-select" onchange="updateGoalNoRender('${goal.id}','goal_type',this.value); setTimeout(render, 300);">
+            <option ${type==="Project"?"selected":""}>Project</option>
+            <option ${type==="Behavior"?"selected":""}>Behavior</option>
+          </select>
+        </label>
+        ${type === "Behavior" ? `
+          <label>Status<br>
+            <select class="status-select behavior-rating" onchange="updateGoalNoRender('${goal.id}','behavior_rating',this.value)">
+              ${behaviorRatings.map(r=>`<option ${(goal.behavior_rating||"Needs Improvement")===r?"selected":""}>${r}</option>`).join("")}
+            </select>
+          </label>
+        ` : `
+          <label>Status<br>
+            <select class="status-select" onchange="updateGoalNoRender('${goal.id}','status',this.value)">
+              ${statuses.map(s=>`<option ${(goal.status||"Not Started")===s?"selected":""}>${s}</option>`).join("")}
+            </select>
+          </label>
+        `}
+        <label>Priority<br>${priorityOptions(goal)}</label>
+      </div>
+    </article>`;
+  }
 
   return `<article class="goal-card" id="goal-${goal.id}">
     <div class="goal-top">
@@ -637,7 +726,7 @@ function goalCard(goal) {
       <textarea class="goal-title" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', 'title', this.value)">${escapeHtml(goal.title)}</textarea>
     </div>
 
-    <div class="grid-three">
+    <div class="grid-four goal-controls-grid">
       <label>Type<br>
         <select class="status-select" onchange="updateGoalNoRender('${goal.id}','goal_type',this.value); setTimeout(render, 300);">
           <option ${type==="Project"?"selected":""}>Project</option>
@@ -658,6 +747,7 @@ function goalCard(goal) {
         </label>
       `}
       <label>Priority<br>${priorityOptions(goal)}</label>
+      <label>Time<br>${timeOptionsHtml(goal)}</label>
     </div>
 
     ${fieldCard(goal, "key_results", "Key Results", "full")}
@@ -932,6 +1022,8 @@ function todayThisWeekHtml() {
       const pa = prioritySortValue(a);
       const pb = prioritySortValue(b);
       if (pa !== pb) return pa - pb;
+      const timeDiff = timeMinutes(b) - timeMinutes(a);
+      if (timeDiff !== 0) return timeDiff;
       return (a.category || "").localeCompare(b.category || "");
     });
 
@@ -1101,7 +1193,7 @@ function render() {
   const grouped = Object.keys(categories).map(cat => {
     const goals = sortGoalsByCategoryPriority(filteredGoals().filter(g => g.category === cat));
     if (!goals.length) return "";
-    return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
+    return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${categoryEffortSummaryHtml(goals)}${goals.map(goalCard).join("")}`;
   }).join("");
   const dashboard = `${priorityStackHtml()}${todayThisWeekHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
   let main = activeView === "Dashboard" ? dashboard : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Today / This Week" ? todayThisWeekHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
