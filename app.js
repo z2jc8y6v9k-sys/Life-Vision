@@ -1316,7 +1316,7 @@ function statusCardHtml(stats) {
 }
 
 function mainNavCardHtml() {
-  const views = ["Dashboard","Priority Stack","Workplan","Life Seasons","Weekly Review","Strategic Brief","Coach"];
+  const views = ["Dashboard","Workplan","Priority Stack","Resources","Life Seasons","Weekly Review","Strategic Brief","Coach"];
   return `<aside class="nav-box dashboard-box">
     <div class="box-title">Dashboard</div>
     <div class="button-wrap">
@@ -1340,8 +1340,9 @@ function viewTitleHtml() {
 
   const titles = {
     "Dashboard": "Dashboard",
-    "Priority Stack": "Priority Stack",
     "Workplan": "Workplan",
+    "Priority Stack": "Priority Stack",
+    "Resources": "Resources",
     "Life Seasons": "Life Seasons",
     "Weekly Review": "Weekly Review",
     "Strategic Brief": "Strategic Brief",
@@ -1351,11 +1352,32 @@ function viewTitleHtml() {
   return `<section class="view-title"><h2>${titles[activeView] || activeCategory || activeView}</h2></section>`;
 }
 
+
+function resourcesHtml() {
+  const goals = state.goals || [];
+  const withResources = goals.filter(g => (g.money || "").trim() || metaValue(g, "resource_time") || metaValue(g, "resource_money") || metaValue(g, "resource_physical"));
+  const missingPeople = goals.filter(g => !(g.people || "").trim());
+  const waitingActions = workplanActionItems ? workplanActionItems().filter(i => /waiting/i.test(i.timeLabel || "") || /waiting/i.test(i.text || "")) : [];
+
+  return `<section class="panel resources-placeholder">
+    <h3>Resources</h3>
+    <p>This dashboard will become the place to understand what your goals require: time, money, people, and physical energy.</p>
+    <div class="resource-dashboard-grid">
+      <div><b>${withResources.length}</b><span>Goals with resource notes</span></div>
+      <div><b>${missingPeople.length}</b><span>Goals missing people/support</span></div>
+      <div><b>${waitingActions.length}</b><span>Potential waiting items</span></div>
+    </div>
+    <div class="resource-next-note">
+      <strong>Next release:</strong> resource analysis across time, money, people, and physical effort.
+    </div>
+  </section>`;
+}
+
 function dashboardIntroHtml(stats) {
   return `<section class="dashboard-hero compact-hero">
     <div>
       <h2>Dashboard</h2>
-      <p>Start here: what matters now, what needs action this week, and what is moving.</p>
+      <p>Choose where to focus: work, priorities, resources, review, strategy, or coaching.</p>
     </div>
   </section>`;
 }
@@ -1452,8 +1474,8 @@ function render() {
     return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
   const dashboard = `${priorityStackHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
-  let main = activeView === "Dashboard" ? dashboard : activeView === "Today / This Week" ? workplanHtml() : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Workplan" ? workplanHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
-  document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand-row"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS</p></div>${statusCardHtml(completionStats())}</div>${utilityMenuHtml()}</aside><main class="content ${activeView==='Workbook' ? 'workbook-page' : ''}">
+  let main = activeView === "Dashboard" ? dashboard : activeView === "Today / This Week" ? workplanHtml() : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Resources" ? resourcesHtml() : activeView === "Workplan" ? workplanHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
+  document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand-row"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS</p></div></div>${utilityMenuHtml()}</aside><main class="content ${activeView==='Workbook' ? 'workbook-page' : ''}">
         <header class="app-header-simple">
           ${utilityMenuHtml()}
           <div class="brand-main">
@@ -1462,7 +1484,6 @@ function render() {
           </div>
         </header>
 
-        ${statusRibbonHtml(stats)}
 
         <div class="global-top-nav" aria-label="Quick top navigation">
           <button onclick="openWorkbookTop()">Workbook</button>

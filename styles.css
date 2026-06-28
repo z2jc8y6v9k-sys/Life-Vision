@@ -2234,3 +2234,69 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* v48 dashboard cleanup */
+.status-ribbon,
+.status-card,
+.status-square,
+.status-mini-grid,
+.status-detail,
+.status-compact-row {
+  display: none !important;
+}
+
+.app-header-simple {
+  margin-bottom: 24px !important;
+}
+
+.nav-workbook-row {
+  margin-top: 0 !important;
+}
+
+.resources-placeholder p {
+  max-width: 760px;
+}
+
+.resource-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.resource-dashboard-grid div {
+  background: #fbfaf7;
+  border: 1px solid rgba(31,41,51,.10);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.resource-dashboard-grid b {
+  display: block;
+  font-size: 28px;
+  letter-spacing: -0.05em;
+  color: #111827;
+}
+
+.resource-dashboard-grid span {
+  display: block;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.resource-next-note {
+  background: #fffdf8;
+  border: 1px solid rgba(31,41,51,.10);
+  border-radius: 18px;
+  padding: 14px 16px;
+  color: #475467;
+}
+
+@media(max-width:800px) {
+  .resource-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
