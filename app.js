@@ -549,24 +549,29 @@ function priorityOptions(goal) {
   </select>`;
 }
 
+function moneyOptionsHtml(goal) {
+  return `<select onchange="updateGoalNoRender('${goal.id}','resource_money',this.value)">
+    ${[
+      ["", "Select"],
+      ["$", "$ — under $500"],
+      ["$$", "$$ — $500–$1,000"],
+      ["$$$", "$$$ — $1,000–$5,000"],
+      ["$$$$", "$$$$ — $5,000–$10,000"],
+      ["$$$$$", "$$$$$ — $10,000–$50,000"],
+      ["$$$$$$", "$$$$$$ — $50,000+"]
+    ].map(([v,label])=>`<option value="${v}" ${(goal.resource_money||"")===v?"selected":""}>${label}</option>`).join("")}
+  </select>`;
+}
+
 function resourceProfileHtml(goal) {
   return `<div class="resource-profile resource-profile-compact">
-    <label>Time Required
+    <label><strong>Time Required</strong>
       ${resourceTimeOptionsHtml(goal)}
     </label>
-    <label>Money Required
-      <select onchange="updateGoalNoRender('${goal.id}','resource_money',this.value)">
-        ${[
-          ["", "Select"],
-          ["$", "$ — under $500"],
-          ["$$", "$$ — $500–$1,000"],
-          ["$$$", "$$$ — $1,000–$5,000"],
-          ["$$$$", "$$$$ — $5,000–$10,000"],
-          ["$$$$$", "$$$$$ — $10,000+"]
-        ].map(([v,label])=>`<option value="${v}" ${(goal.resource_money||"")===v?"selected":""}>${label}</option>`).join("")}
-      </select>
+    <label><strong>Money Required</strong>
+      ${moneyOptionsHtml(goal)}
     </label>
-    <label>Physical Demand
+    <label><strong>Physical Demand</strong>
       <select onchange="updateGoalNoRender('${goal.id}','resource_physical',this.value)">
         ${["","Low","Medium","High"].map(v=>`<option value="${v}" ${(goal.resource_physical||"")===v?"selected":""}>${v || "Select"}</option>`).join("")}
       </select>
@@ -1479,23 +1484,97 @@ function viewTitleHtml() {
 }
 
 
+function resourceRankValue(value) {
+  const map = {"Low": 1, "Medium": 2, "High": 3};
+  return map[value] || 0;
+}
+
+function moneyRankValue(value) {
+  const map = {"$": 1, "$$": 2, "$$$": 3, "$$$$": 4, "$$$$$": 5, "$$$$$$": 6};
+  return map[value] || 0;
+}
+
+function moneyLabel(value) {
+  const labels = {
+    "$": "$ — under $500",
+    "$$": "$$ — $500–$1,000",
+    "$$$": "$$$ — $1,000–$5,000",
+    "$$$$": "$$$$ — $5,000–$10,000",
+    "$$$$$": "$$$$$ — $10,000–$50,000",
+    "$$$$$$": "$$$$$$ — $50,000+"
+  };
+  return labels[value] || "Not set";
+}
+
+function resourceProfileScore(goal) {
+  const time = resourceRankValue(goal.resource_time);
+  const money = moneyRankValue(goal.resource_money);
+  const physical = resourceRankValue(goal.resource_physical);
+  const highCount = [time >= 3, money >= 4, physical >= 3].filter(Boolean).length;
+  const mediumCount = [time >= 2, money >= 3, physical >= 2].filter(Boolean).length;
+  if (highCount >= 1 || mediumCount >= 2) return {label:"Major Commitment", cls:"major", note:"Requires planning"};
+  if (mediumCount >= 1) return {label:"Requires Planning", cls:"planning", note:"Manage consciously"};
+  if (time || money || physical) return {label:"Easy to Start", cls:"easy", note:"Good near-term move"};
+  return {label:"Not Fully Set", cls:"unset", note:"Add resources"};
+}
+
+function resourcesAnalysisRecommendations(goals) {
+  const recs = [];
+  const top = goals.filter(g => priorityValue(g) !== null && priorityValue(g) > 0 && priorityValue(g) <= 3);
+  const highTime = top.filter(g => g.resource_time === "High");
+  const highMoney = top.filter(g => moneyRankValue(g.resource_money) >= 4);
+  const highPhysical = top.filter(g => g.resource_physical === "High");
+  const incomplete = top.filter(g => !g.resource_time || !g.resource_money || !g.resource_physical);
+  const easy = top.filter(g => resourceProfileScore(g).cls === "easy");
+  if (highTime.length >= 3) recs.push(`You have ${highTime.length} top-priority goals requiring High time. Consider sequencing them instead of trying to advance all at once.`);
+  if (highMoney.length) recs.push(`${highMoney.length} top-priority goal${highMoney.length===1?"":"s"} require $5,000+. Confirm timing before committing money.`);
+  if (highPhysical.length >= 2) recs.push(`${highPhysical.length} top-priority goals require High physical effort. Spread them out to protect consistency.`);
+  if (easy.length) recs.push(`${easy.length} top-priority goal${easy.length===1?" is":"s are"} easy to start. Use these for near-term momentum.`);
+  if (incomplete.length) recs.push(`${incomplete.length} top-priority goal${incomplete.length===1?" is":"s are"} missing at least one resource estimate. Fill those in first for a clearer plan.`);
+  if (!recs.length) recs.push("Your top-priority resources look balanced. Keep using Workplan to turn them into next actions.");
+  return recs.slice(0,3);
+}
+
 function resourcesHtml() {
   const goals = state.goals || [];
-  const withResources = goals.filter(g => (g.money || "").trim() || metaValue(g, "resource_time") || metaValue(g, "resource_money") || metaValue(g, "resource_physical"));
-  const missingPeople = goals.filter(g => !(g.people || "").trim());
-  const waitingActions = workplanActionItems ? workplanActionItems().filter(i => /waiting/i.test(i.timeLabel || "") || /waiting/i.test(i.text || "")) : [];
+  const topGoals = goals
+    .filter(g => priorityValue(g) !== null && priorityValue(g) > 0 && priorityValue(g) <= 5)
+    .sort((a,b) => prioritySortValue(a) - prioritySortValue(b));
+  const priorities = topGoals.length ? topGoals : sortGoalsByCategoryPriority(goals).slice(0,8);
+  const timeCounts = ["Low","Medium","High"].map(v => [v, priorities.filter(g => g.resource_time === v).length]);
+  const physicalCounts = ["Low","Medium","High"].map(v => [v, priorities.filter(g => g.resource_physical === v).length]);
+  const moneyLevels = ["$","$$","$$$","$$$$","$$$$$","$$$$$$"].map(v => [v, priorities.filter(g => g.resource_money === v).length]);
+  const recs = resourcesAnalysisRecommendations(priorities);
 
-  return `<section class="panel resources-placeholder">
-    <h3>Resources</h3>
-    <p>This dashboard will become the place to understand what your goals require: time, money, people, and physical energy.</p>
-    <div class="resource-dashboard-grid">
-      <div><b>${withResources.length}</b><span>Goals with resource notes</span></div>
-      <div><b>${missingPeople.length}</b><span>Goals missing people/support</span></div>
-      <div><b>${waitingActions.length}</b><span>Potential waiting items</span></div>
-    </div>
-    <div class="resource-next-note">
-      <strong>Next release:</strong> resource analysis across time, money, people, and physical effort.
-    </div>
+  return `<section class="resources-page">
+    <section class="panel resources-analysis-panel">
+      <h3>Resources</h3>
+      <p>Resource analysis for your highest-priority goals: time, money, and physical effort.</p>
+      <div class="resource-summary-strip">
+        <div><b>${priorities.length}</b><span>Priority goals analyzed</span></div>
+        <div><b>${priorities.filter(g=>g.resource_time === "High").length}</b><span>High time</span></div>
+        <div><b>${priorities.filter(g=>moneyRankValue(g.resource_money) >= 4).length}</b><span>$5k+ goals</span></div>
+        <div><b>${priorities.filter(g=>g.resource_physical === "High").length}</b><span>High physical effort</span></div>
+      </div>
+    </section>
+    <section class="panel">
+      <h3>Top Priorities Resource Snapshot</h3>
+      <div class="resource-priority-table">
+        <div class="resource-table-head"><span>Priority</span><span>Goal</span><span>Time</span><span>Money</span><span>Physical</span><span>Profile</span></div>
+        ${priorities.length ? priorities.map(g => {
+          const profile = resourceProfileScore(g);
+          return `<div class="resource-table-row clickable-card" onclick="openGoal('${g.id}')">
+            <span>${priorityLabel(g)}</span><strong style="color:${categories[g.category]?.color || '#111827'}">${escapeHtml(g.title)}</strong><span>${g.resource_time || "Not set"}</span><span>${moneyLabel(g.resource_money)}</span><span>${g.resource_physical || "Not set"}</span><em class="resource-profile-badge ${profile.cls}">${profile.label}</em>
+          </div>`;
+        }).join("") : `<div class="recent-item"><strong>No priorities available yet.</strong><small>Set priorities and resources in the Workbook.</small></div>`}
+      </div>
+    </section>
+    <section class="resource-analysis-grid">
+      <div class="panel"><h3>Time</h3><div class="resource-count-list">${timeCounts.map(([label,count])=>`<div><strong>${label}</strong><span>${count} goal${count===1?"":"s"}</span></div>`).join("")}</div></div>
+      <div class="panel"><h3>Money</h3><div class="resource-count-list">${moneyLevels.map(([label,count])=>`<div><strong>${label}</strong><span>${count} goal${count===1?"":"s"}</span></div>`).join("")}</div></div>
+      <div class="panel"><h3>Physical Effort</h3><div class="resource-count-list">${physicalCounts.map(([label,count])=>`<div><strong>${label}</strong><span>${count} goal${count===1?"":"s"}</span></div>`).join("")}</div></div>
+    </section>
+    <section class="panel recommendation-card"><h3>Analysis & Recommendations</h3><div class="resource-recommendations">${recs.map(r=>`<div>${escapeHtml(r)}</div>`).join("")}</div></section>
   </section>`;
 }
 

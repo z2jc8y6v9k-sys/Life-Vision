@@ -2650,3 +2650,32 @@ body {
     grid-column: auto;
   }
 }
+
+
+/* v54 workbook resources + Resources dashboard analysis */
+.resource-profile label,
+.resource-profile label strong { font-weight: 950 !important; color: var(--ink) !important; }
+.resource-profile label select { font-weight: 800; }
+.resources-page { display: grid; gap: 20px; }
+.resources-analysis-panel p { margin-bottom: 18px; }
+.resource-summary-strip { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; }
+.resource-summary-strip div, .resource-count-list div { background: #fbfaf7; border: 1px solid rgba(31,41,51,.10); border-radius: 16px; padding: 14px; }
+.resource-summary-strip b { display:block; font-size:26px; letter-spacing:-0.05em; }
+.resource-summary-strip span, .resource-count-list span { display:block; color:#667085; font-size:12px; font-weight:800; margin-top:4px; }
+.resource-priority-table { display:grid; gap:8px; }
+.resource-table-head, .resource-table-row { display:grid; grid-template-columns: 100px minmax(220px,1.4fr) 110px 180px 120px 160px; gap:10px; align-items:center; }
+.resource-table-head { color:#667085; font-size:12px; font-weight:950; text-transform:uppercase; letter-spacing:.06em; padding:0 12px 4px; }
+.resource-table-row { background:#fbfaf7; border:1px solid rgba(31,41,51,.10); border-radius:18px; padding:12px; }
+.resource-table-row span, .resource-table-row strong { font-size:13px; }
+.resource-profile-badge { display:inline-flex; justify-content:center; border-radius:999px; padding:7px 10px; font-size:12px; font-weight:900; font-style:normal; white-space:nowrap; }
+.resource-profile-badge.easy { background:#ecfdf3; color:#027a48; }
+.resource-profile-badge.planning { background:#fffaeb; color:#b54708; }
+.resource-profile-badge.major { background:#fff1f2; color:#9f1239; }
+.resource-profile-badge.unset { background:#f3f4f6; color:#667085; }
+.resource-analysis-grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:20px; }
+.resource-count-list { display:grid; gap:10px; }
+.resource-count-list strong { display:block; font-size:18px; }
+.resource-recommendations { display:grid; gap:10px; }
+.resource-recommendations div { background:#fbfaf7; border:1px solid rgba(31,41,51,.10); border-radius:16px; padding:14px; line-height:1.45; color:#1f2933; }
+@media(max-width:1050px){ .resource-summary-strip, .resource-analysis-grid { grid-template-columns:1fr 1fr; } .resource-table-head{display:none;} .resource-table-row{grid-template-columns:1fr;gap:6px;} }
+@media(max-width:700px){ .resource-summary-strip, .resource-analysis-grid { grid-template-columns:1fr; } }

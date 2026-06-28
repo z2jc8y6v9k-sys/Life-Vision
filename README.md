@@ -1,11 +1,15 @@
-# My Life Vision App v53 Workplan + Resource Refinements
+# My Life Vision App v54 Resources Analysis
 
 Changes:
-- Workbook action detail rows now include a completion checkbox for Today / This Week and Next 30 Days actions.
-- Checking an action in either Workbook or Workplan completes it and moves it to Wins.
-- Dashboard navigation label changed from Dashboard to Overview.
-- Workplan now separates Today / This Week actions from Next 30 Days actions.
-- Workbook Resources: Time Required now uses Low, Medium, High only.
-- Workbook Resources: Money Required now uses expanded ranges: $, $$, $$$, $$$$, $$$$$.
+- Bolded Workbook Resources labels: Time Required, Money Required, Physical Demand.
+- Updated Money Required scale:
+  - $: under $500
+  - $$: $500–$1,000
+  - $$$: $1,000–$5,000
+  - $$$$: $5,000–$10,000
+  - $$$$$: $10,000–$50,000
+  - $$$$$$: $50,000+
+- Replaced Dashboard Resources placeholder with priority resource analysis.
+- Resources dashboard now shows priority goals with time, money, physical effort, resource profile, and recommendations.
 
 No SQL changes required.
