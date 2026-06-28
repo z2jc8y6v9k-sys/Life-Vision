@@ -1,16 +1,11 @@
-# My Life Vision App v52 Single Source Workplan
+# My Life Vision App v53 Workplan + Resource Refinements
 
 Changes:
-- Workbook action bullets are the source of truth for Workplan.
-- Workplan is read-only and generated from Today / This Week and Next 30 Days action metadata.
-- Removed separate Today’s Work, Quick Wins, and Deep Work sections from Workplan.
-- Added a cleaner Workplan structure:
-  - Start Here
-  - Next Up
-  - Waiting
-  - Completed Today
-- Start Here recommends the best next action using priority, field, time, and owner.
-- Completing an action moves it into Wins and displays it under Completed Today.
-- Action badges now show time, owner, and whether the action is a Quick Win or Deep Work.
+- Workbook action detail rows now include a completion checkbox for Today / This Week and Next 30 Days actions.
+- Checking an action in either Workbook or Workplan completes it and moves it to Wins.
+- Dashboard navigation label changed from Dashboard to Overview.
+- Workplan now separates Today / This Week actions from Next 30 Days actions.
+- Workbook Resources: Time Required now uses Low, Medium, High only.
+- Workbook Resources: Money Required now uses expanded ranges: $, $$, $$$, $$$$, $$$$$.
 
 No SQL changes required.

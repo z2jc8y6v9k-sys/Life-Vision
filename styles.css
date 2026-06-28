@@ -2593,3 +2593,60 @@ body {
     grid-column: auto;
   }
 }
+
+
+/* v53 Workbook action completion + resource refinements */
+.action-meta-row {
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+}
+
+.action-meta-check-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.action-meta-check,
+.action-check {
+  width: 18px !important;
+  height: 18px !important;
+  accent-color: #111827;
+  cursor: pointer;
+}
+
+.action-queue-row .action-check {
+  appearance: auto !important;
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.resource-time-select {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.single-source-grid {
+  grid-template-columns: 1fr 1fr !important;
+}
+
+.start-here-card {
+  grid-column: 1 / -1;
+}
+
+.completed-card {
+  grid-column: 1 / -1;
+}
+
+@media(max-width:1000px) {
+  .single-source-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .start-here-card,
+  .completed-card {
+    grid-column: auto;
+  }
+}

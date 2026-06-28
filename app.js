@@ -519,7 +519,10 @@ function timeOptionsSelect(value, onChange) {
 
 function resourceTimeOptionsHtml(goal) {
   const current = goal.resource_time || "";
-  return timeOptionsSelect(current, `updateGoalNoRender('${goal.id}','resource_time',this.value); setTimeout(render, 150);`);
+  const options = ["", "Low", "Medium", "High"];
+  return `<select class="status-select resource-time-select" onchange="updateGoalNoRender('${goal.id}','resource_time',this.value); setTimeout(render, 150);">
+    ${options.map(v => `<option value="${v}" ${current===v ? "selected" : ""}>${v || "Select"}</option>`).join("")}
+  </select>`;
 }
 
 function actionTimeOptionsHtml(goal, key) {
@@ -553,7 +556,14 @@ function resourceProfileHtml(goal) {
     </label>
     <label>Money Required
       <select onchange="updateGoalNoRender('${goal.id}','resource_money',this.value)">
-        ${["","$","$$","$$$","$$$$"].map(v=>`<option value="${v}" ${(goal.resource_money||"")===v?"selected":""}>${v || "Select"}</option>`).join("")}
+        ${[
+          ["", "Select"],
+          ["$", "$ — under $500"],
+          ["$$", "$$ — $500–$1,000"],
+          ["$$$", "$$$ — $1,000–$5,000"],
+          ["$$$$", "$$$$ — $5,000–$10,000"],
+          ["$$$$$", "$$$$$ — $10,000+"]
+        ].map(([v,label])=>`<option value="${v}" ${(goal.resource_money||"")===v?"selected":""}>${label}</option>`).join("")}
       </select>
     </label>
     <label>Physical Demand
@@ -1172,13 +1182,19 @@ function actionMetadataEditorHtml(goal, field, label) {
   }
   return `<div class="action-meta-panel">
     <div class="action-meta-title">${label} action details</div>
-    ${items.map(item => `<div class="action-meta-row">
-      <div class="action-meta-text">${escapeHtml(item.text)}</div>
-      <div class="action-meta-controls">
-        ${actionTimeSelect(goal, field, item.text)}
-        ${actionOwnerSelect(goal, field, item.text)}
-      </div>
-    </div>`).join("")}
+    ${items.map(item => {
+      const actionKey = actionHash(goal.id + "|" + field + "|" + item.text);
+      return `<div class="action-meta-row">
+        <label class="action-meta-check-wrap" title="Complete and move to Wins">
+          <input type="checkbox" class="action-meta-check" onchange="completeWorkplanAction('${goal.id}','${field}','${actionKey}')" />
+        </label>
+        <div class="action-meta-text">${escapeHtml(item.text)}</div>
+        <div class="action-meta-controls">
+          ${actionTimeSelect(goal, field, item.text)}
+          ${actionOwnerSelect(goal, field, item.text)}
+        </div>
+      </div>`;
+    }).join("")}
   </div>`;
 }
 
@@ -1320,7 +1336,7 @@ function actionBadgesHtml(item) {
 function actionQueueRow(item, opts = {}) {
   const compact = opts.compact ? " compact" : "";
   return `<div class="action-queue-row${compact} clickable-card" onclick="openGoal('${item.goalId}')">
-    <button class="action-check" onclick="event.stopPropagation(); completeWorkplanAction('${item.goalId}','${item.field}','${item.actionKey}')" title="Complete and move to Wins">✓</button>
+    <input type="checkbox" class="action-check" onclick="event.stopPropagation()" onchange="completeWorkplanAction('${item.goalId}','${item.field}','${item.actionKey}')" title="Complete and move to Wins" />
     <div class="action-main">
       <strong>${escapeHtml(item.action)}</strong>
       <small>${escapeHtml(item.title)} • ${escapeHtml(item.priorityLabel)}${item.category ? " • " + escapeHtml(item.category) : ""}</small>
@@ -1364,6 +1380,8 @@ function workplanHtml() {
   const totals = workplanTotals(items);
   const first = recommendedFirstAction(items);
   const activeItems = items.filter(i => i !== first && !["Waiting", "Delegated"].includes(i.owner));
+  const todayItems = activeItems.filter(i => i.field === "today_this_week");
+  const next30Items = activeItems.filter(i => i.field === "next30");
   const waitingItems = items.filter(i => i.owner === "Waiting" || i.owner === "Delegated");
   const completed = completedTodayItems();
 
@@ -1380,12 +1398,17 @@ function workplanHtml() {
       </div>
 
       <div class="workplan-card action-queue-card">
-        <span class="workplan-eyebrow">Next Up</span>
-        ${actionQueueHtml(activeItems)}
+        <span class="workplan-eyebrow">Today / This Week</span>
+        ${actionQueueHtml(todayItems)}
+      </div>
+
+      <div class="workplan-card action-queue-card">
+        <span class="workplan-eyebrow">Next 30 Days</span>
+        ${actionQueueHtml(next30Items)}
       </div>
 
       <div class="workplan-card waiting-card">
-        <span class="workplan-eyebrow">Waiting</span>
+        <span class="workplan-eyebrow">Waiting / Delegated</span>
         ${waitingListHtml(waitingItems)}
       </div>
 
@@ -1410,11 +1433,20 @@ function statusCardHtml(stats) {
 }
 
 function mainNavCardHtml() {
-  const views = ["Dashboard","Workplan","Priority Stack","Resources","Life Seasons","Weekly Review","Strategic Brief","Coach"];
+  const views = [
+    ["Dashboard", "Overview"],
+    ["Workplan", "Workplan"],
+    ["Priority Stack", "Priority Stack"],
+    ["Resources", "Resources"],
+    ["Life Seasons", "Life Seasons"],
+    ["Weekly Review", "Weekly Review"],
+    ["Strategic Brief", "Strategic Brief"],
+    ["Coach", "Coach"]
+  ];
   return `<aside class="nav-box dashboard-box">
     <div class="box-title">Dashboard</div>
     <div class="button-wrap">
-      ${views.map(v => `<button onclick="setMainView('${v}')" class="${activeView===v ? "active" : ""}">${v}</button>`).join("")}
+      ${views.map(([v,label]) => `<button onclick="setMainView('${v}')" class="${activeView===v ? "active" : ""}">${label}</button>`).join("")}
     </div>
   </aside>`;
 }
@@ -1433,7 +1465,7 @@ function viewTitleHtml() {
   if (activeView === "Workbook") return "";
 
   const titles = {
-    "Dashboard": "Dashboard",
+    "Dashboard": "Overview",
     "Workplan": "Your Action Plan",
     "Priority Stack": "Priority Stack",
     "Resources": "Resources",
@@ -1470,7 +1502,7 @@ function resourcesHtml() {
 function dashboardIntroHtml(stats) {
   return `<section class="dashboard-hero compact-hero">
     <div>
-      <h2>Dashboard</h2>
+      <h2>Overview</h2>
       <p>Choose where to focus: work, priorities, resources, review, strategy, or coaching.</p>
     </div>
   </section>`;
