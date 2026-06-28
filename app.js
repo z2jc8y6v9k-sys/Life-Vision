@@ -386,6 +386,31 @@ function keyResultsLabelFor(goal) {
 }
 
 
+function countUsefulLines(text) {
+  return (text || "")
+    .split(/\n+/)
+    .map(line => line.replace(/^\s*[•\-*]\s*/, "").trim())
+    .filter(Boolean).length;
+}
+
+function autoBehaviorRating(goal) {
+  if (goalType(goal) !== "Behavior") return goal.status || "Not Started";
+  const wins = countUsefulLines(goal.wins);
+  const actions = countUsefulLines(goal.today_this_week);
+  const keyResults = countUsefulLines(goal.key_results);
+  const next30 = countUsefulLines(goal.next30);
+
+  if (wins >= 2 || (wins >= 1 && actions >= 1 && next30 >= 1)) return "Exceeds";
+  if (wins >= 1 || actions >= 1 || keyResults >= 1 || next30 >= 1) return "Meets";
+  return "Needs Improvement";
+}
+
+function behaviorRatingPill(goal) {
+  const rating = autoBehaviorRating(goal);
+  return `<div class="auto-behavior-rating"><strong>${rating}</strong><span>Auto-rated from Wins, Today / This Week, Key Results, and Next 30 Days.</span></div>`;
+}
+
+
 function priorityValue(goal) {
   const value = goal?.priority_rank;
   if (value === null || value === undefined || value === "") return null;
@@ -416,36 +441,69 @@ const timeOptions = [
   ["2–4 hours", "2–4 hours", 180],
   ["1 day", "1 day", 480],
   ["Multi-day", "Multi-day", 1440],
-  ["Ongoing", "Ongoing", 9999],
-  ["Low", "Low", 30],
-  ["Medium", "Medium", 180],
-  ["High", "High", 1440]
+  ["Ongoing", "Ongoing", 9999]
 ];
 
-function timeMinutes(goal) {
-  const value = goal?.resource_time || "";
-  const match = timeOptions.find(opt => opt[0] === value);
+function optionMinutes(value) {
+  const match = timeOptions.find(opt => opt[0] === (value || ""));
   return match ? match[2] : 0;
 }
 
-function timeLabel(goal) {
-  return goal?.resource_time || "No time set";
+function timeMinutes(goal) {
+  return optionMinutes(goal?.resource_time || "");
 }
 
-function timeOptionsHtml(goal) {
-  const current = goal.resource_time || "";
-  const primary = timeOptions.filter(opt => !["Low","Medium","High"].includes(opt[0]));
-  return `<select class="status-select" onchange="updateGoalNoRender('${goal.id}','resource_time',this.value); setTimeout(render, 150);">
-    ${primary.map(([value,label]) => `<option value="${value}" ${current===value ? "selected" : ""}>${label}</option>`).join("")}
-    ${["Low","Medium","High"].includes(current) ? `<option value="${current}" selected>${current}</option>` : ""}
+function parseGoalMeta(goal) {
+  try {
+    const raw = goal?.friction || "";
+    if (!raw.trim().startsWith("{")) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && parsed.__lifeVisionMeta ? parsed : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function metaValue(goal, key) {
+  return parseGoalMeta(goal)[key] || "";
+}
+
+function metaTimeMinutes(goal, key) {
+  return optionMinutes(metaValue(goal, key));
+}
+
+function updateGoalMeta(goalId, key, value) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal) return;
+  const meta = parseGoalMeta(goal);
+  meta.__lifeVisionMeta = true;
+  meta[key] = value;
+  const next = JSON.stringify(meta);
+  updateGoalNoRender(goalId, "friction", next);
+  setTimeout(render, 150);
+}
+
+function timeOptionsSelect(value, onChange) {
+  return `<select class="status-select time-select" onchange="${onChange}">
+    ${timeOptions.map(([v,label]) => `<option value="${v}" ${value===v ? "selected" : ""}>${label}</option>`).join("")}
   </select>`;
+}
+
+function resourceTimeOptionsHtml(goal) {
+  const current = goal.resource_time || "";
+  return timeOptionsSelect(current, `updateGoalNoRender('${goal.id}','resource_time',this.value); setTimeout(render, 150);`);
+}
+
+function actionTimeOptionsHtml(goal, key) {
+  const current = metaValue(goal, key);
+  return timeOptionsSelect(current, `updateGoalMeta('${goal.id}','${key}',this.value)`);
 }
 
 function sortGoalsByCategoryPriority(goals) {
   return [...goals].sort((a, b) => {
     const priorityDiff = prioritySortValue(a) - prioritySortValue(b);
     if (priorityDiff !== 0) return priorityDiff;
-    const timeDiff = timeMinutes(b) - timeMinutes(a);
+    const timeDiff = timeMinutes(a) - timeMinutes(b);
     if (timeDiff !== 0) return timeDiff;
     return new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0);
   });
@@ -462,6 +520,9 @@ function priorityOptions(goal) {
 
 function resourceProfileHtml(goal) {
   return `<div class="resource-profile resource-profile-compact">
+    <label>Time Required
+      ${resourceTimeOptionsHtml(goal)}
+    </label>
     <label>Money Required
       <select onchange="updateGoalNoRender('${goal.id}','resource_money',this.value)">
         ${["","$","$$","$$$","$$$$"].map(v=>`<option value="${v}" ${(goal.resource_money||"")===v?"selected":""}>${v || "Select"}</option>`).join("")}
@@ -494,11 +555,16 @@ function categoryEffortSummaryHtml(goals) {
   const ongoing = active.some(g => timeMinutes(g) >= 9999);
   return `<div class="category-effort-summary">
     <span><b>${high.length}</b> high priority</span>
-    <span><b>${formatMinutes(total)}</b>${ongoing ? " + ongoing" : ""}</span>
+    <span><b>${formatMinutes(total)}</b>${ongoing ? " + ongoing" : ""} resource time</span>
     <span><b>${quickWins}</b> quick wins (&lt;30 min)</span>
-    <span>Sorted by priority, then time high → low</span>
+    <span>Sorted by priority, then resource time low → high</span>
   </div>`;
 }
+
+function actionTimeControlHtml(goal, key, label) {
+  return `<div class="section-time-control"><span>${label}</span>${actionTimeOptionsHtml(goal, key)}</div>`;
+}
+
 
 function priorityStackHtml() {
   const priorities = state.goals
@@ -512,7 +578,7 @@ function priorityStackHtml() {
     <h3>Priority Stack</h3>
     <p>The 3–5 goals that matter most right now.</p>
     <div class="recent-list">
-      ${priorities.length ? priorities.map(g => `<div class="recent-item clickable-card" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">${priorityLabel(g)} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${g.status || g.behavior_rating || ""}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
+      ${priorities.length ? priorities.map(g => `<div class="recent-item clickable-card" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">${priorityLabel(g)} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${goalStatusLabel(g)}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
     </div>
   </section>`;
 }
@@ -684,7 +750,7 @@ function weeklyArchiveHtml() {
 }
 
 function goalStatusLabel(goal) {
-  return goalType(goal) === "Behavior" ? (goal.behavior_rating || "Needs Improvement") : (goal.status || "Not Started");
+  return goalType(goal) === "Behavior" ? autoBehaviorRating(goal) : (goal.status || "Not Started");
 }
 
 function goalCard(goal) {
@@ -703,10 +769,8 @@ function goalCard(goal) {
           </select>
         </label>
         ${type === "Behavior" ? `
-          <label>Status<br>
-            <select class="status-select behavior-rating" onchange="updateGoalNoRender('${goal.id}','behavior_rating',this.value)">
-              ${behaviorRatings.map(r=>`<option ${(goal.behavior_rating||"Needs Improvement")===r?"selected":""}>${r}</option>`).join("")}
-            </select>
+          <label>Behavior Rating<br>
+            ${behaviorRatingPill(goal)}
           </label>
         ` : `
           <label>Status<br>
@@ -726,7 +790,7 @@ function goalCard(goal) {
       <textarea class="goal-title" style="color:${color}" oninput="updateGoalNoRender('${goal.id}', 'title', this.value)">${escapeHtml(goal.title)}</textarea>
     </div>
 
-    <div class="grid-four goal-controls-grid">
+    <div class="grid-three goal-controls-grid">
       <label>Type<br>
         <select class="status-select" onchange="updateGoalNoRender('${goal.id}','goal_type',this.value); setTimeout(render, 300);">
           <option ${type==="Project"?"selected":""}>Project</option>
@@ -735,9 +799,7 @@ function goalCard(goal) {
       </label>
       ${type === "Behavior" ? `
         <label>Behavior Rating<br>
-          <select class="status-select behavior-rating" onchange="updateGoalNoRender('${goal.id}','behavior_rating',this.value)">
-            ${behaviorRatings.map(r=>`<option ${(goal.behavior_rating||"Needs Improvement")===r?"selected":""}>${r}</option>`).join("")}
-          </select>
+          ${behaviorRatingPill(goal)}
         </label>
       ` : `
         <label>Status<br>
@@ -747,7 +809,6 @@ function goalCard(goal) {
         </label>
       `}
       <label>Priority<br>${priorityOptions(goal)}</label>
-      <label>Time<br>${timeOptionsHtml(goal)}</label>
     </div>
 
     ${fieldCard(goal, "key_results", "Key Results", "full")}
@@ -766,8 +827,14 @@ function goalCard(goal) {
     </div>
 
     <div class="grid-two">
-      ${fieldCard(goal, "today_this_week", "Today / This Week")}
-      ${fieldCard(goal, "next30", "Next 30 Days")}
+      <div>
+        ${fieldCard(goal, "today_this_week", "Today / This Week")}
+        ${actionTimeControlHtml(goal, "today_this_week_time", "Today / This Week Time")}
+      </div>
+      <div>
+        ${fieldCard(goal, "next30", "Next 30 Days")}
+        ${actionTimeControlHtml(goal, "next30_time", "Next 30 Days Time")}
+      </div>
     </div>
 
     ${fieldCard(goal, "next12", "Next 12 Months", "full")}
@@ -837,7 +904,7 @@ function buildAIPrompt() {
       title: g.title,
       status: g.status,
       progress: g.progress,
-      behavior_rating: g.behavior_rating,
+      behavior_rating: autoBehaviorRating(g),
       why: g.why,
       people: g.people,
       resources: g.money,
@@ -963,7 +1030,7 @@ function strategicBriefText() {
   const onTrack = state.goals.filter(g => (g.goal_type || "Project") === "Project" && g.status === "On Track");
   const completed = state.goals.filter(g => (g.goal_type || "Project") === "Project" && (g.status === "Completed" || Number(g.progress||0) >= 100));
   const notStarted = state.goals.filter(g => (g.status || "Not Started") === "Not Started" && Number(g.progress||0) === 0);
-  const needsImprovement = state.goals.filter(g => g.goal_type === "Behavior" && (g.behavior_rating || "Needs Improvement") === "Needs Improvement");
+  const needsImprovement = state.goals.filter(g => g.goal_type === "Behavior" && autoBehaviorRating(g) === "Needs Improvement");
   const noNext30 = state.goals.filter(g => !(g.next30||"").trim());
   const noResources = state.goals.filter(g => !(g.money||"").trim());
   const noPeople = state.goals.filter(g => !(g.people||"").trim());
@@ -1022,7 +1089,7 @@ function todayThisWeekHtml() {
       const pa = prioritySortValue(a);
       const pb = prioritySortValue(b);
       if (pa !== pb) return pa - pb;
-      const timeDiff = timeMinutes(b) - timeMinutes(a);
+      const timeDiff = metaTimeMinutes(a, "today_this_week_time") - metaTimeMinutes(b, "today_this_week_time");
       if (timeDiff !== 0) return timeDiff;
       return (a.category || "").localeCompare(b.category || "");
     });
@@ -1035,7 +1102,7 @@ function todayThisWeekHtml() {
       ${goals.map(g => `<div class="action-card clickable-card" onclick="openGoal('${g.id}')">
         <div class="action-top">
           <strong style="color:${categories[g.category].color}">${priorityValue(g) !== null ? priorityLabel(g) + " — " : ""}${escapeHtml(g.title)}</strong>
-          <small>${goalType(g)}${g.goal_type === "Behavior" ? " • " + (g.behavior_rating || "Needs Improvement") : " • " + (g.status || "Not Started")}</small>
+          <small>${goalType(g)}${g.goal_type === "Behavior" ? " • " + autoBehaviorRating(g) : " • " + (g.status || "Not Started")}${metaValue(g, "today_this_week_time") ? " • " + metaValue(g, "today_this_week_time") : ""}</small>
         </div>
         <div class="action-body">${escapeHtml(g.today_this_week).replaceAll("\\n", "<br>")}</div>
       </div>`).join("")}
@@ -1044,7 +1111,7 @@ function todayThisWeekHtml() {
 
   return `<section class="panel">
     <h3>Today / This Week Actions</h3>
-    <p>All current action steps pulled from every goal, sorted by priority first and then category.</p>
+    <p>All current action steps pulled from every goal, sorted by priority first, then Today / This Week time low → high.</p>
     ${actionGoals.length ? grouped : `<div class="recent-item"><strong>No actions entered yet.</strong><small>Add Today / This Week items inside any goal card.</small></div>`}
   </section>`;
 }
@@ -1123,8 +1190,8 @@ function statusRibbonHtml(stats) {
   const projectStarted = projects.filter(g => Number(g.progress || 0) > 0 || !["Not Started", "", null, undefined].includes(g.status)).length;
   const projectDone = projects.filter(g => g.status === "Completed" || Number(g.progress || 0) >= 100).length;
 
-  const behaviorStarted = behaviors.filter(g => (g.behavior_rating || "Needs Improvement") !== "Needs Improvement" || (g.today_this_week || "").trim() || (g.key_results || "").trim()).length;
-  const behaviorMeets = behaviors.filter(g => ["Meets", "Exceeds"].includes(g.behavior_rating || "")).length;
+  const behaviorStarted = behaviors.filter(g => autoBehaviorRating(g) !== "Needs Improvement" || (g.today_this_week || "").trim() || (g.key_results || "").trim()).length;
+  const behaviorMeets = behaviors.filter(g => ["Meets", "Exceeds"].includes(autoBehaviorRating(g))).length;
 
   return `<section class="status-ribbon">
     <span class="status-ribbon-title">Status</span>

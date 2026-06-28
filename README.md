@@ -1,11 +1,14 @@
-# My Life Vision App v42 Priority + Time Sort
+# My Life Vision App v43 Section Time + Auto Behavior Rating
 
 Changes:
-- Goals still sort within each category by Priority first.
-- Within the same priority, goals now sort by Time from high to low.
-- Adds a Time dropdown on active goal cards: 5 min, 15 min, 30 min, 1 hour, 2–4 hours, 1 day, Multi-day, Ongoing.
-- Adds a category effort summary above each category.
-- Inventory goals collapse down to show only goal, type, status, and priority.
-- Existing categories, layout, weekly archive, bullet controls, and navigation are preserved.
+- Removes the top-level Time control from under Priority.
+- Keeps Time inside the Resources section and sorts resource time low → high.
+- Adds section-level time controls for Today / This Week and Next 30 Days.
+- Today / This Week action view sorts by Priority, then Today / This Week time low → high.
+- Behavior Rating is now automatic based on activity signals:
+  - Needs Improvement: no meaningful action/results entered yet.
+  - Meets: action, key result, Next 30, or win exists.
+  - Exceeds: multiple wins or wins plus current/next actions.
+- Inventory cards remain collapsed.
 
-No SQL changes required; this uses the existing resource_time field.
+No SQL changes required. Section-level time estimates are stored in the existing goal metadata field.
