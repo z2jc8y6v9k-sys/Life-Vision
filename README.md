@@ -1,15 +1,9 @@
-# My Life Vision App v54 Resources Analysis
+# My Life Vision App v55 Schema Fix
 
-Changes:
-- Bolded Workbook Resources labels: Time Required, Money Required, Physical Demand.
-- Updated Money Required scale:
-  - $: under $500
-  - $$: $500–$1,000
-  - $$$: $1,000–$5,000
-  - $$$$: $5,000–$10,000
-  - $$$$$: $10,000–$50,000
-  - $$$$$$: $50,000+
-- Replaced Dashboard Resources placeholder with priority resource analysis.
-- Resources dashboard now shows priority goals with time, money, physical effort, resource profile, and recommendations.
+Fixes:
+- Removes the unsupported `friction` field from Supabase insert/update flows.
+- Fixes the add-goal error: “Could not find the friction column…”
+- Keeps Resources dashboard analysis intact.
+- Keeps action metadata working without requiring a database migration.
 
 No SQL changes required.

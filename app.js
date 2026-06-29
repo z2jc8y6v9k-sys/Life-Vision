@@ -104,7 +104,7 @@ async function seedStarterGoalsIfEmpty() {
   if (data && data.length > 0) return;
   const rows = starterGoals.map(g => ({ 
     user_id: state.user.id, category: g.category, title: g.title, why: "", people: "", money: "", 
-    next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective: "", key_results: "", friction: "", resources: ""
+    next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective: "", key_results: ""
   }));
   await supabaseClient.from("goals").insert(rows);
 }
@@ -175,7 +175,7 @@ async function addGoal(event) {
   const title = document.getElementById("newGoalTitle").value.trim();
   const category = document.getElementById("newGoalCategory").value;
   if (!title) return;
-  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", today_this_week:"", behavior_standard:"", goal_type:"Project", behavior_rating:"Needs Improvement", priority_rank:null, resource_time:"", resource_money:"", resource_physical:"", wins:"", lessons:"", today_this_week:"", friction:"", resources:"" };
+  const row = { user_id: state.user.id, category, title, why: "", people: "", money: "", next30: "", next12: "", progress: 0, ages: [], status: "Not Started", objective:"", key_results:"", today_this_week:"", behavior_standard:"", goal_type:"Project", behavior_rating:"Needs Improvement", priority_rank:null, resource_time:"", resource_money:"", resource_physical:"", wins:"", lessons:"", today_this_week:"" };
   const { error } = await supabaseClient.from("goals").insert(row);
   if (error) return alert("Could not add goal: " + error.message);
   showAdd = false;
@@ -300,7 +300,7 @@ function coachInsights() {
   const noPeople = state.goals.filter(g => !(g.people||"").trim());
   if (lowest) insights.push({title:`Under-invested area: ${lowest.cat}`, text:`This category has the lowest average progress at ${lowest.avg}%. Pick one small next action this week.`});
   if (highest && highest.avg > 0) insights.push({title:`Strongest momentum: ${highest.cat}`, text:`This category is currently leading at ${highest.avg}%. Ask what is working here that could transfer elsewhere.`});
-  if (atRisk.length) insights.push({title:`At-risk goals need attention`, text:`You marked ${atRisk.length} goal(s) as At Risk. Review friction and resources before adding new goals.`});
+  if (atRisk.length) insights.push({title:`At-risk goals need attention`, text:`You marked ${atRisk.length} goal(s) as At Risk. Review blockers and resources before adding new goals.`});
   if (noNext30.length) insights.push({title:`Next 30 Days gap`, text:`${noNext30.length} goal(s) have no next-30-day action. These are likely to stay aspirational unless you define the next move.`});
   if (noPeople.length) insights.push({title:`People strategy gap`, text:`${noPeople.length} goal(s) do not name people yet. Add collaborators, beneficiaries, or supporters.`});
   if (insights.length === 0) insights.push({title:"Solid system health", text:"Your goals have next actions, people, and progress. Use the quarterly review to choose what matters most now."});
@@ -481,9 +481,14 @@ function timeMinutes(goal) {
   return optionMinutes(goal?.resource_time || "");
 }
 
+function goalMetaStorageKey(goalId) {
+  return `lifeVisionGoalMeta:${state.user?.id || "local"}:${goalId}`;
+}
+
 function parseGoalMeta(goal) {
   try {
-    const raw = goal?.friction || "";
+    if (!goal?.id) return {};
+    const raw = localStorage.getItem(goalMetaStorageKey(goal.id)) || "";
     if (!raw.trim().startsWith("{")) return {};
     const parsed = JSON.parse(raw);
     return parsed && parsed.__lifeVisionMeta ? parsed : {};
@@ -506,8 +511,8 @@ function updateGoalMeta(goalId, key, value) {
   const meta = parseGoalMeta(goal);
   meta.__lifeVisionMeta = true;
   meta[key] = value;
-  const next = JSON.stringify(meta);
-  updateGoalNoRender(goalId, "friction", next);
+  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
+  showSaved("Saved locally");
   setTimeout(render, 150);
 }
 
@@ -908,7 +913,7 @@ function metricsHtml() {
 }
 function reviewsHtml() {
   const reviews = [
-    ["quarterly","Quarterly Review","Objective, key results, next 30 days, friction, resources."],
+    ["quarterly","Quarterly Review","Objective, key results, next 30 days, blockers, resources."],
     ["annual","Annual Review","What mattered most this year? What do I want next year?"],
     ["stop_doing","Stop Doing","What should I stop doing to make room for what matters?"],
     ["year_success","This Year Success","What would make this year a success?"]
@@ -1027,7 +1032,7 @@ function aiCoachHtml() {
   const hasKey = !!getOpenAIKey();
   return `<section class="panel">
     <h3>AI Coach</h3>
-    <p>This uses OpenAI to review your goals, progress, reviews, metrics, vision board, friction, people, and resources. Your OpenAI key is stored only in this browser's local storage.</p>
+    <p>This uses OpenAI to review your goals, progress, reviews, metrics, vision board, blockers, people, and resources. Your OpenAI key is stored only in this browser's local storage.</p>
     <div class="ai-warning">For a stronger production version, the OpenAI key should eventually be moved to a secure Supabase Edge Function. This version is designed for your personal use.</div>
     <div class="ai-setup">
       <input id="openaiKey" type="password" placeholder="${hasKey ? "OpenAI API key saved locally" : "Paste OpenAI API key"}" />
@@ -1080,7 +1085,7 @@ function strategicBriefText() {
   const recent = recentGoals().slice(0,3);
 
   const highestLeverage = state.goals
-    .filter(g => (g.next30||"").trim() || (g.friction||"").trim() || g.status === "At Risk")
+    .filter(g => (g.next30||"").trim() || g.status === "At Risk")
     .sort((a,b) => (b.status === "At Risk") - (a.status === "At Risk") || Number(b.progress||0)-Number(a.progress||0))[0];
 
   return `TODD'S STRATEGIC BRIEF
