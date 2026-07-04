@@ -1,9 +1,10 @@
-# My Life Vision App v56.6 Meaning & Feeling
+# My Life Vision App v56.7 Action Detail Persistence + Meaning/Feeling Layout
 
 Changes:
-- Places **Why This Matters** and **Feeling This Will Provide When Completed** side by side in the Workbook.
-- Uses the same two-column pattern as Wins and Lessons.
-- Updates the label to: **Feeling This Will Provide When Completed**.
-- Keeps the Workplan Feeling column connected to this field.
+- Fixes Today / This Week and Next 30 Days action detail persistence.
+- Time and Owner values now save using both the action text and its row position, so unchanged actions keep their details after re-rendering.
+- Completion still moves the action to Wins without wiping remaining action metadata.
+- Why This Matters and Feeling This Will Provide When Completed are displayed side by side, like Wins and Lessons.
+- Workplan / This Moment's Decision includes a Feeling column pulled from the goal's Feeling field.
 
 No SQL changes required.

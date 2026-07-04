@@ -43,8 +43,6 @@ let showAddVision = false;
 let saveTimer = null;
 let updateTimers = {};
 let decisionSort = { key: "priority", dir: "asc" };
-let compareSelectedActionIds = [];
-let comparePanelOpen = false;
 
 async function init() {
   const { data } = await supabaseClient.auth.getSession();
@@ -321,16 +319,6 @@ function fieldCard(goal, key, label, className = "") {
   return `<div class="field-card ${className}"><div class="field-header field-header-with-tool" style="background:${color}"><span>${label}</span>${bulletTools}</div><textarea id="${textareaId}" class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" onkeydown="handleBulletKeydown(event)" oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea></div>`;
 }
 
-function feelingFieldHtml(goal, className = "") {
-  const color = categories[goal.category].color;
-  const textareaId = `feeling-${goal.id}`;
-  const value = metaValue(goal, "completion_feeling");
-  return `<div class="field-card ${className} feeling-field-card">
-    <div class="field-header field-header-with-tool" style="background:${color}"><span>Feeling This Will Provide When Completed</span></div>
-    <textarea id="${textareaId}" class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" oninput="updateGoalMeta('${goal.id}', 'completion_feeling', this.value)">${escapeHtml(value || "")}</textarea>
-  </div>`;
-}
-
 function insertBullet(textareaId) {
   const textarea = document.getElementById(textareaId);
   if (!textarea) return;
@@ -529,6 +517,35 @@ function updateGoalMeta(goalId, key, value) {
   setTimeout(render, 150);
 }
 
+function updateGoalMetaNoRender(goalId, key, value) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal) return;
+  const meta = parseGoalMeta(goal);
+  meta.__lifeVisionMeta = true;
+  meta[key] = value;
+  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
+  showSaved("Saved locally");
+}
+
+function updateActionMeta(goalId, field, actionKey, index, suffix, value) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal) return;
+  const meta = parseGoalMeta(goal);
+  meta.__lifeVisionMeta = true;
+  meta[`action_${field}_${actionKey}_${suffix}`] = value;
+  meta[`action_${field}_idx_${index}_${suffix}`] = value;
+  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
+  showSaved("Saved locally");
+}
+
+function localMetaFieldCard(goal, key, label, cls = "") {
+  const value = metaValue(goal, key);
+  return `<div class="field-card ${cls}">
+    <div class="field-header" style="background:${categories[goal.category]?.color || '#111827'}">${label}</div>
+    <textarea class="field-body ${cls==='full' ? 'large' : ''}" oninput="updateGoalMetaNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(value)}</textarea>
+  </div>`;
+}
+
 function timeOptionsSelect(value, onChange) {
   return `<select class="status-select time-select" onchange="${onChange}">
     ${timeOptions.map(([v,label]) => `<option value="${v}" ${value===v ? "selected" : ""}>${label}</option>`).join("")}
@@ -634,20 +651,12 @@ function priorityStackHtml() {
       return value !== null && value > 0;
     })
     .sort((a,b) => prioritySortValue(a)-prioritySortValue(b));
-  const inventory = state.goals
-    .filter(g => priorityValue(g) === -1)
-    .sort((a,b) => String(a.title || "").localeCompare(String(b.title || "")));
 
-  return `<section class="panel priority-stack-panel">
+  return `<section class="panel">
     <h3>Priority Stack</h3>
+    <p>The 3–5 goals that matter most right now.</p>
     <div class="recent-list">
       ${priorities.length ? priorities.map(g => `<div class="recent-item clickable-card" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">${priorityLabel(g)} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${goalStatusLabel(g)}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
-    </div>
-    <div class="inventory-stack-section">
-      <h4>Inventory</h4>
-      <div class="recent-list">
-        ${inventory.length ? inventory.map(g => `<div class="recent-item clickable-card inventory-stack-item" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${goalStatusLabel(g)} • Inventory</small></div>`).join("") : `<div class="recent-item"><small>No inventory goals yet.</small></div>`}
-      </div>
     </div>
   </section>`;
 }
@@ -884,7 +893,7 @@ function goalCard(goal) {
 
     <div class="grid-two meaning-feeling-grid">
       ${fieldCard(goal, "why", "Why This Matters")}
-      ${feelingFieldHtml(goal)}
+      ${localMetaFieldCard(goal, "feeling_completed", "Feeling This Will Provide When Completed")}
     </div>
 
     <div class="timeline-label">Life Season</div>
@@ -1176,62 +1185,50 @@ function actionLines(goal, field = "today_this_week") {
     .filter(item => item.text);
 }
 
-function normalizedActionText(lineText) {
-  return cleanActionLine(lineText).toLowerCase().replace(/\s+/g, " ").trim();
+function actionKeyFor(goalId, field, lineText) {
+  return actionHash(goalId + "|" + field + "|" + cleanActionLine(lineText));
 }
 
 function actionMetaKey(goalId, field, lineText, suffix) {
-  return `action_${field}_${actionHash(goalId + "|" + field + "|" + lineText)}_${suffix}`;
+  return `action_${field}_${actionKeyFor(goalId, field, lineText)}_${suffix}`;
 }
 
-function stableActionMetaKey(goalId, field, lineText, suffix) {
-  return `action_${field}_${actionHash(goalId + "|" + field + "|" + normalizedActionText(lineText))}_${suffix}`;
+function actionIndexMetaKey(field, index, suffix) {
+  return `action_${field}_idx_${index}_${suffix}`;
 }
 
-function actionMetaValue(goal, field, lineText, suffix) {
+function actionMetaValue(goal, field, lineText, index, suffix) {
   const meta = parseGoalMeta(goal);
-  const stableKey = stableActionMetaKey(goal.id, field, lineText, suffix);
-  const legacyKey = actionMetaKey(goal.id, field, lineText, suffix);
-  return meta[stableKey] || meta[legacyKey] || "";
+  const textKey = actionMetaKey(goal.id, field, lineText, suffix);
+  const idxKey = actionIndexMetaKey(field, index, suffix);
+  return meta[textKey] || meta[idxKey] || "";
 }
 
-function updateActionMeta(goalId, field, lineText, suffix, value) {
-  const goal = state.goals.find(g => g.id === goalId);
-  if (!goal) return;
-  const meta = parseGoalMeta(goal);
-  meta.__lifeVisionMeta = true;
-  meta[stableActionMetaKey(goalId, field, lineText, suffix)] = value;
-  meta[actionMetaKey(goalId, field, lineText, suffix)] = value;
-  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
-  showSaved("Saved locally");
-  setTimeout(render, 150);
+function actionTimeValue(goal, field, lineText, index = 0) {
+  return actionMetaValue(goal, field, lineText, index, "time");
 }
 
-function actionTimeValue(goal, field, lineText) {
-  return actionMetaValue(goal, field, lineText, "time");
+function actionOwnerValue(goal, field, lineText, index = 0) {
+  return actionMetaValue(goal, field, lineText, index, "owner") || "Me";
 }
 
-function actionOwnerValue(goal, field, lineText) {
-  return actionMetaValue(goal, field, lineText, "owner") || "Me";
+function actionMinutes(goal, field, lineText, index = 0) {
+  return optionMinutes(actionTimeValue(goal, field, lineText, index));
 }
 
-function actionMinutes(goal, field, lineText) {
-  return optionMinutes(actionTimeValue(goal, field, lineText));
-}
-
-function actionTimeSelect(goal, field, lineText) {
-  const current = actionTimeValue(goal, field, lineText);
-  const safeText = JSON.stringify(lineText);
-  return `<select class="status-select action-mini-select" onclick="event.stopPropagation()" onchange="updateActionMeta('${goal.id}','${field}',${safeText},'time',this.value)">
+function actionTimeSelect(goal, field, item) {
+  const actionKey = actionKeyFor(goal.id, field, item.text);
+  const current = actionTimeValue(goal, field, item.text, item.index);
+  return `<select class="status-select action-mini-select" onclick="event.stopPropagation()" onchange="updateActionMeta('${goal.id}','${field}','${actionKey}',${item.index},'time',this.value)">
     ${timeOptions.map(([v,label]) => `<option value="${v}" ${current===v ? "selected" : ""}>${label}</option>`).join("")}
   </select>`;
 }
 
-function actionOwnerSelect(goal, field, lineText) {
-  const current = actionOwnerValue(goal, field, lineText);
-  const safeText = JSON.stringify(lineText);
+function actionOwnerSelect(goal, field, item) {
+  const actionKey = actionKeyFor(goal.id, field, item.text);
+  const current = actionOwnerValue(goal, field, item.text, item.index);
   const owners = ["Me", "Waiting", "Delegated", "Scheduled"];
-  return `<select class="status-select action-mini-select" onclick="event.stopPropagation()" onchange="updateActionMeta('${goal.id}','${field}',${safeText},'owner',this.value)">
+  return `<select class="status-select action-mini-select" onclick="event.stopPropagation()" onchange="updateActionMeta('${goal.id}','${field}','${actionKey}',${item.index},'owner',this.value)">
     ${owners.map(v => `<option value="${v}" ${current===v ? "selected" : ""}>${v}</option>`).join("")}
   </select>`;
 }
@@ -1244,15 +1241,15 @@ function actionMetadataEditorHtml(goal, field, label) {
   return `<div class="action-meta-panel">
     <div class="action-meta-title">${label} action details</div>
     ${items.map(item => {
-      const actionKey = actionHash(goal.id + "|" + field + "|" + item.text);
+      const actionKey = actionKeyFor(goal.id, field, item.text);
       return `<div class="action-meta-row">
         <label class="action-meta-check-wrap" title="Complete and move to Wins">
           <input type="checkbox" class="action-meta-check" onchange="completeWorkplanAction('${goal.id}','${field}','${actionKey}')" />
         </label>
         <div class="action-meta-text">${escapeHtml(item.text)}</div>
         <div class="action-meta-controls">
-          ${actionTimeSelect(goal, field, item.text)}
-          ${actionOwnerSelect(goal, field, item.text)}
+          ${actionTimeSelect(goal, field, item)}
+          ${actionOwnerSelect(goal, field, item)}
         </div>
       </div>`;
     }).join("")}
@@ -1263,13 +1260,14 @@ function workplanActionItems() {
   const fields = ["today_this_week", "next30"];
   return state.goals
     .flatMap(goal => fields.flatMap(field => actionLines(goal, field).map(item => {
-      const timeValue = actionTimeValue(goal, field, item.text) || "";
+      const timeValue = actionTimeValue(goal, field, item.text, item.index) || "";
       const minutes = optionMinutes(timeValue);
-      const owner = actionOwnerValue(goal, field, item.text);
+      const owner = actionOwnerValue(goal, field, item.text, item.index);
+      const feeling = metaValue(goal, "feeling_completed") || "—";
       return {
         goal,
         goalId: goal.id,
-        actionKey: actionHash(goal.id + "|" + field + "|" + item.text),
+        actionKey: actionKeyFor(goal.id, field, item.text),
         field,
         fieldLabel: field === "today_this_week" ? "Today / This Week" : "Next 30 Days",
         lineIndex: item.index,
@@ -1281,10 +1279,10 @@ function workplanActionItems() {
         priorityLabel: priorityLabel(goal),
         minutes,
         timeLabel: timeValue || "No time set",
-        feeling: metaValue(goal, "completion_feeling") || "",
         owner,
         type: goalType(goal),
-        rating: goalType(goal) === "Behavior" ? effectiveBehaviorRating(goal) : (goal.status || "Not Started")
+        rating: goalType(goal) === "Behavior" ? effectiveBehaviorRating(goal) : (goal.status || "Not Started"),
+        feeling
       };
     })))
     .sort((a,b) => {
@@ -1369,17 +1367,8 @@ function todayString() {
 function completeWorkplanAction(goalId, field, actionKey) {
   const goal = state.goals.find(g => g.id === goalId);
   if (!goal) return;
-
-  // v56.4.1 persistence fix:
-  // Completing an action can happen immediately after editing the source text area.
-  // If a pending debounced save fires after completion, it can write the old
-  // Today / This Week or Next 30 Days text back to Supabase, making the
-  // completed action reappear and causing time/owner to look reset.
-  clearTimeout(updateTimers[goalId + field]);
-  clearTimeout(updateTimers[goalId + "wins"]);
-
   const lines = String(goal[field] || "").split(/\n+/);
-  const matchIndex = lines.findIndex(line => actionHash(goalId + "|" + field + "|" + cleanActionLine(line)) === actionKey);
+  const matchIndex = lines.findIndex(line => actionKeyFor(goalId, field, cleanActionLine(line)) === actionKey);
   if (matchIndex < 0) return;
   const actionText = cleanActionLine(lines[matchIndex]);
   const remaining = lines.filter((_, idx) => idx !== matchIndex).join("\n").trim();
@@ -1472,113 +1461,11 @@ function decisionResourcesValue(item) {
   return profile.label;
 }
 
-
-function compareActionId(item) {
-  return `${item.goalId}__${item.field}__${item.actionKey}`;
-}
-
-function toggleCompareAction(compareId, checked) {
-  if (checked) {
-    if (!compareSelectedActionIds.includes(compareId)) {
-      if (compareSelectedActionIds.length >= 2) {
-        showSaved("Compare only two actions at a time");
-        render();
-        return;
-      }
-      compareSelectedActionIds.push(compareId);
-    }
-  } else {
-    compareSelectedActionIds = compareSelectedActionIds.filter(id => id !== compareId);
-  }
-  if (compareSelectedActionIds.length !== 2) comparePanelOpen = false;
-  render();
-}
-
-function openComparePanel() {
-  if (compareSelectedActionIds.length === 2) {
-    comparePanelOpen = true;
-    render();
-  }
-}
-
-function clearCompareSelection() {
-  compareSelectedActionIds = [];
-  comparePanelOpen = false;
-  render();
-}
-
-function selectedCompareItems(items) {
-  const ids = new Set(compareSelectedActionIds);
-  return items.filter(item => ids.has(compareActionId(item)));
-}
-
-function compareControlsHtml(items) {
-  const selected = selectedCompareItems(items);
-  compareSelectedActionIds = selected.map(compareActionId);
-  if (!items.length) return "";
-  const selectedCount = selected.length;
-  return `<div class="compare-controls">
-    <div>
-      <strong>Compare Mode</strong>
-      <span>${selectedCount === 0 ? "Select two actions to see the tradeoff side by side." : selectedCount === 1 ? "Select one more action to compare." : "Two actions selected."}</span>
-    </div>
-    <div class="compare-actions">
-      ${selectedCount === 2 ? `<button class="primary compare-button" onclick="openComparePanel()">Compare</button>` : ""}
-      ${selectedCount ? `<button class="secondary compare-clear" onclick="clearCompareSelection()">Clear</button>` : ""}
-    </div>
-  </div>`;
-}
-
-function compareValueRow(label, left, right) {
-  return `<div class="compare-value-row">
-    <span>${escapeHtml(label)}</span>
-    <strong>${left}</strong>
-    <strong>${right}</strong>
-  </div>`;
-}
-
-function comparePanelHtml(items) {
-  if (!comparePanelOpen) return "";
-  const selected = selectedCompareItems(items);
-  if (selected.length !== 2) return "";
-  const [a, b] = selected;
-  const aProfile = resourceProfileScore(a.goal);
-  const bProfile = resourceProfileScore(b.goal);
-  return `<div class="compare-panel">
-    <div class="compare-panel-header">
-      <div>
-        <span class="workplan-eyebrow">Tradeoff View</span>
-        <h3>Compare these two actions</h3>
-        <p>No winner. Just the facts that help you decide what deserves your attention.</p>
-      </div>
-      <button class="secondary compare-clear" onclick="clearCompareSelection()">Close</button>
-    </div>
-    <div class="compare-grid">
-      <div></div>
-      <div class="compare-action-title"><strong>${escapeHtml(a.action)}</strong><small>${escapeHtml(a.title)}</small></div>
-      <div class="compare-action-title"><strong>${escapeHtml(b.action)}</strong><small>${escapeHtml(b.title)}</small></div>
-      ${compareValueRow("Goal", escapeHtml(a.title), escapeHtml(b.title))}
-      ${compareValueRow("Feeling", escapeHtml(a.feeling || "—"), escapeHtml(b.feeling || "—"))}
-      ${compareValueRow("Category", escapeHtml(a.category || "—"), escapeHtml(b.category || "—"))}
-      ${compareValueRow("Priority", `${priorityStars(a)}<small>${escapeHtml(a.priorityLabel)}</small>`, `${priorityStars(b)}<small>${escapeHtml(b.priorityLabel)}</small>`)}
-      ${compareValueRow("Time", `<span class="decision-pill">${escapeHtml(a.timeLabel)}</span>`, `<span class="decision-pill">${escapeHtml(b.timeLabel)}</span>`)}
-      ${compareValueRow("Unlocks", `<span class="decision-pill">${decisionUnlocksValue(a, items)}</span>`, `<span class="decision-pill">${decisionUnlocksValue(b, items)}</span>`)}
-      ${compareValueRow("Resources", `<span class="resource-profile-badge ${aProfile.cls}">${escapeHtml(aProfile.label)}</span>`, `<span class="resource-profile-badge ${bProfile.cls}">${escapeHtml(bProfile.label)}</span>`)}
-      ${compareValueRow("Owner", `<span class="action-owner-badge owner-${String(a.owner || "Me").toLowerCase().replace(/\s+/g,"-")}">${escapeHtml(a.owner)}</span>`, `<span class="action-owner-badge owner-${String(b.owner || "Me").toLowerCase().replace(/\s+/g,"-")}">${escapeHtml(b.owner)}</span>`)}
-    </div>
-  </div>`;
-}
-
 function decisionTableRowHtml(item, allItems) {
   const profile = resourceProfileScore(item.goal);
   const unlocks = decisionUnlocksValue(item, allItems);
   const ownerClass = `owner-${String(item.owner || "Me").toLowerCase().replace(/\s+/g,"-")}`;
-  const compareId = compareActionId(item);
-  const compareChecked = compareSelectedActionIds.includes(compareId) ? "checked" : "";
   return `<div class="decision-table-row clickable-card" onclick="openGoal('${item.goalId}')">
-    <div class="decision-compare-cell">
-      <input type="checkbox" class="compare-check" ${compareChecked} onclick="event.stopPropagation()" onchange="toggleCompareAction('${compareId}', this.checked)" title="Select for compare" />
-    </div>
     <div class="decision-action-cell">
       <input type="checkbox" class="action-check" onclick="event.stopPropagation()" onchange="completeWorkplanAction('${item.goalId}','${item.field}','${item.actionKey}')" title="Complete and move to Wins" />
       <div>
@@ -1588,9 +1475,9 @@ function decisionTableRowHtml(item, allItems) {
     </div>
     <div class="decision-priority-cell" title="${escapeHtml(item.priorityLabel)}"><span>${priorityStars(item)}</span><small>${escapeHtml(item.priorityLabel)}</small></div>
     <div><span class="decision-pill">${escapeHtml(item.timeLabel)}</span></div>
-    <div class="decision-feeling-cell">${item.feeling ? `<span>${escapeHtml(item.feeling)}</span>` : `<span class="muted-dash">—</span>`}</div>
     <div><span class="decision-pill">${unlocks}</span></div>
     <div><span class="resource-profile-badge ${profile.cls}">${escapeHtml(profile.label)}</span></div>
+    <div><span class="decision-pill decision-feeling-pill">${escapeHtml(item.feeling || "—")}</span></div>
     <div><span class="action-owner-badge ${ownerClass}">${escapeHtml(item.owner)}</span></div>
   </div>`;
 }
@@ -1624,6 +1511,7 @@ function decisionSortValue(item, allItems, key) {
   if (key === "unlocks") return decisionUnlocksValue(item, allItems);
   if (key === "resources") return decisionResourceSortValue(item);
   if (key === "owner") return ownerSortValue(item.owner);
+  if (key === "feeling") return String(item.feeling || "").toLowerCase();
   if (key === "action") return String(item.action || "").toLowerCase();
   return item.priority || 999;
 }
@@ -1662,19 +1550,17 @@ function decisionTableHtml(items) {
       ${decisionSortButton("Time", "time")}
       ${decisionSortButton("Unlocks", "unlocks")}
       ${decisionSortButton("Resources", "resources")}
+      ${decisionSortButton("Feeling", "feeling")}
       ${decisionSortButton("Owner", "owner")}
     </div>
-    ${compareControlsHtml(items)}
-    ${comparePanelHtml(items)}
     <div class="decision-table">
       <div class="decision-table-head">
-        <span>Compare</span>
         <button onclick="setDecisionSort('action')">Action${decisionSort.key === "action" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('priority')">Priority${decisionSort.key === "priority" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('time')">Time${decisionSort.key === "time" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
-        <span>Feeling</span>
         <button onclick="setDecisionSort('unlocks')">Unlocks${decisionSort.key === "unlocks" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('resources')">Resources${decisionSort.key === "resources" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
+        <button onclick="setDecisionSort('feeling')">Feeling${decisionSort.key === "feeling" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('owner')">Owner${decisionSort.key === "owner" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
       </div>
       ${visibleItems.map(i => decisionTableRowHtml(i, items)).join("")}

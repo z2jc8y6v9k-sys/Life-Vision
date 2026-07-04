@@ -2936,239 +2936,10 @@ body {
 }
 
 
-/* v56.4 Compare Mode */
-.decision-table-head,
-.decision-table-row {
-  grid-template-columns: 78px minmax(260px, 1.55fr) 140px 105px 95px 150px 120px !important;
-}
-
-.decision-table-head > span {
-  color: #667085;
-  font-size: 12px;
-  font-weight: 950;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-}
-
-.decision-compare-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.compare-check {
-  width: 18px;
-  height: 18px;
-  accent-color: #111827;
-  cursor: pointer;
-}
-
-.compare-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin: 0 0 14px;
-  padding: 13px 14px;
-  background: #fffdf8;
-  border: 1px solid rgba(31,41,51,.10);
-  border-radius: 18px;
-}
-
-.compare-controls strong,
-.compare-controls span {
-  display: block;
-}
-
-.compare-controls strong {
-  font-size: 14px;
-  letter-spacing: -0.02em;
-}
-
-.compare-controls span {
-  margin-top: 3px;
-  color: #667085;
-  font-size: 12px;
-  font-weight: 750;
-}
-
-.compare-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.compare-button,
-.compare-clear {
-  border-radius: 999px !important;
-  padding: 8px 12px !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-}
-
-.compare-panel {
-  margin: 0 0 16px;
-  background: linear-gradient(135deg, #ffffff, #fffdf8);
-  border: 1px solid rgba(31,41,51,.12);
-  border-radius: 24px;
-  padding: 18px;
-  box-shadow: 0 12px 28px rgba(31,41,51,.07);
-}
-
-.compare-panel-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-
-.compare-panel-header h3 {
-  margin: 0 0 6px;
-  font-size: 26px;
-  letter-spacing: -0.05em;
-}
-
-.compare-panel-header p {
-  margin: 0;
-  color: #667085;
-  font-weight: 700;
-}
-
-.compare-grid {
-  display: grid;
-  grid-template-columns: 120px repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.compare-action-title,
-.compare-value-row > strong,
-.compare-value-row > span {
-  background: #fbfaf7;
-  border: 1px solid rgba(31,41,51,.10);
-  border-radius: 16px;
-  padding: 12px;
-}
-
-.compare-action-title strong,
-.compare-action-title small,
-.compare-value-row strong small {
-  display: block;
-}
-
-.compare-action-title small,
-.compare-value-row strong small {
-  margin-top: 4px;
-  color: #667085;
-  font-size: 12px;
-  line-height: 1.3;
-}
-
-.compare-value-row {
-  display: contents;
-}
-
-.compare-value-row > span {
-  color: #667085;
-  font-size: 12px;
-  font-weight: 950;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-}
-
-.compare-value-row > strong {
-  font-size: 14px;
-  line-height: 1.35;
-}
-
-@media(max-width:1100px) {
-  .decision-table-row > div:nth-child(2)::before { content: "Action"; }
-  .decision-table-row > div:nth-child(3)::before { content: "Priority"; }
-  .decision-table-row > div:nth-child(4)::before { content: "Time"; }
-  .decision-table-row > div:nth-child(5)::before { content: "Unlocks"; }
-  .decision-table-row > div:nth-child(6)::before { content: "Resources"; }
-  .decision-table-row > div:nth-child(7)::before { content: "Owner"; }
-  .decision-compare-cell::before { content: "Compare"; }
-  .decision-compare-cell {
-    justify-content: flex-start;
-    gap: 8px;
-  }
-}
-
-@media(max-width:800px) {
-  .compare-controls,
-  .compare-panel-header {
-    display: grid;
-  }
-  .compare-grid {
-    grid-template-columns: 1fr;
-  }
-  .compare-grid > div:first-child {
-    display: none;
-  }
-  .compare-value-row > span {
-    margin-top: 10px;
-  }
-}
-
-/* v56.5 Priority Stack + Feeling column */
-.inventory-stack-section {
-  margin-top: 22px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(31,41,51,.10);
-}
-
-.inventory-stack-section h4 {
-  margin: 0 0 10px;
-  color: #667085;
-  font-size: 12px;
-  font-weight: 950;
-  text-transform: uppercase;
-  letter-spacing: .07em;
-}
-
-.inventory-stack-item {
-  opacity: .88;
-}
-
-.feeling-field-card .field-body {
-  min-height: 82px !important;
-}
-
-.decision-table-head,
-.decision-table-row {
-  grid-template-columns: 78px minmax(240px, 1.45fr) 132px 96px minmax(150px, .8fr) 90px 142px 112px !important;
-}
-
-.decision-feeling-cell span {
-  display: block;
-  color: #475467;
-  font-size: 12.5px;
-  font-weight: 750;
-  line-height: 1.3;
-}
-
-.decision-feeling-cell .muted-dash {
-  color: #98a2b3;
-  font-weight: 900;
-}
-
-@media(max-width:1100px) {
-  .decision-table-row > div:nth-child(2)::before { content: "Action"; }
-  .decision-table-row > div:nth-child(3)::before { content: "Priority"; }
-  .decision-table-row > div:nth-child(4)::before { content: "Time"; }
-  .decision-table-row > div:nth-child(5)::before { content: "Feeling"; }
-  .decision-table-row > div:nth-child(6)::before { content: "Unlocks"; }
-  .decision-table-row > div:nth-child(7)::before { content: "Resources"; }
-  .decision-table-row > div:nth-child(8)::before { content: "Owner"; }
-}
-
-
-/* v56.6 Meaning & Feeling side-by-side */
+/* v56.7 Action detail persistence + Meaning / Feeling layout */
 .meaning-feeling-grid {
-  align-items: stretch !important;
+  align-items: stretch;
+  margin-bottom: 22px;
 }
 .meaning-feeling-grid .field-card {
   height: 100%;
@@ -3176,6 +2947,18 @@ body {
 .meaning-feeling-grid .field-body {
   min-height: 138px;
 }
-@media(max-width:950px){
-  .meaning-feeling-grid { grid-template-columns: 1fr !important; }
+.decision-table-head,
+.decision-table-row {
+  grid-template-columns: minmax(240px, 1.45fr) 130px 100px 90px 140px minmax(140px, .9fr) 115px !important;
+}
+.decision-feeling-pill {
+  justify-content: flex-start;
+  max-width: 100%;
+  white-space: normal;
+  line-height: 1.25;
+  text-align: left;
+}
+@media(max-width:1100px) {
+  .decision-table-row > div:nth-child(6)::before { content: "Feeling"; }
+  .decision-table-row > div:nth-child(7)::before { content: "Owner"; }
 }
