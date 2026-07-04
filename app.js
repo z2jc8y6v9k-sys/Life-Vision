@@ -1599,6 +1599,24 @@ function workplanSectionHtml(title, items, intro = "") {
   </div>`;
 }
 
+function myActionsSectionHtml(myItems, delegatedItems, scheduledItems) {
+  return `<div class="workplan-card decision-table-card owner-workplan-section my-actions-section">
+    <span class="workplan-eyebrow">My Actions (${myItems.length})</span>
+    <p class="decision-table-intro">Only Today / This Week actions appear here. Start with work where you are the owner. Delegated items stay visible underneath without becoming their own primary section.</p>
+    ${decisionTableHtml(myItems)}
+    ${delegatedItems.length ? `
+      <div class="delegated-inline-block">
+        <div class="delegated-inline-label">Delegated (${delegatedItems.length})</div>
+        ${decisionTableHtml(delegatedItems)}
+      </div>` : ""}
+    ${scheduledItems.length ? `
+      <div class="delegated-inline-block scheduled-inline-block">
+        <div class="delegated-inline-label">Scheduled (${scheduledItems.length})</div>
+        ${decisionTableHtml(scheduledItems)}
+      </div>` : ""}
+  </div>`;
+}
+
 function workplanHtml() {
   const items = workplanActionItems();
   const myItems = items.filter(i => i.owner === "Me");
@@ -1608,14 +1626,10 @@ function workplanHtml() {
   const totals = workplanTotals(items);
   const completed = completedTodayItems();
 
-  return `<section class="workplan-page action-plan-page single-source-workplan decision-view-page decision-table-page owner-based-workplan-page">
+  return `<section class="workplan-page action-plan-page single-source-workplan decision-view-page decision-table-page owner-based-workplan-page cleaner-workplan-page">
     ${decisionSnapshotHtml(items, totals)}
 
-    ${workplanSectionHtml("My Actions", myItems, "Only Today / This Week actions appear here. This section shows work where you are the owner. Sort by priority, time, leverage, resources, or feeling to decide what deserves your attention.")}
-
-    ${workplanSectionHtml("Delegated", delegatedItems, "These are Today / This Week actions you have handed off. Review them for follow-up without mixing them into your own action list.")}
-
-    ${scheduledItems.length ? workplanSectionHtml("Scheduled", scheduledItems, "These are Today / This Week actions already scheduled. Keep them visible without treating them like open decisions.") : ""}
+    ${myActionsSectionHtml(myItems, delegatedItems, scheduledItems)}
 
     <div class="workplan-card waiting-card-focused">
       <span class="workplan-eyebrow">Waiting (${waitingItems.length})</span>
