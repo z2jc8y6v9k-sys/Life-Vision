@@ -3016,3 +3016,22 @@ body {
 .cleaner-workplan-page .scheduled-inline-block .delegated-inline-label {
   background: #fffdf8;
 }
+
+
+/* v57.1 Priority Stack cleanup + Inventory Goals */
+.priority-stack-panel > p {
+  display: none !important;
+}
+.inventory-goals-section {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(31,41,51,.10);
+}
+.inventory-goals-section h4 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+}
+.inventory-goal-item {
+  background: #fffdf8;
+}

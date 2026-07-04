@@ -652,11 +652,21 @@ function priorityStackHtml() {
     })
     .sort((a,b) => prioritySortValue(a)-prioritySortValue(b));
 
-  return `<section class="panel">
+  const inventoryGoals = state.goals
+    .filter(g => priorityValue(g) === -1)
+    .sort((a,b) => (a.category || "").localeCompare(b.category || "") || (a.title || "").localeCompare(b.title || ""));
+
+  return `<section class="panel priority-stack-panel">
     <h3>Priority Stack</h3>
-    <p>The 3–5 goals that matter most right now.</p>
     <div class="recent-list">
       ${priorities.length ? priorities.map(g => `<div class="recent-item clickable-card" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">${priorityLabel(g)} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${goalStatusLabel(g)}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
+    </div>
+
+    <div class="inventory-goals-section">
+      <h4>Inventory Goals</h4>
+      <div class="recent-list">
+        ${inventoryGoals.length ? inventoryGoals.map(g => `<div class="recent-item clickable-card inventory-goal-item" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${goalStatusLabel(g)}</small></div>`).join("") : `<div class="recent-item"><strong>No inventory goals yet.</strong><small>Set a goal's priority to Inventory to list it here.</small></div>`}
+      </div>
     </div>
   </section>`;
 }

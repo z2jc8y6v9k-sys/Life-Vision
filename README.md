@@ -1,11 +1,10 @@
-# My Life Vision App v57 Cleaner Workplan
+# My Life Vision App v57.1 Priority Stack + Inventory Goals
 
 Changes:
-- Delegated items no longer have their own top-level Workplan section.
-- Workplan / This Moment's Decision shows My Actions first.
-- Delegated Today / This Week actions appear directly under My Actions as a secondary inline group.
-- Waiting remains its own separate section.
-- Scheduled Today / This Week actions remain visible as a secondary inline group when present.
-- Preserves Today / This Week-only filtering, action detail persistence, Feeling column, sorting, completion to Wins, and Workbook synchronization.
+- Removes the phrase “The 3–5 goals that matter most right now” from Dashboard / Overview → Priority Stack.
+- Adds a separate Inventory Goals section underneath Priority Stack.
+- Inventory Goals automatically lists goals where Priority is set to Inventory.
+- Inventory items remain clickable and open the corresponding goal in the Workbook.
+- Preserves v57 cleaner Workplan behavior.
 
 No SQL changes required.
