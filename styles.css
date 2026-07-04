@@ -3112,3 +3112,55 @@ body {
     margin-top: 10px;
   }
 }
+
+/* v56.5 Priority Stack + Feeling column */
+.inventory-stack-section {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(31,41,51,.10);
+}
+
+.inventory-stack-section h4 {
+  margin: 0 0 10px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+.inventory-stack-item {
+  opacity: .88;
+}
+
+.feeling-field-card .field-body {
+  min-height: 82px !important;
+}
+
+.decision-table-head,
+.decision-table-row {
+  grid-template-columns: 78px minmax(240px, 1.45fr) 132px 96px minmax(150px, .8fr) 90px 142px 112px !important;
+}
+
+.decision-feeling-cell span {
+  display: block;
+  color: #475467;
+  font-size: 12.5px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.decision-feeling-cell .muted-dash {
+  color: #98a2b3;
+  font-weight: 900;
+}
+
+@media(max-width:1100px) {
+  .decision-table-row > div:nth-child(2)::before { content: "Action"; }
+  .decision-table-row > div:nth-child(3)::before { content: "Priority"; }
+  .decision-table-row > div:nth-child(4)::before { content: "Time"; }
+  .decision-table-row > div:nth-child(5)::before { content: "Feeling"; }
+  .decision-table-row > div:nth-child(6)::before { content: "Unlocks"; }
+  .decision-table-row > div:nth-child(7)::before { content: "Resources"; }
+  .decision-table-row > div:nth-child(8)::before { content: "Owner"; }
+}

@@ -321,6 +321,16 @@ function fieldCard(goal, key, label, className = "") {
   return `<div class="field-card ${className}"><div class="field-header field-header-with-tool" style="background:${color}"><span>${label}</span>${bulletTools}</div><textarea id="${textareaId}" class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" onkeydown="handleBulletKeydown(event)" oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea></div>`;
 }
 
+function feelingFieldHtml(goal) {
+  const color = categories[goal.category].color;
+  const textareaId = `feeling-${goal.id}`;
+  const value = metaValue(goal, "completion_feeling");
+  return `<div class="field-card full feeling-field-card">
+    <div class="field-header field-header-with-tool" style="background:${color}"><span>Feeling This Will Provide If Completed</span></div>
+    <textarea id="${textareaId}" class="field-body" style="color:${color}" oninput="updateGoalMeta('${goal.id}', 'completion_feeling', this.value)">${escapeHtml(value || "")}</textarea>
+  </div>`;
+}
+
 function insertBullet(textareaId) {
   const textarea = document.getElementById(textareaId);
   if (!textarea) return;
@@ -624,12 +634,20 @@ function priorityStackHtml() {
       return value !== null && value > 0;
     })
     .sort((a,b) => prioritySortValue(a)-prioritySortValue(b));
+  const inventory = state.goals
+    .filter(g => priorityValue(g) === -1)
+    .sort((a,b) => String(a.title || "").localeCompare(String(b.title || "")));
 
-  return `<section class="panel">
+  return `<section class="panel priority-stack-panel">
     <h3>Priority Stack</h3>
-    <p>The 3–5 goals that matter most right now.</p>
     <div class="recent-list">
       ${priorities.length ? priorities.map(g => `<div class="recent-item clickable-card" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">${priorityLabel(g)} — ${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${goalStatusLabel(g)}</small></div>`).join("") : `<div class="recent-item"><strong>No priorities selected yet.</strong><small>Set Priority 1–5 on any goal card.</small></div>`}
+    </div>
+    <div class="inventory-stack-section">
+      <h4>Inventory</h4>
+      <div class="recent-list">
+        ${inventory.length ? inventory.map(g => `<div class="recent-item clickable-card inventory-stack-item" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${goalStatusLabel(g)} • Inventory</small></div>`).join("") : `<div class="recent-item"><small>No inventory goals yet.</small></div>`}
+      </div>
     </div>
   </section>`;
 }
@@ -865,6 +883,7 @@ function goalCard(goal) {
     ${fieldCard(goal, "key_results", "Key Results", "full")}
 
     ${fieldCard(goal, "why", "Why This Matters", "full")}
+    ${feelingFieldHtml(goal)}
 
     <div class="timeline-label">Life Season</div>
     <div class="timeline">${ageBands.map(age => `<label class="age-chip"><input type="checkbox" ${goal.ages?.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />${age}</label>`).join("")}</div>
@@ -1260,6 +1279,7 @@ function workplanActionItems() {
         priorityLabel: priorityLabel(goal),
         minutes,
         timeLabel: timeValue || "No time set",
+        feeling: metaValue(goal, "completion_feeling") || "",
         owner,
         type: goalType(goal),
         rating: goalType(goal) === "Behavior" ? effectiveBehaviorRating(goal) : (goal.status || "Not Started")
@@ -1536,6 +1556,7 @@ function comparePanelHtml(items) {
       <div class="compare-action-title"><strong>${escapeHtml(a.action)}</strong><small>${escapeHtml(a.title)}</small></div>
       <div class="compare-action-title"><strong>${escapeHtml(b.action)}</strong><small>${escapeHtml(b.title)}</small></div>
       ${compareValueRow("Goal", escapeHtml(a.title), escapeHtml(b.title))}
+      ${compareValueRow("Feeling", escapeHtml(a.feeling || "—"), escapeHtml(b.feeling || "—"))}
       ${compareValueRow("Category", escapeHtml(a.category || "—"), escapeHtml(b.category || "—"))}
       ${compareValueRow("Priority", `${priorityStars(a)}<small>${escapeHtml(a.priorityLabel)}</small>`, `${priorityStars(b)}<small>${escapeHtml(b.priorityLabel)}</small>`)}
       ${compareValueRow("Time", `<span class="decision-pill">${escapeHtml(a.timeLabel)}</span>`, `<span class="decision-pill">${escapeHtml(b.timeLabel)}</span>`)}
@@ -1565,6 +1586,7 @@ function decisionTableRowHtml(item, allItems) {
     </div>
     <div class="decision-priority-cell" title="${escapeHtml(item.priorityLabel)}"><span>${priorityStars(item)}</span><small>${escapeHtml(item.priorityLabel)}</small></div>
     <div><span class="decision-pill">${escapeHtml(item.timeLabel)}</span></div>
+    <div class="decision-feeling-cell">${item.feeling ? `<span>${escapeHtml(item.feeling)}</span>` : `<span class="muted-dash">—</span>`}</div>
     <div><span class="decision-pill">${unlocks}</span></div>
     <div><span class="resource-profile-badge ${profile.cls}">${escapeHtml(profile.label)}</span></div>
     <div><span class="action-owner-badge ${ownerClass}">${escapeHtml(item.owner)}</span></div>
@@ -1648,6 +1670,7 @@ function decisionTableHtml(items) {
         <button onclick="setDecisionSort('action')">Action${decisionSort.key === "action" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('priority')">Priority${decisionSort.key === "priority" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('time')">Time${decisionSort.key === "time" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
+        <span>Feeling</span>
         <button onclick="setDecisionSort('unlocks')">Unlocks${decisionSort.key === "unlocks" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('resources')">Resources${decisionSort.key === "resources" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('owner')">Owner${decisionSort.key === "owner" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
