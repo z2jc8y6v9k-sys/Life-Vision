@@ -1591,21 +1591,31 @@ function decisionSnapshotHtml(items, totals) {
   </div>`;
 }
 
+function workplanSectionHtml(title, items, intro = "") {
+  return `<div class="workplan-card decision-table-card owner-workplan-section">
+    <span class="workplan-eyebrow">${title} (${items.length})</span>
+    ${intro ? `<p class="decision-table-intro">${intro}</p>` : ""}
+    ${decisionTableHtml(items)}
+  </div>`;
+}
+
 function workplanHtml() {
   const items = workplanActionItems();
-  const activeItems = items.filter(i => i.owner !== "Waiting");
+  const myItems = items.filter(i => i.owner === "Me");
+  const delegatedItems = items.filter(i => i.owner === "Delegated");
   const waitingItems = items.filter(i => i.owner === "Waiting");
+  const scheduledItems = items.filter(i => i.owner === "Scheduled");
   const totals = workplanTotals(items);
   const completed = completedTodayItems();
 
-  return `<section class="workplan-page action-plan-page single-source-workplan decision-view-page decision-table-page">
+  return `<section class="workplan-page action-plan-page single-source-workplan decision-view-page decision-table-page owner-based-workplan-page">
     ${decisionSnapshotHtml(items, totals)}
 
-    <div class="workplan-card decision-table-card">
-      <span class="workplan-eyebrow">Active Actions (${activeItems.length})</span>
-      <p class="decision-table-intro">Only Today / This Week actions appear here. Look at the same work through priority, time, leverage, resources, feeling, and ownership. No deadlines. No pressure.</p>
-      ${decisionTableHtml(activeItems)}
-    </div>
+    ${workplanSectionHtml("My Actions", myItems, "Only Today / This Week actions appear here. This section shows work where you are the owner. Sort by priority, time, leverage, resources, or feeling to decide what deserves your attention.")}
+
+    ${workplanSectionHtml("Delegated", delegatedItems, "These are Today / This Week actions you have handed off. Review them for follow-up without mixing them into your own action list.")}
+
+    ${scheduledItems.length ? workplanSectionHtml("Scheduled", scheduledItems, "These are Today / This Week actions already scheduled. Keep them visible without treating them like open decisions.") : ""}
 
     <div class="workplan-card waiting-card-focused">
       <span class="workplan-eyebrow">Waiting (${waitingItems.length})</span>

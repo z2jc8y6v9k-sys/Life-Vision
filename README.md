@@ -1,10 +1,11 @@
-# My Life Vision App v56.8 Focused Workplan
+# My Life Vision App v56.9 Owner-Based Workplan
 
 Changes:
-- Workplan / This Moment's Decision now displays only actions from Today / This Week.
-- Next 30 Days and Next 12 Months actions are excluded from the active Workplan.
-- Active Actions are shown separately from Waiting items.
-- Waiting section lists Today / This Week actions where Owner is Waiting.
-- Preserves action detail persistence, completion to Wins, Feeling column, and sortable Decision Table.
+- Workplan / This Moment's Decision now separates Today / This Week actions by owner.
+- My Actions shows items where Owner = Me.
+- Delegated appears directly below My Actions and shows items where Owner = Delegated.
+- Waiting appears below Delegated and shows items where Owner = Waiting.
+- Scheduled items remain visible in their own section when present.
+- All sections preserve the Decision Table columns, sorting, action detail persistence, Feeling column, completion to Wins, and Workbook synchronization.
 
 No SQL changes required.

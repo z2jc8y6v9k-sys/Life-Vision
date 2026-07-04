@@ -2975,3 +2975,19 @@ body {
 .waiting-card-focused .mini-action-row small {
   color: #92400e;
 }
+
+
+/* v56.9 Owner-based Workplan */
+.owner-based-workplan-page .owner-workplan-section {
+  margin-bottom: 0;
+}
+.owner-based-workplan-page .owner-workplan-section:nth-of-type(3) {
+  border-color: rgba(29,78,216,.16) !important;
+}
+.owner-based-workplan-page .owner-workplan-section:nth-of-type(3) .decision-table-row {
+  background: #eff6ff;
+  border-color: rgba(29,78,216,.14);
+}
+.owner-based-workplan-page .owner-workplan-section:nth-of-type(4) {
+  border-color: rgba(71,84,103,.16) !important;
+}
