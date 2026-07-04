@@ -2962,3 +2962,16 @@ body {
   .decision-table-row > div:nth-child(6)::before { content: "Feeling"; }
   .decision-table-row > div:nth-child(7)::before { content: "Owner"; }
 }
+
+/* v56.8 Focused Workplan: Today/This Week only + Waiting section */
+.waiting-card-focused {
+  border-color: rgba(31,41,51,.10) !important;
+  background: #fff !important;
+}
+.waiting-card-focused .mini-action-row {
+  border-color: rgba(146,64,14,.18);
+  background: #fffbeb;
+}
+.waiting-card-focused .mini-action-row small {
+  color: #92400e;
+}

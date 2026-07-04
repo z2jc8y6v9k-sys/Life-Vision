@@ -1257,7 +1257,7 @@ function actionMetadataEditorHtml(goal, field, label) {
 }
 
 function workplanActionItems() {
-  const fields = ["today_this_week", "next30"];
+  const fields = ["today_this_week"];
   return state.goals
     .flatMap(goal => fields.flatMap(field => actionLines(goal, field).map(item => {
       const timeValue = actionTimeValue(goal, field, item.text, item.index) || "";
@@ -1269,7 +1269,7 @@ function workplanActionItems() {
         goalId: goal.id,
         actionKey: actionKeyFor(goal.id, field, item.text),
         field,
-        fieldLabel: field === "today_this_week" ? "Today / This Week" : "Next 30 Days",
+        fieldLabel: "Today / This Week",
         lineIndex: item.index,
         title: goal.title || "Untitled Goal",
         action: item.text,
@@ -1331,7 +1331,7 @@ function recommendedFirstAction(items) {
 }
 
 function workplanFocusText(items, totals) {
-  if (!items.length) return "Add actions inside Today / This Week or Next 30 Days. Workplan will organize them automatically.";
+  if (!items.length) return "Add actions inside Today / This Week. Workplan will organize them automatically.";
   const highGoals = state.goals.filter(g => priorityValue(g) === 1);
   const actionGoalIds = new Set(items.map(i => i.goalId));
   const highWithoutActions = highGoals.filter(g => !actionGoalIds.has(g.id)).length;
@@ -1406,15 +1406,15 @@ function actionQueueRow(item, opts = {}) {
 }
 
 function actionQueueHtml(items) {
-  if (!items.length) return `<div class="recent-item"><strong>No actions yet.</strong><small>Add bullets inside Today / This Week or Next 30 Days.</small></div>`;
+  if (!items.length) return `<div class="recent-item"><strong>No actions yet.</strong><small>Add bullets inside Today / This Week.</small></div>`;
   return items.map(i => actionQueueRow(i, { compact: true })).join("");
 }
 
 function waitingListHtml(items) {
-  const waiting = items.filter(i => i.owner === "Waiting" || i.owner === "Delegated");
-  if (!waiting.length) return `<div class="recent-item"><strong>Nothing waiting.</strong><small>No blocked or delegated actions are marked.</small></div>`;
+  const waiting = items.filter(i => i.owner === "Waiting");
+  if (!waiting.length) return `<div class="recent-item"><strong>Nothing waiting.</strong><small>No Today / This Week actions are marked Waiting.</small></div>`;
   return waiting.map(i => `<div class="mini-action-row clickable-card" onclick="openGoal('${i.goalId}')">
-    <span>${escapeHtml(i.action)}<small>${escapeHtml(i.owner)} • ${escapeHtml(i.title)}</small></span><b>${escapeHtml(i.timeLabel)}</b>
+    <span>${escapeHtml(i.action)}<small>Waiting • ${escapeHtml(i.title)}</small></span><b>${escapeHtml(i.timeLabel)}</b>
   </div>`).join("");
 }
 
@@ -1542,7 +1542,7 @@ function decisionSortButton(label, key) {
 }
 
 function decisionTableHtml(items) {
-  if (!items.length) return `<div class="recent-item"><strong>No actions yet.</strong><small>Add bullets inside Today / This Week or Next 30 Days.</small></div>`;
+  if (!items.length) return `<div class="recent-item"><strong>No actions yet.</strong><small>Add bullets inside Today / This Week.</small></div>`;
   const visibleItems = sortedDecisionItems(items);
   return `<div class="decision-sort-bar">
       <span>Sort by</span>
@@ -1572,7 +1572,7 @@ function decisionSnapshotHtml(items, totals) {
   const topPriorityItems = items.filter(i => i.priorityRaw === 1);
   const quickItems = items.filter(i => i.minutes && i.minutes <= 15);
   const highTimeItems = items.filter(i => i.minutes && i.minutes >= 60 && i.minutes < 9999);
-  const waitingItems = items.filter(i => i.owner === "Waiting" || i.owner === "Delegated");
+  const waitingItems = items.filter(i => i.owner === "Waiting");
   const noTimeItems = items.filter(i => !i.minutes && !["Waiting", "Delegated"].includes(i.owner));
   return `<div class="decision-snapshot-card">
     <div>
@@ -1584,7 +1584,7 @@ function decisionSnapshotHtml(items, totals) {
       <div><b>${topPriorityItems.length}</b><span>Top-priority actions</span></div>
       <div><b>${quickItems.length}</b><span>15 minutes or less</span></div>
       <div><b>${highTimeItems.length}</b><span>60+ minute actions</span></div>
-      <div><b>${waitingItems.length}</b><span>Waiting / delegated</span></div>
+      <div><b>${waitingItems.length}</b><span>Waiting</span></div>
       <div><b>${totals.total ? formatMinutes(totals.total) : "—"}</b><span>Estimated active time</span></div>
       <div><b>${noTimeItems.length}</b><span>Need time estimate</span></div>
     </div>
@@ -1593,6 +1593,8 @@ function decisionSnapshotHtml(items, totals) {
 
 function workplanHtml() {
   const items = workplanActionItems();
+  const activeItems = items.filter(i => i.owner !== "Waiting");
+  const waitingItems = items.filter(i => i.owner === "Waiting");
   const totals = workplanTotals(items);
   const completed = completedTodayItems();
 
@@ -1600,9 +1602,14 @@ function workplanHtml() {
     ${decisionSnapshotHtml(items, totals)}
 
     <div class="workplan-card decision-table-card">
-      <span class="workplan-eyebrow">Decision Table</span>
-      <p class="decision-table-intro">Look at the same work through the lenses that matter: priority, time, leverage, resources, and ownership. No deadlines. No pressure.</p>
-      ${decisionTableHtml(items)}
+      <span class="workplan-eyebrow">Active Actions (${activeItems.length})</span>
+      <p class="decision-table-intro">Only Today / This Week actions appear here. Look at the same work through priority, time, leverage, resources, feeling, and ownership. No deadlines. No pressure.</p>
+      ${decisionTableHtml(activeItems)}
+    </div>
+
+    <div class="workplan-card waiting-card-focused">
+      <span class="workplan-eyebrow">Waiting (${waitingItems.length})</span>
+      ${waitingListHtml(items)}
     </div>
 
     <div class="workplan-card completed-card">
