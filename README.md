@@ -1,9 +1,16 @@
-# My Life Vision App v56.1 — This Moment's Decision
+# My Life Vision App v56.2 Decision Table
 
 Changes:
-- Workplan now opens with **This Moment's Decision**.
-- Replaces the Start Here / recommendation emphasis with a Decision Snapshot.
-- Decision Snapshot shows the facts needed to choose what deserves attention: top-priority actions, quick actions, high-time actions, waiting/delegated actions, estimated active time, and actions needing time estimates.
-- Keeps existing Workbook ↔ Workplan completion behavior.
-- Keeps Today / This Week, Next 30 Days, Waiting / Delegated, and Completed Today sections intact.
-- No database changes required.
+- Keeps Workplan navigation, but the page is now framed around **This Moment's Decision**.
+- Adds a primary Decision Table with these lenses:
+  - Action
+  - Priority
+  - Time
+  - Unlocks
+  - Resources
+  - Owner
+- Removes deadline pressure entirely.
+- Keeps checkbox completion behavior: checked actions move into Wins and Completed Today.
+- Keeps Decision Snapshot from v56.1.
+
+No SQL changes required.

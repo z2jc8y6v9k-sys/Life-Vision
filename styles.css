@@ -2754,3 +2754,119 @@ body {
     grid-template-columns: 1fr !important;
   }
 }
+
+
+/* v56.2 Decision Table */
+.decision-table-page {
+  display: grid;
+  gap: 18px;
+}
+
+.decision-table-card {
+  overflow: hidden;
+}
+
+.decision-table-intro {
+  margin: -2px 0 16px !important;
+  color: #667085 !important;
+  max-width: 900px;
+}
+
+.decision-table {
+  display: grid;
+  gap: 8px;
+}
+
+.decision-table-head,
+.decision-table-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.55fr) 140px 105px 95px 150px 120px;
+  gap: 10px;
+  align-items: center;
+}
+
+.decision-table-head {
+  padding: 0 12px 4px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.decision-table-row {
+  background: #fbfaf7;
+  border: 1px solid rgba(31,41,51,.10);
+  border-radius: 18px;
+  padding: 12px;
+}
+
+.decision-action-cell {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.decision-action-cell strong,
+.decision-action-cell small,
+.decision-priority-cell span,
+.decision-priority-cell small {
+  display: block;
+}
+
+.decision-action-cell small,
+.decision-priority-cell small {
+  color: #667085;
+  font-size: 12px;
+  margin-top: 3px;
+  line-height: 1.3;
+}
+
+.decision-priority-cell span {
+  letter-spacing: .04em;
+  color: #111827;
+  font-weight: 900;
+}
+
+.decision-pill,
+.action-owner-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(31,41,51,.10);
+  background: #fff;
+  color: #475467;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.action-owner-badge.owner-me { background: #ecfdf3; color: #027a48; border-color: #bbf7d0; }
+.action-owner-badge.owner-waiting { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+.action-owner-badge.owner-delegated { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.action-owner-badge.owner-scheduled { background: #f8fafc; color: #475467; border-color: #e5e7eb; }
+
+@media(max-width:1100px) {
+  .decision-table-head { display: none; }
+  .decision-table-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .decision-table-row > div:not(.decision-action-cell)::before {
+    display: block;
+    color: #667085;
+    font-size: 11px;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 4px;
+  }
+  .decision-table-row > div:nth-child(2)::before { content: "Priority"; }
+  .decision-table-row > div:nth-child(3)::before { content: "Time"; }
+  .decision-table-row > div:nth-child(4)::before { content: "Unlocks"; }
+  .decision-table-row > div:nth-child(5)::before { content: "Resources"; }
+  .decision-table-row > div:nth-child(6)::before { content: "Owner"; }
+}

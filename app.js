@@ -1386,6 +1386,62 @@ function completedTodayHtml(items) {
 }
 
 
+function priorityStars(item) {
+  const raw = item.priorityRaw || 0;
+  if (raw === 1) return "★★★★★";
+  if (raw === 2) return "★★★★☆";
+  if (raw === 3) return "★★★☆☆";
+  if (raw === 4) return "★★☆☆☆";
+  if (raw === 5) return "★☆☆☆☆";
+  return "—";
+}
+
+function decisionUnlocksValue(item, allItems) {
+  // For now, "Unlocks" means other active actions tied to the same goal.
+  // It is a leverage signal, not a deadline or pressure mechanism.
+  return allItems.filter(i =>
+    i.goalId === item.goalId &&
+    i.actionKey !== item.actionKey &&
+    !["Waiting", "Delegated"].includes(i.owner)
+  ).length;
+}
+
+function decisionResourcesValue(item) {
+  const profile = resourceProfileScore(item.goal);
+  return profile.label;
+}
+
+function decisionTableRowHtml(item, allItems) {
+  const profile = resourceProfileScore(item.goal);
+  const unlocks = decisionUnlocksValue(item, allItems);
+  const ownerClass = `owner-${String(item.owner || "Me").toLowerCase().replace(/\s+/g,"-")}`;
+  return `<div class="decision-table-row clickable-card" onclick="openGoal('${item.goalId}')">
+    <div class="decision-action-cell">
+      <input type="checkbox" class="action-check" onclick="event.stopPropagation()" onchange="completeWorkplanAction('${item.goalId}','${item.field}','${item.actionKey}')" title="Complete and move to Wins" />
+      <div>
+        <strong>${escapeHtml(item.action)}</strong>
+        <small>${escapeHtml(item.title)} • ${escapeHtml(item.fieldLabel)}${item.category ? " • " + escapeHtml(item.category) : ""}</small>
+      </div>
+    </div>
+    <div class="decision-priority-cell" title="${escapeHtml(item.priorityLabel)}"><span>${priorityStars(item)}</span><small>${escapeHtml(item.priorityLabel)}</small></div>
+    <div><span class="decision-pill">${escapeHtml(item.timeLabel)}</span></div>
+    <div><span class="decision-pill">${unlocks}</span></div>
+    <div><span class="resource-profile-badge ${profile.cls}">${escapeHtml(profile.label)}</span></div>
+    <div><span class="action-owner-badge ${ownerClass}">${escapeHtml(item.owner)}</span></div>
+  </div>`;
+}
+
+function decisionTableHtml(items) {
+  if (!items.length) return `<div class="recent-item"><strong>No actions yet.</strong><small>Add bullets inside Today / This Week or Next 30 Days.</small></div>`;
+  return `<div class="decision-table">
+    <div class="decision-table-head">
+      <span>Action</span><span>Priority</span><span>Time</span><span>Unlocks</span><span>Resources</span><span>Owner</span>
+    </div>
+    ${items.map(i => decisionTableRowHtml(i, items)).join("")}
+  </div>`;
+}
+
+
 function decisionSnapshotHtml(items, totals) {
   const topPriorityItems = items.filter(i => i.priorityRaw === 1);
   const quickItems = items.filter(i => i.minutes && i.minutes <= 15);
@@ -1412,35 +1468,20 @@ function decisionSnapshotHtml(items, totals) {
 function workplanHtml() {
   const items = workplanActionItems();
   const totals = workplanTotals(items);
-  const activeItems = items.filter(i => !["Waiting", "Delegated"].includes(i.owner));
-  const todayItems = activeItems.filter(i => i.field === "today_this_week");
-  const next30Items = activeItems.filter(i => i.field === "next30");
-  const waitingItems = items.filter(i => i.owner === "Waiting" || i.owner === "Delegated");
   const completed = completedTodayItems();
 
-  return `<section class="workplan-page action-plan-page single-source-workplan decision-view-page">
+  return `<section class="workplan-page action-plan-page single-source-workplan decision-view-page decision-table-page">
     ${decisionSnapshotHtml(items, totals)}
 
-    <div class="workplan-main-grid action-plan-grid single-source-grid decision-view-grid">
-      <div class="workplan-card action-queue-card">
-        <span class="workplan-eyebrow">Today / This Week</span>
-        ${actionQueueHtml(todayItems)}
-      </div>
+    <div class="workplan-card decision-table-card">
+      <span class="workplan-eyebrow">Decision Table</span>
+      <p class="decision-table-intro">Look at the same work through the lenses that matter: priority, time, leverage, resources, and ownership. No deadlines. No pressure.</p>
+      ${decisionTableHtml(items)}
+    </div>
 
-      <div class="workplan-card action-queue-card">
-        <span class="workplan-eyebrow">Next 30 Days</span>
-        ${actionQueueHtml(next30Items)}
-      </div>
-
-      <div class="workplan-card waiting-card">
-        <span class="workplan-eyebrow">Waiting / Delegated</span>
-        ${waitingListHtml(waitingItems)}
-      </div>
-
-      <div class="workplan-card completed-card">
-        <span class="workplan-eyebrow">Completed Today</span>
-        ${completedTodayHtml(completed)}
-      </div>
+    <div class="workplan-card completed-card">
+      <span class="workplan-eyebrow">Completed Today</span>
+      ${completedTodayHtml(completed)}
     </div>
   </section>`;
 }
