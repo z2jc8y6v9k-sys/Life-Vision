@@ -2870,3 +2870,67 @@ body {
   .decision-table-row > div:nth-child(5)::before { content: "Resources"; }
   .decision-table-row > div:nth-child(6)::before { content: "Owner"; }
 }
+
+
+/* v56.3 Sortable Decision Table */
+.decision-sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  background: #fffdf8;
+  border: 1px solid rgba(31,41,51,.10);
+  border-radius: 18px;
+}
+
+.decision-sort-bar span {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-right: 2px;
+}
+
+.decision-sort-button,
+.decision-table-head button {
+  border: 1px solid rgba(31,41,51,.12);
+  background: #fff;
+  color: #475467;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.decision-sort-button:hover,
+.decision-table-head button:hover {
+  border-color: rgba(17,24,39,.28);
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+.decision-sort-button.active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+
+.decision-table-head button {
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: #667085;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.decision-table-head button:hover {
+  transform: none;
+  text-decoration: underline;
+}

@@ -1,16 +1,16 @@
-# My Life Vision App v56.2 Decision Table
+# My Life Vision App v56.3 Sortable Decision Table
 
 Changes:
-- Keeps Workplan navigation, but the page is now framed around **This Moment's Decision**.
-- Adds a primary Decision Table with these lenses:
-  - Action
+- Adds clickable sorting to the Workplan Decision Table.
+- Sort lenses include:
   - Priority
   - Time
   - Unlocks
   - Resources
   - Owner
-- Removes deadline pressure entirely.
-- Keeps checkbox completion behavior: checked actions move into Wins and Completed Today.
-- Keeps Decision Snapshot from v56.1.
+- Table headers are also clickable.
+- Keeps the page framed as **This Moment's Decision**.
+- Keeps deadlines removed.
+- Keeps existing checkbox completion behavior: completed actions move to Wins and Completed Today.
 
 No SQL changes required.

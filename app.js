@@ -42,6 +42,7 @@ let showAdd = false;
 let showAddVision = false;
 let saveTimer = null;
 let updateTimers = {};
+let decisionSort = { key: "priority", dir: "asc" };
 
 async function init() {
   const { data } = await supabaseClient.auth.getSession();
@@ -1431,14 +1432,86 @@ function decisionTableRowHtml(item, allItems) {
   </div>`;
 }
 
+
+function setDecisionSort(key) {
+  if (decisionSort.key === key) {
+    decisionSort.dir = decisionSort.dir === "asc" ? "desc" : "asc";
+  } else {
+    decisionSort.key = key;
+    decisionSort.dir = key === "time" ? "asc" : "desc";
+    if (key === "priority") decisionSort.dir = "asc";
+  }
+  render();
+}
+
+function decisionResourceSortValue(item) {
+  const profile = resourceProfileScore(item.goal);
+  const order = {
+    "Easy to Start": 1,
+    "Requires Planning": 2,
+    "Major Commitment": 3,
+    "Resources Unset": 4
+  };
+  return order[profile.label] || 9;
+}
+
+function decisionSortValue(item, allItems, key) {
+  if (key === "priority") return item.priority || 999;
+  if (key === "time") return item.minutes || 9998;
+  if (key === "unlocks") return decisionUnlocksValue(item, allItems);
+  if (key === "resources") return decisionResourceSortValue(item);
+  if (key === "owner") return ownerSortValue(item.owner);
+  if (key === "action") return String(item.action || "").toLowerCase();
+  return item.priority || 999;
+}
+
+function sortedDecisionItems(items) {
+  const key = decisionSort.key || "priority";
+  const dir = decisionSort.dir || "asc";
+  return [...items].sort((a,b) => {
+    const av = decisionSortValue(a, items, key);
+    const bv = decisionSortValue(b, items, key);
+    let cmp = 0;
+    if (typeof av === "string" || typeof bv === "string") cmp = String(av).localeCompare(String(bv));
+    else cmp = av - bv;
+    if (dir === "desc") cmp = -cmp;
+    if (cmp !== 0) return cmp;
+    if ((a.priority || 999) !== (b.priority || 999)) return (a.priority || 999) - (b.priority || 999);
+    const at = a.minutes || 9998;
+    const bt = b.minutes || 9998;
+    if (at !== bt) return at - bt;
+    return String(a.action || "").localeCompare(String(b.action || ""));
+  });
+}
+
+function decisionSortButton(label, key) {
+  const active = decisionSort.key === key;
+  const arrow = active ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : "";
+  return `<button class="decision-sort-button ${active ? "active" : ""}" onclick="setDecisionSort('${key}')">${label}${arrow}</button>`;
+}
+
 function decisionTableHtml(items) {
   if (!items.length) return `<div class="recent-item"><strong>No actions yet.</strong><small>Add bullets inside Today / This Week or Next 30 Days.</small></div>`;
-  return `<div class="decision-table">
-    <div class="decision-table-head">
-      <span>Action</span><span>Priority</span><span>Time</span><span>Unlocks</span><span>Resources</span><span>Owner</span>
+  const visibleItems = sortedDecisionItems(items);
+  return `<div class="decision-sort-bar">
+      <span>Sort by</span>
+      ${decisionSortButton("Priority", "priority")}
+      ${decisionSortButton("Time", "time")}
+      ${decisionSortButton("Unlocks", "unlocks")}
+      ${decisionSortButton("Resources", "resources")}
+      ${decisionSortButton("Owner", "owner")}
     </div>
-    ${items.map(i => decisionTableRowHtml(i, items)).join("")}
-  </div>`;
+    <div class="decision-table">
+      <div class="decision-table-head">
+        <button onclick="setDecisionSort('action')">Action${decisionSort.key === "action" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
+        <button onclick="setDecisionSort('priority')">Priority${decisionSort.key === "priority" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
+        <button onclick="setDecisionSort('time')">Time${decisionSort.key === "time" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
+        <button onclick="setDecisionSort('unlocks')">Unlocks${decisionSort.key === "unlocks" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
+        <button onclick="setDecisionSort('resources')">Resources${decisionSort.key === "resources" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
+        <button onclick="setDecisionSort('owner')">Owner${decisionSort.key === "owner" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
+      </div>
+      ${visibleItems.map(i => decisionTableRowHtml(i, items)).join("")}
+    </div>`;
 }
 
 
