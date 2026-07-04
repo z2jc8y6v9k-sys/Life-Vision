@@ -43,6 +43,8 @@ let showAddVision = false;
 let saveTimer = null;
 let updateTimers = {};
 let decisionSort = { key: "priority", dir: "asc" };
+let compareSelectedActionIds = [];
+let comparePanelOpen = false;
 
 async function init() {
   const { data } = await supabaseClient.auth.getSession();
@@ -1412,11 +1414,112 @@ function decisionResourcesValue(item) {
   return profile.label;
 }
 
+
+function compareActionId(item) {
+  return `${item.goalId}__${item.field}__${item.actionKey}`;
+}
+
+function toggleCompareAction(compareId, checked) {
+  if (checked) {
+    if (!compareSelectedActionIds.includes(compareId)) {
+      if (compareSelectedActionIds.length >= 2) {
+        showSaved("Compare only two actions at a time");
+        render();
+        return;
+      }
+      compareSelectedActionIds.push(compareId);
+    }
+  } else {
+    compareSelectedActionIds = compareSelectedActionIds.filter(id => id !== compareId);
+  }
+  if (compareSelectedActionIds.length !== 2) comparePanelOpen = false;
+  render();
+}
+
+function openComparePanel() {
+  if (compareSelectedActionIds.length === 2) {
+    comparePanelOpen = true;
+    render();
+  }
+}
+
+function clearCompareSelection() {
+  compareSelectedActionIds = [];
+  comparePanelOpen = false;
+  render();
+}
+
+function selectedCompareItems(items) {
+  const ids = new Set(compareSelectedActionIds);
+  return items.filter(item => ids.has(compareActionId(item)));
+}
+
+function compareControlsHtml(items) {
+  const selected = selectedCompareItems(items);
+  compareSelectedActionIds = selected.map(compareActionId);
+  if (!items.length) return "";
+  const selectedCount = selected.length;
+  return `<div class="compare-controls">
+    <div>
+      <strong>Compare Mode</strong>
+      <span>${selectedCount === 0 ? "Select two actions to see the tradeoff side by side." : selectedCount === 1 ? "Select one more action to compare." : "Two actions selected."}</span>
+    </div>
+    <div class="compare-actions">
+      ${selectedCount === 2 ? `<button class="primary compare-button" onclick="openComparePanel()">Compare</button>` : ""}
+      ${selectedCount ? `<button class="secondary compare-clear" onclick="clearCompareSelection()">Clear</button>` : ""}
+    </div>
+  </div>`;
+}
+
+function compareValueRow(label, left, right) {
+  return `<div class="compare-value-row">
+    <span>${escapeHtml(label)}</span>
+    <strong>${left}</strong>
+    <strong>${right}</strong>
+  </div>`;
+}
+
+function comparePanelHtml(items) {
+  if (!comparePanelOpen) return "";
+  const selected = selectedCompareItems(items);
+  if (selected.length !== 2) return "";
+  const [a, b] = selected;
+  const aProfile = resourceProfileScore(a.goal);
+  const bProfile = resourceProfileScore(b.goal);
+  return `<div class="compare-panel">
+    <div class="compare-panel-header">
+      <div>
+        <span class="workplan-eyebrow">Tradeoff View</span>
+        <h3>Compare these two actions</h3>
+        <p>No winner. Just the facts that help you decide what deserves your attention.</p>
+      </div>
+      <button class="secondary compare-clear" onclick="clearCompareSelection()">Close</button>
+    </div>
+    <div class="compare-grid">
+      <div></div>
+      <div class="compare-action-title"><strong>${escapeHtml(a.action)}</strong><small>${escapeHtml(a.title)}</small></div>
+      <div class="compare-action-title"><strong>${escapeHtml(b.action)}</strong><small>${escapeHtml(b.title)}</small></div>
+      ${compareValueRow("Goal", escapeHtml(a.title), escapeHtml(b.title))}
+      ${compareValueRow("Category", escapeHtml(a.category || "—"), escapeHtml(b.category || "—"))}
+      ${compareValueRow("Priority", `${priorityStars(a)}<small>${escapeHtml(a.priorityLabel)}</small>`, `${priorityStars(b)}<small>${escapeHtml(b.priorityLabel)}</small>`)}
+      ${compareValueRow("Time", `<span class="decision-pill">${escapeHtml(a.timeLabel)}</span>`, `<span class="decision-pill">${escapeHtml(b.timeLabel)}</span>`)}
+      ${compareValueRow("Unlocks", `<span class="decision-pill">${decisionUnlocksValue(a, items)}</span>`, `<span class="decision-pill">${decisionUnlocksValue(b, items)}</span>`)}
+      ${compareValueRow("Resources", `<span class="resource-profile-badge ${aProfile.cls}">${escapeHtml(aProfile.label)}</span>`, `<span class="resource-profile-badge ${bProfile.cls}">${escapeHtml(bProfile.label)}</span>`)}
+      ${compareValueRow("Owner", `<span class="action-owner-badge owner-${String(a.owner || "Me").toLowerCase().replace(/\s+/g,"-")}">${escapeHtml(a.owner)}</span>`, `<span class="action-owner-badge owner-${String(b.owner || "Me").toLowerCase().replace(/\s+/g,"-")}">${escapeHtml(b.owner)}</span>`)}
+    </div>
+  </div>`;
+}
+
 function decisionTableRowHtml(item, allItems) {
   const profile = resourceProfileScore(item.goal);
   const unlocks = decisionUnlocksValue(item, allItems);
   const ownerClass = `owner-${String(item.owner || "Me").toLowerCase().replace(/\s+/g,"-")}`;
+  const compareId = compareActionId(item);
+  const compareChecked = compareSelectedActionIds.includes(compareId) ? "checked" : "";
   return `<div class="decision-table-row clickable-card" onclick="openGoal('${item.goalId}')">
+    <div class="decision-compare-cell">
+      <input type="checkbox" class="compare-check" ${compareChecked} onclick="event.stopPropagation()" onchange="toggleCompareAction('${compareId}', this.checked)" title="Select for compare" />
+    </div>
     <div class="decision-action-cell">
       <input type="checkbox" class="action-check" onclick="event.stopPropagation()" onchange="completeWorkplanAction('${item.goalId}','${item.field}','${item.actionKey}')" title="Complete and move to Wins" />
       <div>
@@ -1501,8 +1604,11 @@ function decisionTableHtml(items) {
       ${decisionSortButton("Resources", "resources")}
       ${decisionSortButton("Owner", "owner")}
     </div>
+    ${compareControlsHtml(items)}
+    ${comparePanelHtml(items)}
     <div class="decision-table">
       <div class="decision-table-head">
+        <span>Compare</span>
         <button onclick="setDecisionSort('action')">Action${decisionSort.key === "action" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('priority')">Priority${decisionSort.key === "priority" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('time')">Time${decisionSort.key === "time" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
