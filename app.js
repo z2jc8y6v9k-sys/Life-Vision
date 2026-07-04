@@ -1385,28 +1385,43 @@ function completedTodayHtml(items) {
   </div>`).join("");
 }
 
+
+function decisionSnapshotHtml(items, totals) {
+  const topPriorityItems = items.filter(i => i.priorityRaw === 1);
+  const quickItems = items.filter(i => i.minutes && i.minutes <= 15);
+  const highTimeItems = items.filter(i => i.minutes && i.minutes >= 60 && i.minutes < 9999);
+  const waitingItems = items.filter(i => i.owner === "Waiting" || i.owner === "Delegated");
+  const noTimeItems = items.filter(i => !i.minutes && !["Waiting", "Delegated"].includes(i.owner));
+  return `<div class="decision-snapshot-card">
+    <div>
+      <span class="workplan-eyebrow">Decision Snapshot</span>
+      <h2>This Moment's Decision</h2>
+      <p class="decision-prompt">What deserves your attention right now?</p>
+    </div>
+    <div class="decision-snapshot-grid">
+      <div><b>${topPriorityItems.length}</b><span>Top-priority actions</span></div>
+      <div><b>${quickItems.length}</b><span>15 minutes or less</span></div>
+      <div><b>${highTimeItems.length}</b><span>60+ minute actions</span></div>
+      <div><b>${waitingItems.length}</b><span>Waiting / delegated</span></div>
+      <div><b>${totals.total ? formatMinutes(totals.total) : "—"}</b><span>Estimated active time</span></div>
+      <div><b>${noTimeItems.length}</b><span>Need time estimate</span></div>
+    </div>
+  </div>`;
+}
+
 function workplanHtml() {
   const items = workplanActionItems();
   const totals = workplanTotals(items);
-  const first = recommendedFirstAction(items);
-  const activeItems = items.filter(i => i !== first && !["Waiting", "Delegated"].includes(i.owner));
+  const activeItems = items.filter(i => !["Waiting", "Delegated"].includes(i.owner));
   const todayItems = activeItems.filter(i => i.field === "today_this_week");
   const next30Items = activeItems.filter(i => i.field === "next30");
   const waitingItems = items.filter(i => i.owner === "Waiting" || i.owner === "Delegated");
   const completed = completedTodayItems();
 
-  return `<section class="workplan-page action-plan-page single-source-workplan">
-    <div class="workplan-focus-card">
-      <span class="workplan-eyebrow">Today's Focus</span>
-      <p>${escapeHtml(workplanFocusText(items, totals))}</p>
-    </div>
+  return `<section class="workplan-page action-plan-page single-source-workplan decision-view-page">
+    ${decisionSnapshotHtml(items, totals)}
 
-    <div class="workplan-main-grid action-plan-grid single-source-grid">
-      <div class="workplan-card start-here-card">
-        <span class="workplan-eyebrow">Start Here</span>
-        ${first ? actionQueueRow(first) + `<p class="start-reason">${escapeHtml(actionRecommendationReason(first))}</p>` : `<div class="recent-item"><strong>Add one action.</strong><small>Use Today / This Week or Next 30 Days inside a goal.</small></div>`}
-      </div>
-
+    <div class="workplan-main-grid action-plan-grid single-source-grid decision-view-grid">
       <div class="workplan-card action-queue-card">
         <span class="workplan-eyebrow">Today / This Week</span>
         ${actionQueueHtml(todayItems)}
