@@ -1,19 +1,10 @@
-# My Life Vision App v56.4 Compare Mode
+# My Life Vision App v56.4.1 Persistent Action Metadata
 
-Changes:
-- Adds Compare Mode to the Workplan Decision Table.
-- Adds a separate Compare checkbox for each action row.
-- Allows comparing exactly two actions at a time.
-- Adds a side-by-side Tradeoff View showing:
-  - Goal
-  - Category
-  - Priority
-  - Time
-  - Unlocks
-  - Resources
-  - Owner
-- Keeps deadlines removed.
-- Keeps existing sortable decision table behavior.
-- Keeps existing completion behavior: completed actions move to Wins and Completed Today.
+Fixes:
+- Prevents completed actions from reappearing because of pending text-area autosaves.
+- Keeps Time selections stable when the Workplan/Workbook re-renders.
+- Keeps Owner selections stable when the Workplan/Workbook re-renders.
+- Adds a more stable metadata key for actions while preserving older saved metadata.
+- Preserves v56.4 Compare Mode and the sortable Decision Table.
 
 No SQL changes required.

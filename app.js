@@ -1155,16 +1155,43 @@ function actionLines(goal, field = "today_this_week") {
     .filter(item => item.text);
 }
 
+function normalizedActionText(lineText) {
+  return cleanActionLine(lineText).toLowerCase().replace(/\s+/g, " ").trim();
+}
+
 function actionMetaKey(goalId, field, lineText, suffix) {
   return `action_${field}_${actionHash(goalId + "|" + field + "|" + lineText)}_${suffix}`;
 }
 
+function stableActionMetaKey(goalId, field, lineText, suffix) {
+  return `action_${field}_${actionHash(goalId + "|" + field + "|" + normalizedActionText(lineText))}_${suffix}`;
+}
+
+function actionMetaValue(goal, field, lineText, suffix) {
+  const meta = parseGoalMeta(goal);
+  const stableKey = stableActionMetaKey(goal.id, field, lineText, suffix);
+  const legacyKey = actionMetaKey(goal.id, field, lineText, suffix);
+  return meta[stableKey] || meta[legacyKey] || "";
+}
+
+function updateActionMeta(goalId, field, lineText, suffix, value) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal) return;
+  const meta = parseGoalMeta(goal);
+  meta.__lifeVisionMeta = true;
+  meta[stableActionMetaKey(goalId, field, lineText, suffix)] = value;
+  meta[actionMetaKey(goalId, field, lineText, suffix)] = value;
+  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
+  showSaved("Saved locally");
+  setTimeout(render, 150);
+}
+
 function actionTimeValue(goal, field, lineText) {
-  return metaValue(goal, actionMetaKey(goal.id, field, lineText, "time"));
+  return actionMetaValue(goal, field, lineText, "time");
 }
 
 function actionOwnerValue(goal, field, lineText) {
-  return metaValue(goal, actionMetaKey(goal.id, field, lineText, "owner")) || "Me";
+  return actionMetaValue(goal, field, lineText, "owner") || "Me";
 }
 
 function actionMinutes(goal, field, lineText) {
@@ -1172,18 +1199,18 @@ function actionMinutes(goal, field, lineText) {
 }
 
 function actionTimeSelect(goal, field, lineText) {
-  const key = actionMetaKey(goal.id, field, lineText, "time");
-  const current = metaValue(goal, key);
-  return `<select class="status-select action-mini-select" onclick="event.stopPropagation()" onchange="updateGoalMeta('${goal.id}','${key}',this.value)">
+  const current = actionTimeValue(goal, field, lineText);
+  const safeText = JSON.stringify(lineText);
+  return `<select class="status-select action-mini-select" onclick="event.stopPropagation()" onchange="updateActionMeta('${goal.id}','${field}',${safeText},'time',this.value)">
     ${timeOptions.map(([v,label]) => `<option value="${v}" ${current===v ? "selected" : ""}>${label}</option>`).join("")}
   </select>`;
 }
 
 function actionOwnerSelect(goal, field, lineText) {
-  const key = actionMetaKey(goal.id, field, lineText, "owner");
   const current = actionOwnerValue(goal, field, lineText);
+  const safeText = JSON.stringify(lineText);
   const owners = ["Me", "Waiting", "Delegated", "Scheduled"];
-  return `<select class="status-select action-mini-select" onclick="event.stopPropagation()" onchange="updateGoalMeta('${goal.id}','${key}',this.value)">
+  return `<select class="status-select action-mini-select" onclick="event.stopPropagation()" onchange="updateActionMeta('${goal.id}','${field}',${safeText},'owner',this.value)">
     ${owners.map(v => `<option value="${v}" ${current===v ? "selected" : ""}>${v}</option>`).join("")}
   </select>`;
 }
@@ -1320,6 +1347,15 @@ function todayString() {
 function completeWorkplanAction(goalId, field, actionKey) {
   const goal = state.goals.find(g => g.id === goalId);
   if (!goal) return;
+
+  // v56.4.1 persistence fix:
+  // Completing an action can happen immediately after editing the source text area.
+  // If a pending debounced save fires after completion, it can write the old
+  // Today / This Week or Next 30 Days text back to Supabase, making the
+  // completed action reappear and causing time/owner to look reset.
+  clearTimeout(updateTimers[goalId + field]);
+  clearTimeout(updateTimers[goalId + "wins"]);
+
   const lines = String(goal[field] || "").split(/\n+/);
   const matchIndex = lines.findIndex(line => actionHash(goalId + "|" + field + "|" + cleanActionLine(line)) === actionKey);
   if (matchIndex < 0) return;
