@@ -3164,3 +3164,18 @@ body {
   .decision-table-row > div:nth-child(7)::before { content: "Resources"; }
   .decision-table-row > div:nth-child(8)::before { content: "Owner"; }
 }
+
+
+/* v56.6 Meaning & Feeling side-by-side */
+.meaning-feeling-grid {
+  align-items: stretch !important;
+}
+.meaning-feeling-grid .field-card {
+  height: 100%;
+}
+.meaning-feeling-grid .field-body {
+  min-height: 138px;
+}
+@media(max-width:950px){
+  .meaning-feeling-grid { grid-template-columns: 1fr !important; }
+}

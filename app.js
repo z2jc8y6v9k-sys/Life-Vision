@@ -321,13 +321,13 @@ function fieldCard(goal, key, label, className = "") {
   return `<div class="field-card ${className}"><div class="field-header field-header-with-tool" style="background:${color}"><span>${label}</span>${bulletTools}</div><textarea id="${textareaId}" class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" onkeydown="handleBulletKeydown(event)" oninput="updateGoalNoRender('${goal.id}', '${key}', this.value)">${escapeHtml(goal[key] || "")}</textarea></div>`;
 }
 
-function feelingFieldHtml(goal) {
+function feelingFieldHtml(goal, className = "") {
   const color = categories[goal.category].color;
   const textareaId = `feeling-${goal.id}`;
   const value = metaValue(goal, "completion_feeling");
-  return `<div class="field-card full feeling-field-card">
-    <div class="field-header field-header-with-tool" style="background:${color}"><span>Feeling This Will Provide If Completed</span></div>
-    <textarea id="${textareaId}" class="field-body" style="color:${color}" oninput="updateGoalMeta('${goal.id}', 'completion_feeling', this.value)">${escapeHtml(value || "")}</textarea>
+  return `<div class="field-card ${className} feeling-field-card">
+    <div class="field-header field-header-with-tool" style="background:${color}"><span>Feeling This Will Provide When Completed</span></div>
+    <textarea id="${textareaId}" class="field-body ${className === "full" ? "large" : ""}" style="color:${color}" oninput="updateGoalMeta('${goal.id}', 'completion_feeling', this.value)">${escapeHtml(value || "")}</textarea>
   </div>`;
 }
 
@@ -882,8 +882,10 @@ function goalCard(goal) {
 
     ${fieldCard(goal, "key_results", "Key Results", "full")}
 
-    ${fieldCard(goal, "why", "Why This Matters", "full")}
-    ${feelingFieldHtml(goal)}
+    <div class="grid-two meaning-feeling-grid">
+      ${fieldCard(goal, "why", "Why This Matters")}
+      ${feelingFieldHtml(goal)}
+    </div>
 
     <div class="timeline-label">Life Season</div>
     <div class="timeline">${ageBands.map(age => `<label class="age-chip"><input type="checkbox" ${goal.ages?.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />${age}</label>`).join("")}</div>

@@ -1,10 +1,9 @@
-# My Life Vision App v56.5 Priority Stack + Feeling Column
+# My Life Vision App v56.6 Meaning & Feeling
 
 Changes:
-- Priority Stack no longer includes the phrase “The 3–5 goals that matter most right now.”
-- Priority Stack now lists Inventory goals underneath the priority list.
-- Adds a new field under Why This Matters: “Feeling This Will Provide If Completed.”
-- Workplan / This Moment’s Decision now includes a Feeling column pulled from the goal that supports each action.
-- Compare Mode also includes Feeling.
+- Places **Why This Matters** and **Feeling This Will Provide When Completed** side by side in the Workbook.
+- Uses the same two-column pattern as Wins and Lessons.
+- Updates the label to: **Feeling This Will Provide When Completed**.
+- Keeps the Workplan Feeling column connected to this field.
 
 No SQL changes required.
