@@ -3187,3 +3187,84 @@ body {
     background-position: center center !important;
   }
 }
+
+
+/* v60.2 Definitive Pause background layout
+   Uses the actual uploaded Pause artwork as the full opening screen.
+   The word Pause is part of the image, so app.js keeps the text screen-reader-only.
+   Top anchoring prevents desktop Safari from cropping Pause out of view.
+*/
+.pause-entry-image-page {
+  min-height: 100svh !important;
+  min-height: 100vh !important;
+  width: 100vw !important;
+  overflow: hidden !important;
+  background-image: url("pause-background.png") !important;
+  background-size: cover !important;
+  background-position: center top !important;
+  background-repeat: no-repeat !important;
+  background-color: #b7aa97 !important;
+  position: relative !important;
+}
+
+.pause-entry-image-page .pause-entry-main {
+  display: none !important;
+}
+
+.pause-entry-image-page::before {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  background: linear-gradient(180deg, rgba(17,24,39,0) 0%, rgba(17,24,39,.10) 100%) !important;
+}
+
+.pause-entry-image-page::after {
+  display: none !important;
+}
+
+.pause-entry-image-page .pause-entry-action {
+  position: fixed !important;
+  z-index: 3 !important;
+  right: clamp(14px, 2.2vw, 32px) !important;
+  bottom: clamp(14px, 2.2vw, 32px) !important;
+  opacity: 0 !important;
+  transform: translateY(4px) !important;
+  border: 1px solid rgba(255,255,255,.24) !important;
+  background: rgba(17,24,39,.10) !important;
+  color: rgba(255,253,248,.92) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.pause-entry-image-page:hover .pause-entry-action,
+.pause-entry-image-page:focus-within .pause-entry-action {
+  opacity: .08 !important;
+}
+
+.pause-entry-image-page .pause-entry-action:hover,
+.pause-entry-image-page .pause-entry-action:focus,
+.pause-entry-image-page .pause-entry-action:focus-visible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  background: rgba(255,253,248,.92) !important;
+  color: #111827 !important;
+  outline: none !important;
+}
+
+@media (orientation: portrait) {
+  .pause-entry-image-page {
+    background-size: cover !important;
+    background-position: 58% top !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .pause-entry-image-page {
+    background-position: 60% top !important;
+  }
+  .pause-entry-image-page .pause-entry-action {
+    font-size: 13px !important;
+    padding: 10px 14px !important;
+  }
+}
