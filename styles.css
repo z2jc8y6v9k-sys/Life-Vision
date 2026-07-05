@@ -3037,7 +3037,7 @@ body {
 }
 
 
-/* v59.2 Pause Entry rendered from app.js */
+/* v59.3 Hidden Possibility Entry rendered from app.js */
 .pause-entry-page {
   min-height: 100vh;
   background: var(--bg);
@@ -3056,19 +3056,34 @@ body {
 }
 .pause-entry-action {
   position: fixed;
-  left: 50%;
-  bottom: 34px;
-  transform: translateX(-50%);
+  right: 28px;
+  bottom: 26px;
   border: 1px solid rgba(31,41,51,.14);
-  background: transparent;
+  background: rgba(255,253,248,.92);
   color: #111827;
   border-radius: 999px;
   padding: 12px 18px;
   font-size: 15px;
   font-weight: 900;
   letter-spacing: -0.01em;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .18s ease, transform .18s ease, box-shadow .18s ease, background .18s ease;
 }
-.pause-entry-action:hover {
+.pause-entry-action:hover,
+.pause-entry-action:focus,
+.pause-entry-action:focus-visible {
+  opacity: 1;
+  transform: translateY(0);
   background: #fffdf8;
   box-shadow: 0 10px 24px rgba(31,41,51,.08);
+  outline: none;
+}
+.pause-entry-page:hover .pause-entry-action {
+  opacity: .08;
+}
+.pause-entry-page .pause-entry-action:hover,
+.pause-entry-page .pause-entry-action:focus,
+.pause-entry-page .pause-entry-action:focus-visible {
+  opacity: 1;
 }

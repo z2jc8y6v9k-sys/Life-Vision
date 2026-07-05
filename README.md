@@ -1,10 +1,10 @@
-# My Life Vision App v59.2 Pause Entry
+# My Life Vision App v59.3 Hidden Possibility Entry
 
 Changes:
-- Adds the clean Pause entry screen inside app.js so the normal app render cannot overwrite it.
-- Start screen shows only: Pause.
-- Bottom action: Create from Possibility.
-- Clicking Create from Possibility enters the main app on Dashboard / Workbook.
-- Preserves v58 action-object persistence and Workplan cleanup.
+- Keeps the clean Pause entry screen.
+- Shows only **Pause.** on initial load.
+- Moves **Create from Possibility** to the bottom-right corner.
+- The entry action is hidden by default and becomes visible on hover/focus.
+- Clicking **Create from Possibility** enters the Dashboard / Workbook experience.
 
 No SQL changes required.
