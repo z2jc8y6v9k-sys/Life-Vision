@@ -1472,7 +1472,6 @@ function decisionResourcesValue(item) {
 }
 
 function decisionTableRowHtml(item, allItems) {
-  const profile = resourceProfileScore(item.goal);
   const unlocks = decisionUnlocksValue(item, allItems);
   const ownerClass = `owner-${String(item.owner || "Me").toLowerCase().replace(/\s+/g,"-")}`;
   return `<div class="decision-table-row clickable-card" onclick="openGoal('${item.goalId}')">
@@ -1485,10 +1484,9 @@ function decisionTableRowHtml(item, allItems) {
     </div>
     <div class="decision-priority-cell" title="${escapeHtml(item.priorityLabel)}"><span>${priorityStars(item)}</span><small>${escapeHtml(item.priorityLabel)}</small></div>
     <div><span class="decision-pill">${escapeHtml(item.timeLabel)}</span></div>
-    <div><span class="decision-pill">${unlocks}</span></div>
-    <div><span class="resource-profile-badge ${profile.cls}">${escapeHtml(profile.label)}</span></div>
     <div><span class="decision-pill decision-feeling-pill">${escapeHtml(item.feeling || "—")}</span></div>
     <div><span class="action-owner-badge ${ownerClass}">${escapeHtml(item.owner)}</span></div>
+    <div><span class="decision-pill">${unlocks}</span></div>
   </div>`;
 }
 
@@ -1558,20 +1556,18 @@ function decisionTableHtml(items) {
       <span>Sort by</span>
       ${decisionSortButton("Priority", "priority")}
       ${decisionSortButton("Time", "time")}
-      ${decisionSortButton("Unlocks", "unlocks")}
-      ${decisionSortButton("Resources", "resources")}
       ${decisionSortButton("Feeling", "feeling")}
       ${decisionSortButton("Owner", "owner")}
+      ${decisionSortButton("Unlock", "unlocks")}
     </div>
     <div class="decision-table">
       <div class="decision-table-head">
         <button onclick="setDecisionSort('action')">Action${decisionSort.key === "action" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('priority')">Priority${decisionSort.key === "priority" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('time')">Time${decisionSort.key === "time" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
-        <button onclick="setDecisionSort('unlocks')">Unlocks${decisionSort.key === "unlocks" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
-        <button onclick="setDecisionSort('resources')">Resources${decisionSort.key === "resources" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('feeling')">Feeling${decisionSort.key === "feeling" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('owner')">Owner${decisionSort.key === "owner" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
+        <button onclick="setDecisionSort('unlocks')">Unlock${decisionSort.key === "unlocks" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
       </div>
       ${visibleItems.map(i => decisionTableRowHtml(i, items)).join("")}
     </div>`;

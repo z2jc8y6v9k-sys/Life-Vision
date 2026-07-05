@@ -1,10 +1,16 @@
-# My Life Vision App v57.1 Priority Stack + Inventory Goals
+# My Life Vision App v57.2 Streamlined Workplan
 
 Changes:
-- Removes the phrase “The 3–5 goals that matter most right now” from Dashboard / Overview → Priority Stack.
-- Adds a separate Inventory Goals section underneath Priority Stack.
-- Inventory Goals automatically lists goals where Priority is set to Inventory.
-- Inventory items remain clickable and open the corresponding goal in the Workbook.
-- Preserves v57 cleaner Workplan behavior.
+- Removes the Resources column from Workplan / This Moment's Decision.
+- Reorders Workplan columns to:
+  - Action
+  - Priority
+  - Time
+  - Feeling
+  - Owner
+  - Unlock
+- Keeps completion checkbox inside the Action column.
+- Keeps v57.1 Priority Stack cleanup and Inventory Goals section.
+- Preserves action detail persistence, completion to Wins, Feeling column, sorting, and Workbook / Workplan synchronization.
 
 No SQL changes required.

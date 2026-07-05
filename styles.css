@@ -3035,3 +3035,17 @@ body {
 .inventory-goal-item {
   background: #fffdf8;
 }
+
+/* v57.2 Streamlined Workplan: remove Resources, reorder columns */
+.decision-table-head,
+.decision-table-row {
+  grid-template-columns: minmax(260px, 1.65fr) 130px 105px minmax(150px, .95fr) 120px 95px !important;
+}
+@media(max-width:1100px) {
+  .decision-table-row > div:nth-child(2)::before { content: "Priority" !important; }
+  .decision-table-row > div:nth-child(3)::before { content: "Time" !important; }
+  .decision-table-row > div:nth-child(4)::before { content: "Feeling" !important; }
+  .decision-table-row > div:nth-child(5)::before { content: "Owner" !important; }
+  .decision-table-row > div:nth-child(6)::before { content: "Unlock" !important; }
+  .decision-table-row > div:nth-child(7)::before { content: none !important; display: none !important; }
+}
