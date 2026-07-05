@@ -3268,3 +3268,82 @@ body {
     padding: 10px 14px !important;
   }
 }
+
+/* v60.3 Full-graphic Pause background + visible entry
+   Shows the complete uploaded artwork on desktop and mobile.
+   Uses a versioned image filename to avoid browser cache problems.
+*/
+.pause-entry-image-page {
+  min-height: 100svh !important;
+  min-height: 100vh !important;
+  width: 100vw !important;
+  overflow: hidden !important;
+  background-image: url("pause-background-v60-3.png") !important;
+  background-size: contain !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-color: #a99d8d !important;
+  position: relative !important;
+}
+
+.pause-entry-image-page .pause-entry-main {
+  display: none !important;
+}
+
+.pause-entry-image-page::before {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  background:
+    radial-gradient(circle at 70% 20%, rgba(255,255,255,.08) 0%, rgba(255,255,255,0) 40%),
+    linear-gradient(180deg, rgba(17,24,39,0) 0%, rgba(17,24,39,.08) 100%) !important;
+}
+
+.pause-entry-image-page::after {
+  display: none !important;
+}
+
+.pause-entry-image-page .pause-entry-action {
+  position: fixed !important;
+  z-index: 3 !important;
+  right: clamp(14px, 2.2vw, 32px) !important;
+  bottom: clamp(14px, 2.2vw, 32px) !important;
+  opacity: .38 !important;
+  transform: none !important;
+  border: 1px solid rgba(255,255,255,.28) !important;
+  background: rgba(17,24,39,.16) !important;
+  color: rgba(255,253,248,.94) !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 10px 28px rgba(17,24,39,.10) !important;
+}
+
+.pause-entry-image-page:hover .pause-entry-action,
+.pause-entry-image-page:focus-within .pause-entry-action {
+  opacity: .50 !important;
+}
+
+.pause-entry-image-page .pause-entry-action:hover,
+.pause-entry-image-page .pause-entry-action:focus,
+.pause-entry-image-page .pause-entry-action:focus-visible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  background: rgba(255,253,248,.92) !important;
+  color: #111827 !important;
+  outline: none !important;
+}
+
+@media (max-width: 700px) {
+  .pause-entry-image-page {
+    background-size: contain !important;
+    background-position: center center !important;
+  }
+  .pause-entry-image-page .pause-entry-action {
+    right: 14px !important;
+    bottom: 16px !important;
+    font-size: 13px !important;
+    padding: 10px 14px !important;
+    opacity: .46 !important;
+  }
+}

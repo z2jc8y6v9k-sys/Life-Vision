@@ -1,10 +1,10 @@
-# My Life Vision App v60.2 Pause Background Fixed
+# My Life Vision App v60.3 Pause Background Full Graphic
 
 Changes:
-- Uses the uploaded Pause artwork (`pause-background.png`) as the opening page background.
-- Does not render a second visible Pause text layer; the Pause word comes from the image itself.
-- Anchors the background to the top so the Pause word remains visible on wide desktop Safari windows.
-- Adds portrait/mobile positioning so Pause is not cropped halfway on phone.
-- Keeps Create from Possibility hidden in the bottom-right until hover/focus.
+- Uses the uploaded Pause artwork as the opening screen background.
+- Switches the Pause opening image to `background-size: contain` so the full graphic remains visible on maximized iMac Safari and phone.
+- Uses a versioned background image filename to avoid browser cache holding onto older crops.
+- Keeps the app-rendered Pause text hidden because Pause is already part of the artwork.
+- Makes “Create from Possibility” slightly visible immediately, then fully visible on hover/focus.
 
 No SQL changes required.
