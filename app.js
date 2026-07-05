@@ -48,10 +48,15 @@ let hasEnteredApp = false;
 async function init() {
   const { data } = await supabaseClient.auth.getSession();
   state.user = data.session?.user || null;
-  if (!state.user) return renderAuth();
-  await seedStarterGoalsIfEmpty();
-  await Promise.all([loadGoals(), loadReviews(), loadMetrics(), loadVision()]);
-  render();
+
+  // v59.1: Always begin with the clean Pause entry screen.
+  // If the user is already signed in, load their data first, then show Pause.
+  // If the user is not signed in, Pause still appears first; Create from Possibility opens sign-in.
+  if (state.user) {
+    await seedStarterGoalsIfEmpty();
+    await Promise.all([loadGoals(), loadReviews(), loadMetrics(), loadVision()]);
+  }
+  renderPauseEntry();
 }
 
 function renderAuth(message = "") {
@@ -81,6 +86,7 @@ function renderPauseEntry() {
 function enterFromPossibility() {
   hasEnteredApp = true;
   activeView = "Dashboard";
+  if (!state.user) return renderAuth();
   render();
 }
 
@@ -1955,7 +1961,7 @@ function setWorkbookView(category) {
 }
 
 function render() {
-  if (state.user && !hasEnteredApp) return renderPauseEntry();
+  if (!hasEnteredApp) return renderPauseEntry();
   const stats = completionStats();
   const navCats = "";
   const viewButtons = "";
