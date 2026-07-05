@@ -1,10 +1,13 @@
-# My Life Vision App v59.3 Hidden Possibility Entry
+# My Life Vision App — Foundation Release
 
-Changes:
-- Keeps the clean Pause entry screen.
-- Shows only **Pause.** on initial load.
-- Moves **Create from Possibility** to the bottom-right corner.
-- The entry action is hidden by default and becomes visible on hover/focus.
-- Clicking **Create from Possibility** enters the Dashboard / Workbook experience.
+Foundation fixes:
+- Removes “What deserves your attention right now?” from This Moment’s Decision.
+- Removes the explanatory sentence under My Actions.
+- Keeps Delegated and Scheduled items inside My Actions instead of separate sections.
+- Keeps Waiting as its own section.
+- Removes Resources from the Workplan table.
+- Reorders Workplan columns to: Action, Priority, Time, Feeling, Owner, Unlock.
+- Persists action metadata and Feeling into the goal record using the existing `behavior_standard` field as an internal JSON metadata store, with localStorage only as a cache.
+- This means clearing browser cache should no longer wipe Time, Owner, Feeling, or action metadata once those values have synced to cloud.
 
 No SQL changes required.

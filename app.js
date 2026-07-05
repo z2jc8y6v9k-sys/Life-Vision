@@ -487,7 +487,18 @@ function goalMetaStorageKey(goalId) {
   return `lifeVisionGoalMeta:${state.user?.id || "local"}:${goalId}`;
 }
 
-function parseGoalMeta(goal) {
+function parseStoredGoalMeta(goal) {
+  try {
+    const raw = String(goal?.behavior_standard || "");
+    if (!raw.trim().startsWith("{")) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && parsed.__lifeVisionMeta ? parsed : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function parseLocalGoalMeta(goal) {
   try {
     if (!goal?.id) return {};
     const raw = localStorage.getItem(goalMetaStorageKey(goal.id)) || "";
@@ -497,6 +508,30 @@ function parseGoalMeta(goal) {
   } catch (e) {
     return {};
   }
+}
+
+function parseGoalMeta(goal) {
+  // Foundation Release: metadata is persisted in the goal record, with localStorage as a fast cache.
+  // This prevents cache-clearing from wiping Time / Owner / Feeling / action details.
+  return { ...parseStoredGoalMeta(goal), ...parseLocalGoalMeta(goal) };
+}
+
+function persistGoalMeta(goal, meta, { renderAfter = false } = {}) {
+  if (!goal?.id) return;
+  const cleanMeta = { ...meta, __lifeVisionMeta: true };
+  const serialized = JSON.stringify(cleanMeta);
+  goal.behavior_standard = serialized;
+  localStorage.setItem(goalMetaStorageKey(goal.id), serialized);
+
+  clearTimeout(updateTimers[goal.id + "behavior_standard_meta"]);
+  updateTimers[goal.id + "behavior_standard_meta"] = setTimeout(async () => {
+    const { error } = await supabaseClient
+      .from("goals")
+      .update({ behavior_standard: serialized, updated_at: new Date().toISOString() })
+      .eq("id", goal.id);
+    if (error) showSaved("Save error"); else showSaved("Saved to cloud");
+    if (renderAfter) setTimeout(render, 80);
+  }, 300);
 }
 
 function metaValue(goal, key) {
@@ -511,32 +546,28 @@ function updateGoalMeta(goalId, key, value) {
   const goal = state.goals.find(g => g.id === goalId);
   if (!goal) return;
   const meta = parseGoalMeta(goal);
-  meta.__lifeVisionMeta = true;
   meta[key] = value;
-  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
-  showSaved("Saved locally");
-  setTimeout(render, 150);
+  persistGoalMeta(goal, meta, { renderAfter: true });
+  showSaved("Saving to cloud");
 }
 
 function updateGoalMetaNoRender(goalId, key, value) {
   const goal = state.goals.find(g => g.id === goalId);
   if (!goal) return;
   const meta = parseGoalMeta(goal);
-  meta.__lifeVisionMeta = true;
   meta[key] = value;
-  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
-  showSaved("Saved locally");
+  persistGoalMeta(goal, meta);
+  showSaved("Saving to cloud");
 }
 
 function updateActionMeta(goalId, field, actionKey, index, suffix, value) {
   const goal = state.goals.find(g => g.id === goalId);
   if (!goal) return;
   const meta = parseGoalMeta(goal);
-  meta.__lifeVisionMeta = true;
   meta[`action_${field}_${actionKey}_${suffix}`] = value;
   meta[`action_${field}_idx_${index}_${suffix}`] = value;
-  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
-  showSaved("Saved locally");
+  persistGoalMeta(goal, meta);
+  showSaved("Saving to cloud");
 }
 
 function localMetaFieldCard(goal, key, label, cls = "") {
@@ -1473,7 +1504,6 @@ function decisionResourcesValue(item) {
 }
 
 function decisionTableRowHtml(item, allItems) {
-  const profile = resourceProfileScore(item.goal);
   const unlocks = decisionUnlocksValue(item, allItems);
   const ownerClass = `owner-${String(item.owner || "Me").toLowerCase().replace(/\s+/g,"-")}`;
   return `<div class="decision-table-row clickable-card" onclick="openGoal('${item.goalId}')">
@@ -1486,12 +1516,12 @@ function decisionTableRowHtml(item, allItems) {
     </div>
     <div class="decision-priority-cell" title="${escapeHtml(item.priorityLabel)}"><span>${priorityStars(item)}</span><small>${escapeHtml(item.priorityLabel)}</small></div>
     <div><span class="decision-pill">${escapeHtml(item.timeLabel)}</span></div>
-    <div><span class="decision-pill">${unlocks}</span></div>
-    <div><span class="resource-profile-badge ${profile.cls}">${escapeHtml(profile.label)}</span></div>
     <div><span class="decision-pill decision-feeling-pill">${escapeHtml(item.feeling || "—")}</span></div>
     <div><span class="action-owner-badge ${ownerClass}">${escapeHtml(item.owner)}</span></div>
+    <div><span class="decision-pill">${unlocks}</span></div>
   </div>`;
 }
+
 
 
 function setDecisionSort(key) {
@@ -1559,24 +1589,23 @@ function decisionTableHtml(items) {
       <span>Sort by</span>
       ${decisionSortButton("Priority", "priority")}
       ${decisionSortButton("Time", "time")}
-      ${decisionSortButton("Unlocks", "unlocks")}
-      ${decisionSortButton("Resources", "resources")}
       ${decisionSortButton("Feeling", "feeling")}
       ${decisionSortButton("Owner", "owner")}
+      ${decisionSortButton("Unlock", "unlocks")}
     </div>
     <div class="decision-table">
       <div class="decision-table-head">
         <button onclick="setDecisionSort('action')">Action${decisionSort.key === "action" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('priority')">Priority${decisionSort.key === "priority" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('time')">Time${decisionSort.key === "time" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
-        <button onclick="setDecisionSort('unlocks')">Unlocks${decisionSort.key === "unlocks" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
-        <button onclick="setDecisionSort('resources')">Resources${decisionSort.key === "resources" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('feeling')">Feeling${decisionSort.key === "feeling" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('owner')">Owner${decisionSort.key === "owner" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
+        <button onclick="setDecisionSort('unlocks')">Unlock${decisionSort.key === "unlocks" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
       </div>
       ${visibleItems.map(i => decisionTableRowHtml(i, items)).join("")}
     </div>`;
 }
+
 
 
 function decisionSnapshotHtml(items, totals) {
@@ -1589,7 +1618,6 @@ function decisionSnapshotHtml(items, totals) {
     <div>
       <span class="workplan-eyebrow">Decision Snapshot</span>
       <h2>This Moment's Decision</h2>
-      <p class="decision-prompt">What deserves your attention right now?</p>
     </div>
     <div class="decision-snapshot-grid">
       <div><b>${topPriorityItems.length}</b><span>Top-priority actions</span></div>
@@ -1610,37 +1638,25 @@ function workplanSectionHtml(title, items, intro = "") {
   </div>`;
 }
 
-function myActionsSectionHtml(myItems, delegatedItems, scheduledItems) {
+function myActionsSectionHtml(activeItems) {
   return `<div class="workplan-card decision-table-card owner-workplan-section my-actions-section">
-    <span class="workplan-eyebrow">My Actions (${myItems.length})</span>
-    <p class="decision-table-intro">Only Today / This Week actions appear here. Start with work where you are the owner. Delegated items stay visible underneath without becoming their own primary section.</p>
-    ${decisionTableHtml(myItems)}
-    ${delegatedItems.length ? `
-      <div class="delegated-inline-block">
-        <div class="delegated-inline-label">Delegated (${delegatedItems.length})</div>
-        ${decisionTableHtml(delegatedItems)}
-      </div>` : ""}
-    ${scheduledItems.length ? `
-      <div class="delegated-inline-block scheduled-inline-block">
-        <div class="delegated-inline-label">Scheduled (${scheduledItems.length})</div>
-        ${decisionTableHtml(scheduledItems)}
-      </div>` : ""}
+    <span class="workplan-eyebrow">My Actions (${activeItems.length})</span>
+    ${decisionTableHtml(activeItems)}
   </div>`;
 }
 
+
 function workplanHtml() {
   const items = workplanActionItems();
-  const myItems = items.filter(i => i.owner === "Me");
-  const delegatedItems = items.filter(i => i.owner === "Delegated");
+  const activeItems = items.filter(i => ["Me", "Delegated", "Scheduled"].includes(i.owner));
   const waitingItems = items.filter(i => i.owner === "Waiting");
-  const scheduledItems = items.filter(i => i.owner === "Scheduled");
   const totals = workplanTotals(items);
   const completed = completedTodayItems();
 
-  return `<section class="workplan-page action-plan-page single-source-workplan decision-view-page decision-table-page owner-based-workplan-page cleaner-workplan-page">
+  return `<section class="workplan-page action-plan-page single-source-workplan decision-view-page decision-table-page owner-based-workplan-page cleaner-workplan-page foundation-workplan-page">
     ${decisionSnapshotHtml(items, totals)}
 
-    ${myActionsSectionHtml(myItems, delegatedItems, scheduledItems)}
+    ${myActionsSectionHtml(activeItems)}
 
     <div class="workplan-card waiting-card-focused">
       <span class="workplan-eyebrow">Waiting (${waitingItems.length})</span>
@@ -1653,6 +1669,7 @@ function workplanHtml() {
     </div>
   </section>`;
 }
+
 
 function todayThisWeekHtml() {
   return workplanHtml();
