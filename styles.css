@@ -3088,21 +3088,55 @@ body {
   opacity: 1;
 }
 
-/* Foundation Release: streamlined Workplan columns + cleaner copy */
-.foundation-workplan-page .decision-table-head,
-.foundation-workplan-page .decision-table-row {
-  grid-template-columns: minmax(260px, 1.55fr) 130px 110px minmax(150px, .95fr) 115px 90px !important;
+
+/* v60 Pause image opening page */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
-.foundation-workplan-page .decision-table-intro,
-.foundation-workplan-page .decision-prompt {
-  display: none !important;
+.pause-entry-image-page {
+  min-height: 100vh;
+  background-image: url("pause-background.png");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: #b7aa97;
 }
 
-@media(max-width:1100px) {
-  .foundation-workplan-page .decision-table-row > div:nth-child(2)::before { content: "Priority"; }
-  .foundation-workplan-page .decision-table-row > div:nth-child(3)::before { content: "Time"; }
-  .foundation-workplan-page .decision-table-row > div:nth-child(4)::before { content: "Feeling"; }
-  .foundation-workplan-page .decision-table-row > div:nth-child(5)::before { content: "Owner"; }
-  .foundation-workplan-page .decision-table-row > div:nth-child(6)::before { content: "Unlock"; }
+.pause-entry-image-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(255,255,255,0) 0%, rgba(17,24,39,.10) 100%);
+}
+
+.pause-entry-image-page .pause-entry-action {
+  z-index: 2;
+  right: 28px;
+  bottom: 26px;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(17,24,39,.10);
+  color: rgba(255,253,248,.92);
+  backdrop-filter: blur(10px);
+}
+
+.pause-entry-image-page:hover .pause-entry-action {
+  opacity: .06;
+}
+
+.pause-entry-image-page .pause-entry-action:hover,
+.pause-entry-image-page .pause-entry-action:focus,
+.pause-entry-image-page .pause-entry-action:focus-visible {
+  opacity: 1;
+  background: rgba(255,253,248,.92);
+  color: #111827;
 }
