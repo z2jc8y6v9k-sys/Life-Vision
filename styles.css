@@ -3140,3 +3140,50 @@ body {
   background: rgba(255,253,248,.92);
   color: #111827;
 }
+
+/* v60.1 Responsive Pause background safe-area fix */
+.pause-entry-image-page {
+  background-size: auto 100vh !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-color: #b7aa97 !important;
+}
+
+.pause-entry-image-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(17,24,39,.20), rgba(17,24,39,0) 22%, rgba(17,24,39,0) 78%, rgba(17,24,39,.10)),
+    radial-gradient(circle at center, rgba(255,255,255,0) 0%, rgba(17,24,39,.08) 100%);
+  z-index: 1;
+}
+
+.pause-entry-image-page::after {
+  display: none !important;
+}
+
+.pause-entry-image-page .pause-entry-action {
+  z-index: 3;
+}
+
+@media (max-width: 700px) {
+  .pause-entry-image-page {
+    background-size: auto 100vh !important;
+    background-position: right center !important;
+  }
+  .pause-entry-image-page .pause-entry-action {
+    right: 16px !important;
+    bottom: 18px !important;
+    font-size: 13px !important;
+    padding: 10px 14px !important;
+  }
+}
+
+@media (min-width: 1400px) {
+  .pause-entry-image-page {
+    background-size: auto 100vh !important;
+    background-position: center center !important;
+  }
+}
