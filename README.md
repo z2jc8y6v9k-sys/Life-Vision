@@ -1,11 +1,10 @@
-# My Life Vision App v58.2 Workplan Cleanup Retry
+# My Life Vision App v59 Pause Entry
 
 Changes:
-- Removes “What deserves your attention right now?” under This Moment’s Decision.
-- Removes the “Only Today/This Week actions appear here…” instructional sentence under My Actions.
-- Keeps Delegated items inside My Actions with no separate Delegated section or divider.
-- Keeps Waiting as its own separate section.
-- Keeps streamlined Workplan columns: Action, Priority, Time, Feeling, Owner, Unlock.
-- Preserves v58 action-object persistence work.
+- Adds a clean starting page after sign-in.
+- The starting page shows only: **Pause.**
+- At the bottom of the page, **Create from Possibility** opens the main app.
+- Clicking **Create from Possibility** takes the user into the Dashboard / Workbook system.
+- Preserves v58 Workplan cleanup and action-object persistence behavior.
 
 No SQL changes required.

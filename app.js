@@ -43,6 +43,7 @@ let showAddVision = false;
 let saveTimer = null;
 let updateTimers = {};
 let decisionSort = { key: "priority", dir: "asc" };
+let hasEnteredApp = false;
 
 async function init() {
   const { data } = await supabaseClient.auth.getSession();
@@ -69,6 +70,20 @@ function renderAuth(message = "") {
       </div>
     </div>`;
 }
+function renderPauseEntry() {
+  document.getElementById("app").innerHTML = `
+    <div class="pause-entry-page">
+      <div class="pause-word">Pause.</div>
+      <button class="pause-create-link" onclick="enterFromPossibility()">Create from Possibility</button>
+    </div>`;
+}
+
+function enterFromPossibility() {
+  hasEnteredApp = true;
+  activeView = "Dashboard";
+  render();
+}
+
 
 async function signUp() {
   const email = document.getElementById("email").value.trim();
@@ -1940,6 +1955,7 @@ function setWorkbookView(category) {
 }
 
 function render() {
+  if (state.user && !hasEnteredApp) return renderPauseEntry();
   const stats = completionStats();
   const navCats = "";
   const viewButtons = "";
