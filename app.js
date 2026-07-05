@@ -1907,11 +1907,12 @@ function enterFromPossibility() {
 
 function renderPauseEntry() {
   document.getElementById("app").innerHTML = `
-    <div class="pause-entry-page pause-entry-image-page">
-      <main class="pause-entry-main" aria-label="Pause entry">
+    <div class="pause-entry-page pause-entry-image-page pause-composition-page">
+      <main class="pause-entry-main pause-composition-main" aria-label="Pause entry">
+        <img class="pause-composition-art" src="pause-background.png" alt="Pause." />
         <h1 class="sr-only">Pause.</h1>
       </main>
-      <button class="pause-entry-action" onclick="enterFromPossibility()">Create from Possibility</button>
+      <button class="pause-entry-action pause-composition-action" onclick="enterFromPossibility()">Create from Possibility</button>
     </div>`;
 }
 
