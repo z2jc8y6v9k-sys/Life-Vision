@@ -1640,7 +1640,6 @@ function decisionSnapshotHtml(items, totals) {
     <div>
       <span class="workplan-eyebrow">Decision Snapshot</span>
       <h2>This Moment's Decision</h2>
-      <p class="decision-prompt">What deserves your attention right now?</p>
     </div>
     <div class="decision-snapshot-grid">
       <div><b>${topPriorityItems.length}</b><span>Top-priority actions</span></div>
@@ -1662,20 +1661,10 @@ function workplanSectionHtml(title, items, intro = "") {
 }
 
 function myActionsSectionHtml(myItems, delegatedItems, scheduledItems) {
+  const managedItems = [...myItems, ...delegatedItems, ...scheduledItems];
   return `<div class="workplan-card decision-table-card owner-workplan-section my-actions-section">
-    <span class="workplan-eyebrow">My Actions (${myItems.length})</span>
-    <p class="decision-table-intro">Only Today / This Week actions appear here. Start with work where you are the owner. Delegated items stay visible underneath without becoming their own primary section.</p>
-    ${decisionTableHtml(myItems)}
-    ${delegatedItems.length ? `
-      <div class="delegated-inline-block">
-        <div class="delegated-inline-label">Delegated (${delegatedItems.length})</div>
-        ${decisionTableHtml(delegatedItems)}
-      </div>` : ""}
-    ${scheduledItems.length ? `
-      <div class="delegated-inline-block scheduled-inline-block">
-        <div class="delegated-inline-label">Scheduled (${scheduledItems.length})</div>
-        ${decisionTableHtml(scheduledItems)}
-      </div>` : ""}
+    <span class="workplan-eyebrow">My Actions (${managedItems.length})</span>
+    ${decisionTableHtml(managedItems)}
   </div>`;
 }
 
