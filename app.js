@@ -1661,6 +1661,7 @@ function workplanSectionHtml(title, items, intro = "") {
 }
 
 function myActionsSectionHtml(myItems, delegatedItems, scheduledItems) {
+  // v58.2: Delegated and Scheduled remain inside My Actions; no separate delegated section or divider.
   const managedItems = [...myItems, ...delegatedItems, ...scheduledItems];
   return `<div class="workplan-card decision-table-card owner-workplan-section my-actions-section">
     <span class="workplan-eyebrow">My Actions (${managedItems.length})</span>

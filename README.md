@@ -1,10 +1,11 @@
-# My Life Vision App v58.1 Clean Workplan
+# My Life Vision App v58.2 Workplan Cleanup Retry
 
 Changes:
-- Removes the phrase “What deserves your attention right now?” under This Moment’s Decision.
-- Removes the explanatory sentence under My Actions.
-- Keeps Delegated and Scheduled actions inside My Actions instead of giving them separate visual sections.
-- Keeps Waiting as its own section.
-- Preserves v58 action-object persistence and the streamlined Workplan columns: Priority, Time, Feeling, Owner, Unlock.
+- Removes “What deserves your attention right now?” under This Moment’s Decision.
+- Removes the “Only Today/This Week actions appear here…” instructional sentence under My Actions.
+- Keeps Delegated items inside My Actions with no separate Delegated section or divider.
+- Keeps Waiting as its own separate section.
+- Keeps streamlined Workplan columns: Action, Priority, Time, Feeling, Owner, Unlock.
+- Preserves v58 action-object persistence work.
 
 No SQL changes required.

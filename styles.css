@@ -3062,3 +3062,20 @@ body {
   .decision-table-row > div:nth-child(5)::before { content: "Owner"; }
   .decision-table-row > div:nth-child(6)::before { content: "Unlock"; }
 }
+
+
+/* v58.2 retry: hard cleanup for Workplan text and delegated display */
+.decision-prompt,
+.decision-table-intro,
+.delegated-inline-block,
+.delegated-inline-label {
+  display: none !important;
+}
+.my-actions-section .decision-table-row {
+  background: #fbfaf7 !important;
+  border-color: rgba(31,41,51,.10) !important;
+}
+.decision-table-head,
+.decision-table-row {
+  grid-template-columns: minmax(260px, 1.6fr) 130px 105px minmax(150px, .9fr) 120px 90px !important;
+}
