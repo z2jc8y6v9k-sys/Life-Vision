@@ -3036,84 +3036,39 @@ body {
   background: #fffdf8;
 }
 
-/* v57.2 Streamlined Workplan: remove Resources, reorder columns */
-.decision-table-head,
-.decision-table-row {
-  grid-template-columns: minmax(260px, 1.65fr) 130px 105px minmax(150px, .95fr) 120px 95px !important;
-}
-@media(max-width:1100px) {
-  .decision-table-row > div:nth-child(2)::before { content: "Priority" !important; }
-  .decision-table-row > div:nth-child(3)::before { content: "Time" !important; }
-  .decision-table-row > div:nth-child(4)::before { content: "Feeling" !important; }
-  .decision-table-row > div:nth-child(5)::before { content: "Owner" !important; }
-  .decision-table-row > div:nth-child(6)::before { content: "Unlock" !important; }
-  .decision-table-row > div:nth-child(7)::before { content: none !important; display: none !important; }
-}
 
-/* v58 Action Objects + Streamlined Workplan */
-.decision-table-head,
-.decision-table-row {
-  grid-template-columns: minmax(260px, 1.6fr) 130px 105px minmax(150px, .9fr) 120px 90px !important;
-}
-@media(max-width:1100px) {
-  .decision-table-row > div:nth-child(2)::before { content: "Priority"; }
-  .decision-table-row > div:nth-child(3)::before { content: "Time"; }
-  .decision-table-row > div:nth-child(4)::before { content: "Feeling"; }
-  .decision-table-row > div:nth-child(5)::before { content: "Owner"; }
-  .decision-table-row > div:nth-child(6)::before { content: "Unlock"; }
-}
-
-
-/* v58.2 retry: hard cleanup for Workplan text and delegated display */
-.decision-prompt,
-.decision-table-intro,
-.delegated-inline-block,
-.delegated-inline-label {
-  display: none !important;
-}
-.my-actions-section .decision-table-row {
-  background: #fbfaf7 !important;
-  border-color: rgba(31,41,51,.10) !important;
-}
-.decision-table-head,
-.decision-table-row {
-  grid-template-columns: minmax(260px, 1.6fr) 130px 105px minmax(150px, .9fr) 120px 90px !important;
-}
-
-
-/* v59 Pause Entry */
+/* v59.2 Pause Entry rendered from app.js */
 .pause-entry-page {
   min-height: 100vh;
   background: var(--bg);
   color: var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   position: relative;
-  padding: 40px 24px 72px;
+  padding: 32px;
 }
-
-.pause-word {
-  font-size: clamp(52px, 9vw, 120px);
-  line-height: 0.95;
+.pause-entry-main h1 {
+  margin: 0;
+  font-size: clamp(48px, 9vw, 118px);
+  line-height: .9;
   letter-spacing: -0.085em;
   font-weight: 900;
 }
-
-.pause-create-link {
-  position: absolute;
+.pause-entry-action {
+  position: fixed;
   left: 50%;
-  bottom: 36px;
+  bottom: 34px;
   transform: translateX(-50%);
-  border: 0;
+  border: 1px solid rgba(31,41,51,.14);
   background: transparent;
   color: #111827;
-  font-size: clamp(15px, 2.2vw, 20px);
-  font-weight: 850;
-  letter-spacing: -0.02em;
-  padding: 12px 16px;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
 }
-
-.pause-create-link:hover {
-  text-decoration: underline;
+.pause-entry-action:hover {
+  background: #fffdf8;
+  box-shadow: 0 10px 24px rgba(31,41,51,.08);
 }

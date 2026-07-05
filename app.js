@@ -43,20 +43,15 @@ let showAddVision = false;
 let saveTimer = null;
 let updateTimers = {};
 let decisionSort = { key: "priority", dir: "asc" };
-let hasEnteredApp = false;
+let showPauseEntry = true;
 
 async function init() {
   const { data } = await supabaseClient.auth.getSession();
   state.user = data.session?.user || null;
-
-  // v59.1: Always begin with the clean Pause entry screen.
-  // If the user is already signed in, load their data first, then show Pause.
-  // If the user is not signed in, Pause still appears first; Create from Possibility opens sign-in.
-  if (state.user) {
-    await seedStarterGoalsIfEmpty();
-    await Promise.all([loadGoals(), loadReviews(), loadMetrics(), loadVision()]);
-  }
-  renderPauseEntry();
+  if (!state.user) return renderAuth();
+  await seedStarterGoalsIfEmpty();
+  await Promise.all([loadGoals(), loadReviews(), loadMetrics(), loadVision()]);
+  render();
 }
 
 function renderAuth(message = "") {
@@ -75,21 +70,6 @@ function renderAuth(message = "") {
       </div>
     </div>`;
 }
-function renderPauseEntry() {
-  document.getElementById("app").innerHTML = `
-    <div class="pause-entry-page">
-      <div class="pause-word">Pause.</div>
-      <button class="pause-create-link" onclick="enterFromPossibility()">Create from Possibility</button>
-    </div>`;
-}
-
-function enterFromPossibility() {
-  hasEnteredApp = true;
-  activeView = "Dashboard";
-  if (!state.user) return renderAuth();
-  render();
-}
-
 
 async function signUp() {
   const email = document.getElementById("email").value.trim();
@@ -135,18 +115,6 @@ async function loadGoals() {
   const { data, error } = await supabaseClient.from("goals").select("*").order("created_at", { ascending: true });
   if (error) return alert("Could not load goals: " + error.message);
   state.goals = data || [];
-  syncLocalGoalMetaToCloud();
-}
-
-function syncLocalGoalMetaToCloud() {
-  state.goals.forEach(goal => {
-    if (parseMetaJson(goal.behavior_standard || "")) return;
-    const localMeta = parseMetaJson(localStorage.getItem(goalMetaStorageKey(goal.id)) || "");
-    if (!localMeta) return;
-    const json = JSON.stringify(localMeta);
-    goal.behavior_standard = json;
-    supabaseClient.from("goals").update({ behavior_standard: json, updated_at: new Date().toISOString() }).eq("id", goal.id);
-  });
 }
 async function loadReviews() {
   const { data, error } = await supabaseClient.from("life_reviews").select("*");
@@ -519,45 +487,16 @@ function goalMetaStorageKey(goalId) {
   return `lifeVisionGoalMeta:${state.user?.id || "local"}:${goalId}`;
 }
 
-function parseMetaJson(raw) {
-  try {
-    if (!raw || !String(raw).trim().startsWith("{")) return null;
-    const parsed = JSON.parse(raw);
-    return parsed && parsed.__lifeVisionMeta ? parsed : null;
-  } catch (e) {
-    return null;
-  }
-}
-
 function parseGoalMeta(goal) {
-  if (!goal?.id) return {};
-  const cloudMeta = parseMetaJson(goal.behavior_standard || "");
-  if (cloudMeta) return cloudMeta;
-  // v58 migration bridge: read older local action metadata once, then save future edits to Supabase.
   try {
-    const localMeta = parseMetaJson(localStorage.getItem(goalMetaStorageKey(goal.id)) || "");
-    return localMeta || {};
+    if (!goal?.id) return {};
+    const raw = localStorage.getItem(goalMetaStorageKey(goal.id)) || "";
+    if (!raw.trim().startsWith("{")) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && parsed.__lifeVisionMeta ? parsed : {};
   } catch (e) {
     return {};
   }
-}
-
-function persistGoalMeta(goalId, meta, { rerender = false, message = "Saved to cloud" } = {}) {
-  const goal = state.goals.find(g => g.id === goalId);
-  if (!goal) return;
-  const nextMeta = { ...(meta || {}), __lifeVisionMeta: true };
-  const json = JSON.stringify(nextMeta);
-  goal.behavior_standard = json;
-  try { localStorage.setItem(goalMetaStorageKey(goalId), json); } catch (e) {}
-  clearTimeout(updateTimers["meta" + goalId]);
-  updateTimers["meta" + goalId] = setTimeout(async () => {
-    const { error } = await supabaseClient
-      .from("goals")
-      .update({ behavior_standard: json, updated_at: new Date().toISOString() })
-      .eq("id", goalId);
-    if (error) showSaved("Save error"); else showSaved(message);
-    if (rerender) render();
-  }, 350);
 }
 
 function metaValue(goal, key) {
@@ -572,45 +511,32 @@ function updateGoalMeta(goalId, key, value) {
   const goal = state.goals.find(g => g.id === goalId);
   if (!goal) return;
   const meta = parseGoalMeta(goal);
+  meta.__lifeVisionMeta = true;
   meta[key] = value;
-  persistGoalMeta(goalId, meta, { rerender: true });
+  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
+  showSaved("Saved locally");
+  setTimeout(render, 150);
 }
 
 function updateGoalMetaNoRender(goalId, key, value) {
   const goal = state.goals.find(g => g.id === goalId);
   if (!goal) return;
   const meta = parseGoalMeta(goal);
+  meta.__lifeVisionMeta = true;
   meta[key] = value;
-  persistGoalMeta(goalId, meta);
-}
-
-function actionObjectFor(goal, field, actionKey, item = {}) {
-  const meta = parseGoalMeta(goal);
-  meta.actions = meta.actions || {};
-  meta.actions[field] = meta.actions[field] || {};
-  meta.actions[field][actionKey] = meta.actions[field][actionKey] || {
-    id: actionKey,
-    field,
-    text: item.text || "",
-    lineIndex: item.index ?? null,
-    time: "",
-    owner: "Me",
-    completed: false
-  };
-  if (item.text) meta.actions[field][actionKey].text = item.text;
-  if (item.index !== undefined) meta.actions[field][actionKey].lineIndex = item.index;
-  return { meta, action: meta.actions[field][actionKey] };
+  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
+  showSaved("Saved locally");
 }
 
 function updateActionMeta(goalId, field, actionKey, index, suffix, value) {
   const goal = state.goals.find(g => g.id === goalId);
   if (!goal) return;
-  const item = actionLines(goal, field).find(i => actionKeyFor(goalId, field, i.text) === actionKey) || { text: "", index };
-  const { meta, action } = actionObjectFor(goal, field, actionKey, item);
-  action[suffix] = value;
+  const meta = parseGoalMeta(goal);
+  meta.__lifeVisionMeta = true;
   meta[`action_${field}_${actionKey}_${suffix}`] = value;
   meta[`action_${field}_idx_${index}_${suffix}`] = value;
-  persistGoalMeta(goalId, meta);
+  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
+  showSaved("Saved locally");
 }
 
 function localMetaFieldCard(goal, key, label, cls = "") {
@@ -1284,11 +1210,9 @@ function actionIndexMetaKey(field, index, suffix) {
 
 function actionMetaValue(goal, field, lineText, index, suffix) {
   const meta = parseGoalMeta(goal);
-  const actionKey = actionKeyFor(goal.id, field, lineText);
-  const action = meta.actions?.[field]?.[actionKey];
   const textKey = actionMetaKey(goal.id, field, lineText, suffix);
   const idxKey = actionIndexMetaKey(field, index, suffix);
-  return action?.[suffix] || meta[textKey] || meta[idxKey] || "";
+  return meta[textKey] || meta[idxKey] || "";
 }
 
 function actionTimeValue(goal, field, lineText, index = 0) {
@@ -1549,6 +1473,7 @@ function decisionResourcesValue(item) {
 }
 
 function decisionTableRowHtml(item, allItems) {
+  const profile = resourceProfileScore(item.goal);
   const unlocks = decisionUnlocksValue(item, allItems);
   const ownerClass = `owner-${String(item.owner || "Me").toLowerCase().replace(/\s+/g,"-")}`;
   return `<div class="decision-table-row clickable-card" onclick="openGoal('${item.goalId}')">
@@ -1561,9 +1486,10 @@ function decisionTableRowHtml(item, allItems) {
     </div>
     <div class="decision-priority-cell" title="${escapeHtml(item.priorityLabel)}"><span>${priorityStars(item)}</span><small>${escapeHtml(item.priorityLabel)}</small></div>
     <div><span class="decision-pill">${escapeHtml(item.timeLabel)}</span></div>
+    <div><span class="decision-pill">${unlocks}</span></div>
+    <div><span class="resource-profile-badge ${profile.cls}">${escapeHtml(profile.label)}</span></div>
     <div><span class="decision-pill decision-feeling-pill">${escapeHtml(item.feeling || "—")}</span></div>
     <div><span class="action-owner-badge ${ownerClass}">${escapeHtml(item.owner)}</span></div>
-    <div><span class="decision-pill">${unlocks}</span></div>
   </div>`;
 }
 
@@ -1633,18 +1559,20 @@ function decisionTableHtml(items) {
       <span>Sort by</span>
       ${decisionSortButton("Priority", "priority")}
       ${decisionSortButton("Time", "time")}
+      ${decisionSortButton("Unlocks", "unlocks")}
+      ${decisionSortButton("Resources", "resources")}
       ${decisionSortButton("Feeling", "feeling")}
       ${decisionSortButton("Owner", "owner")}
-      ${decisionSortButton("Unlock", "unlocks")}
     </div>
     <div class="decision-table">
       <div class="decision-table-head">
         <button onclick="setDecisionSort('action')">Action${decisionSort.key === "action" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('priority')">Priority${decisionSort.key === "priority" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('time')">Time${decisionSort.key === "time" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
+        <button onclick="setDecisionSort('unlocks')">Unlocks${decisionSort.key === "unlocks" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
+        <button onclick="setDecisionSort('resources')">Resources${decisionSort.key === "resources" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('feeling')">Feeling${decisionSort.key === "feeling" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
         <button onclick="setDecisionSort('owner')">Owner${decisionSort.key === "owner" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
-        <button onclick="setDecisionSort('unlocks')">Unlock${decisionSort.key === "unlocks" ? (decisionSort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
       </div>
       ${visibleItems.map(i => decisionTableRowHtml(i, items)).join("")}
     </div>`;
@@ -1661,6 +1589,7 @@ function decisionSnapshotHtml(items, totals) {
     <div>
       <span class="workplan-eyebrow">Decision Snapshot</span>
       <h2>This Moment's Decision</h2>
+      <p class="decision-prompt">What deserves your attention right now?</p>
     </div>
     <div class="decision-snapshot-grid">
       <div><b>${topPriorityItems.length}</b><span>Top-priority actions</span></div>
@@ -1682,11 +1611,20 @@ function workplanSectionHtml(title, items, intro = "") {
 }
 
 function myActionsSectionHtml(myItems, delegatedItems, scheduledItems) {
-  // v58.2: Delegated and Scheduled remain inside My Actions; no separate delegated section or divider.
-  const managedItems = [...myItems, ...delegatedItems, ...scheduledItems];
   return `<div class="workplan-card decision-table-card owner-workplan-section my-actions-section">
-    <span class="workplan-eyebrow">My Actions (${managedItems.length})</span>
-    ${decisionTableHtml(managedItems)}
+    <span class="workplan-eyebrow">My Actions (${myItems.length})</span>
+    <p class="decision-table-intro">Only Today / This Week actions appear here. Start with work where you are the owner. Delegated items stay visible underneath without becoming their own primary section.</p>
+    ${decisionTableHtml(myItems)}
+    ${delegatedItems.length ? `
+      <div class="delegated-inline-block">
+        <div class="delegated-inline-label">Delegated (${delegatedItems.length})</div>
+        ${decisionTableHtml(delegatedItems)}
+      </div>` : ""}
+    ${scheduledItems.length ? `
+      <div class="delegated-inline-block scheduled-inline-block">
+        <div class="delegated-inline-label">Scheduled (${scheduledItems.length})</div>
+        ${decisionTableHtml(scheduledItems)}
+      </div>` : ""}
   </div>`;
 }
 
@@ -1960,8 +1898,25 @@ function setWorkbookView(category) {
   jumpToTopNavigation();
 }
 
+
+function enterFromPossibility() {
+  showPauseEntry = false;
+  activeView = "Dashboard";
+  render();
+}
+
+function renderPauseEntry() {
+  document.getElementById("app").innerHTML = `
+    <div class="pause-entry-page">
+      <main class="pause-entry-main" aria-label="Pause entry">
+        <h1>Pause.</h1>
+      </main>
+      <button class="pause-entry-action" onclick="enterFromPossibility()">Create from Possibility</button>
+    </div>`;
+}
+
 function render() {
-  if (!hasEnteredApp) return renderPauseEntry();
+  if (showPauseEntry) return renderPauseEntry();
   const stats = completionStats();
   const navCats = "";
   const viewButtons = "";
