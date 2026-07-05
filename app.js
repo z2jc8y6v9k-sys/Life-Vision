@@ -114,6 +114,18 @@ async function loadGoals() {
   const { data, error } = await supabaseClient.from("goals").select("*").order("created_at", { ascending: true });
   if (error) return alert("Could not load goals: " + error.message);
   state.goals = data || [];
+  syncLocalGoalMetaToCloud();
+}
+
+function syncLocalGoalMetaToCloud() {
+  state.goals.forEach(goal => {
+    if (parseMetaJson(goal.behavior_standard || "")) return;
+    const localMeta = parseMetaJson(localStorage.getItem(goalMetaStorageKey(goal.id)) || "");
+    if (!localMeta) return;
+    const json = JSON.stringify(localMeta);
+    goal.behavior_standard = json;
+    supabaseClient.from("goals").update({ behavior_standard: json, updated_at: new Date().toISOString() }).eq("id", goal.id);
+  });
 }
 async function loadReviews() {
   const { data, error } = await supabaseClient.from("life_reviews").select("*");
@@ -486,16 +498,45 @@ function goalMetaStorageKey(goalId) {
   return `lifeVisionGoalMeta:${state.user?.id || "local"}:${goalId}`;
 }
 
-function parseGoalMeta(goal) {
+function parseMetaJson(raw) {
   try {
-    if (!goal?.id) return {};
-    const raw = localStorage.getItem(goalMetaStorageKey(goal.id)) || "";
-    if (!raw.trim().startsWith("{")) return {};
+    if (!raw || !String(raw).trim().startsWith("{")) return null;
     const parsed = JSON.parse(raw);
-    return parsed && parsed.__lifeVisionMeta ? parsed : {};
+    return parsed && parsed.__lifeVisionMeta ? parsed : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function parseGoalMeta(goal) {
+  if (!goal?.id) return {};
+  const cloudMeta = parseMetaJson(goal.behavior_standard || "");
+  if (cloudMeta) return cloudMeta;
+  // v58 migration bridge: read older local action metadata once, then save future edits to Supabase.
+  try {
+    const localMeta = parseMetaJson(localStorage.getItem(goalMetaStorageKey(goal.id)) || "");
+    return localMeta || {};
   } catch (e) {
     return {};
   }
+}
+
+function persistGoalMeta(goalId, meta, { rerender = false, message = "Saved to cloud" } = {}) {
+  const goal = state.goals.find(g => g.id === goalId);
+  if (!goal) return;
+  const nextMeta = { ...(meta || {}), __lifeVisionMeta: true };
+  const json = JSON.stringify(nextMeta);
+  goal.behavior_standard = json;
+  try { localStorage.setItem(goalMetaStorageKey(goalId), json); } catch (e) {}
+  clearTimeout(updateTimers["meta" + goalId]);
+  updateTimers["meta" + goalId] = setTimeout(async () => {
+    const { error } = await supabaseClient
+      .from("goals")
+      .update({ behavior_standard: json, updated_at: new Date().toISOString() })
+      .eq("id", goalId);
+    if (error) showSaved("Save error"); else showSaved(message);
+    if (rerender) render();
+  }, 350);
 }
 
 function metaValue(goal, key) {
@@ -510,32 +551,45 @@ function updateGoalMeta(goalId, key, value) {
   const goal = state.goals.find(g => g.id === goalId);
   if (!goal) return;
   const meta = parseGoalMeta(goal);
-  meta.__lifeVisionMeta = true;
   meta[key] = value;
-  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
-  showSaved("Saved locally");
-  setTimeout(render, 150);
+  persistGoalMeta(goalId, meta, { rerender: true });
 }
 
 function updateGoalMetaNoRender(goalId, key, value) {
   const goal = state.goals.find(g => g.id === goalId);
   if (!goal) return;
   const meta = parseGoalMeta(goal);
-  meta.__lifeVisionMeta = true;
   meta[key] = value;
-  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
-  showSaved("Saved locally");
+  persistGoalMeta(goalId, meta);
+}
+
+function actionObjectFor(goal, field, actionKey, item = {}) {
+  const meta = parseGoalMeta(goal);
+  meta.actions = meta.actions || {};
+  meta.actions[field] = meta.actions[field] || {};
+  meta.actions[field][actionKey] = meta.actions[field][actionKey] || {
+    id: actionKey,
+    field,
+    text: item.text || "",
+    lineIndex: item.index ?? null,
+    time: "",
+    owner: "Me",
+    completed: false
+  };
+  if (item.text) meta.actions[field][actionKey].text = item.text;
+  if (item.index !== undefined) meta.actions[field][actionKey].lineIndex = item.index;
+  return { meta, action: meta.actions[field][actionKey] };
 }
 
 function updateActionMeta(goalId, field, actionKey, index, suffix, value) {
   const goal = state.goals.find(g => g.id === goalId);
   if (!goal) return;
-  const meta = parseGoalMeta(goal);
-  meta.__lifeVisionMeta = true;
+  const item = actionLines(goal, field).find(i => actionKeyFor(goalId, field, i.text) === actionKey) || { text: "", index };
+  const { meta, action } = actionObjectFor(goal, field, actionKey, item);
+  action[suffix] = value;
   meta[`action_${field}_${actionKey}_${suffix}`] = value;
   meta[`action_${field}_idx_${index}_${suffix}`] = value;
-  localStorage.setItem(goalMetaStorageKey(goalId), JSON.stringify(meta));
-  showSaved("Saved locally");
+  persistGoalMeta(goalId, meta);
 }
 
 function localMetaFieldCard(goal, key, label, cls = "") {
@@ -1209,9 +1263,11 @@ function actionIndexMetaKey(field, index, suffix) {
 
 function actionMetaValue(goal, field, lineText, index, suffix) {
   const meta = parseGoalMeta(goal);
+  const actionKey = actionKeyFor(goal.id, field, lineText);
+  const action = meta.actions?.[field]?.[actionKey];
   const textKey = actionMetaKey(goal.id, field, lineText, suffix);
   const idxKey = actionIndexMetaKey(field, index, suffix);
-  return meta[textKey] || meta[idxKey] || "";
+  return action?.[suffix] || meta[textKey] || meta[idxKey] || "";
 }
 
 function actionTimeValue(goal, field, lineText, index = 0) {

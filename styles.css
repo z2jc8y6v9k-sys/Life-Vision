@@ -3049,3 +3049,16 @@ body {
   .decision-table-row > div:nth-child(6)::before { content: "Unlock" !important; }
   .decision-table-row > div:nth-child(7)::before { content: none !important; display: none !important; }
 }
+
+/* v58 Action Objects + Streamlined Workplan */
+.decision-table-head,
+.decision-table-row {
+  grid-template-columns: minmax(260px, 1.6fr) 130px 105px minmax(150px, .9fr) 120px 90px !important;
+}
+@media(max-width:1100px) {
+  .decision-table-row > div:nth-child(2)::before { content: "Priority"; }
+  .decision-table-row > div:nth-child(3)::before { content: "Time"; }
+  .decision-table-row > div:nth-child(4)::before { content: "Feeling"; }
+  .decision-table-row > div:nth-child(5)::before { content: "Owner"; }
+  .decision-table-row > div:nth-child(6)::before { content: "Unlock"; }
+}
