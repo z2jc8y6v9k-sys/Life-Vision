@@ -11,7 +11,7 @@ const categories = {
   Impact: { color: "#e67e22" }
 };
 const ageBands = ["On-going", "53-58", "58-63", "63-68", "68-73", "73-78", "78-83", "83-88", "88-93"];
-const statuses = ["Not Started", "In Progress", "On Track", "At Risk", "Completed"];
+const statuses = ["Not Started", "In Progress", "On Track", "At Risk", "Completed", "Archived"];
 const behaviorRatings = ["Needs Improvement", "Meets", "Exceeds"];
 const metricKeys = ["Strength", "VO2", "Weight", "Cholesterol", "Energy", "Kids", "Mom", "Friends", "Books Read", "Songs Written"];
 
@@ -155,6 +155,32 @@ function updateGoalNoRender(id, key, value) {
   }, 450);
 }
 
+async function setGoalStatus(id, value) {
+  const goal = state.goals.find(g => g.id === id);
+  if (!goal) return;
+
+  if (value === "Completed" && goal.status !== "Completed") {
+    const reflection = prompt("Congratulations. What did accomplishing this make possible? (Optional)", "");
+    const nextWins = reflection && reflection.trim()
+      ? `${goal.wins ? goal.wins.trim() + "\n" : ""}Completion reflection: ${reflection.trim()}`
+      : goal.wins || "";
+    const updates = { status: "Completed", progress: 100, wins: nextWins, updated_at: new Date().toISOString() };
+    const { error } = await supabaseClient.from("goals").update(updates).eq("id", id);
+    if (error) return alert("Could not complete goal: " + error.message);
+    Object.assign(goal, updates);
+    showSaved("Moved to Achievements");
+    render();
+    return;
+  }
+
+  const updates = { status: value, updated_at: new Date().toISOString() };
+  const { error } = await supabaseClient.from("goals").update(updates).eq("id", id);
+  if (error) return alert("Could not update goal status: " + error.message);
+  Object.assign(goal, updates);
+  showSaved();
+  render();
+}
+
 function updateProgress(id, value) {
   updateGoalNoRender(id, "progress", Number(value));
   const fill = document.querySelector(`[data-progress-fill="${id}"]`);
@@ -253,8 +279,21 @@ function exportData() {
   a.click();
 }
 
+function isCompletedGoal(goal) {
+  return goal.status === "Completed" || Number(goal.progress || 0) >= 100;
+}
+
+function isArchivedGoal(goal) {
+  return goal.status === "Archived";
+}
+
+function activeWorkbookGoals() {
+  return state.goals.filter(g => !isCompletedGoal(g) && !isArchivedGoal(g));
+}
+
 function filteredGoals() {
-  return activeCategory === "All" ? state.goals : state.goals.filter(g => g.category === activeCategory);
+  const goals = activeWorkbookGoals();
+  return activeCategory === "All" ? goals : goals.filter(g => g.category === activeCategory);
 }
 function completionStats() {
   const total = state.goals.length || 1;
@@ -647,6 +686,7 @@ function actionTimeControlHtml(goal, key, label) {
 
 function priorityStackHtml() {
   const priorities = state.goals
+    .filter(g => !isCompletedGoal(g) && !isArchivedGoal(g))
     .filter(g => {
       const value = priorityValue(g);
       return value !== null && value > 0;
@@ -654,6 +694,7 @@ function priorityStackHtml() {
     .sort((a,b) => prioritySortValue(a)-prioritySortValue(b));
 
   const inventoryGoals = state.goals
+    .filter(g => !isCompletedGoal(g) && !isArchivedGoal(g))
     .filter(g => priorityValue(g) === -1)
     .sort((a,b) => (a.category || "").localeCompare(b.category || "") || (a.title || "").localeCompare(b.title || ""));
 
@@ -669,6 +710,40 @@ function priorityStackHtml() {
         ${inventoryGoals.length ? inventoryGoals.map(g => `<div class="recent-item clickable-card inventory-goal-item" onclick="openGoal('${g.id}')"><strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong><small>${g.category} • ${goalType(g)} • ${goalStatusLabel(g)}</small></div>`).join("") : `<div class="recent-item"><strong>No inventory goals yet.</strong><small>Set a goal's priority to Inventory to list it here.</small></div>`}
       </div>
     </div>
+  </section>`;
+}
+
+function achievementsHtml() {
+  const completed = state.goals
+    .filter(g => isCompletedGoal(g) && !isArchivedGoal(g))
+    .sort((a,b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0));
+
+  return `<section class="achievements-page">
+    <section class="panel achievements-hero">
+      <h3>Achievements</h3>
+      <p>A record of the goals you completed and the evidence of the life you created.</p>
+      <div class="achievement-count"><strong>${completed.length}</strong><span>completed goal${completed.length===1?"":"s"}</span></div>
+    </section>
+    <section class="achievements-grid">
+      ${completed.length ? completed.map(g => {
+        const completedDate = new Date(g.updated_at || g.created_at || Date.now()).toLocaleDateString(undefined, { month:"long", day:"numeric", year:"numeric" });
+        return `<article class="panel achievement-card">
+          <div class="achievement-check">✓</div>
+          <div>
+            <span class="category-pill" style="background:${categories[g.category]?.color || '#111827'}">${escapeHtml(g.category || "Goal")}</span>
+            <h3>${escapeHtml(g.title || "Untitled Goal")}</h3>
+            <p class="achievement-date">Completed ${escapeHtml(completedDate)}</p>
+            ${(g.why || "").trim() ? `<div class="achievement-detail"><strong>Why it mattered</strong><p>${escapeHtml(g.why).replaceAll("\n","<br>")}</p></div>` : ""}
+            ${(g.wins || "").trim() ? `<div class="achievement-detail"><strong>Wins & reflection</strong><p>${escapeHtml(g.wins).replaceAll("\n","<br>")}</p></div>` : ""}
+            ${(g.lessons || "").trim() ? `<div class="achievement-detail"><strong>Lessons</strong><p>${escapeHtml(g.lessons).replaceAll("\n","<br>")}</p></div>` : ""}
+            <div class="achievement-actions">
+              <button class="secondary" onclick="setGoalStatus('${g.id}','In Progress')">Return to Workbook</button>
+              <button class="delete" onclick="setGoalStatus('${g.id}','Archived')">Archive</button>
+            </div>
+          </div>
+        </article>`;
+      }).join("") : `<section class="panel"><h3>No achievements yet.</h3><p>When you mark a project Completed, it will move here and leave the main Workbook.</p></section>`}
+    </section>
   </section>`;
 }
 
@@ -863,7 +938,7 @@ function goalCard(goal) {
           </label>
         ` : `
           <label>Status<br>
-            <select class="status-select" onchange="updateGoalNoRender('${goal.id}','status',this.value)">
+            <select class="status-select" onchange="setGoalStatus('${goal.id}',this.value)">
               ${statuses.map(s=>`<option ${(goal.status||"Not Started")===s?"selected":""}>${s}</option>`).join("")}
             </select>
           </label>
@@ -892,7 +967,7 @@ function goalCard(goal) {
         </label>
       ` : `
         <label>Status<br>
-          <select class="status-select" onchange="updateGoalNoRender('${goal.id}','status',this.value)">
+          <select class="status-select" onchange="setGoalStatus('${goal.id}',this.value)">
             ${statuses.map(s=>`<option ${(goal.status||"Not Started")===s?"selected":""}>${s}</option>`).join("")}
           </select>
         </label>
@@ -1270,6 +1345,7 @@ function actionMetadataEditorHtml(goal, field, label) {
 function workplanActionItems() {
   const fields = ["today_this_week"];
   return state.goals
+    .filter(goal => !isCompletedGoal(goal) && !isArchivedGoal(goal))
     .flatMap(goal => fields.flatMap(field => actionLines(goal, field).map(item => {
       const timeValue = actionTimeValue(goal, field, item.text, item.index) || "";
       const minutes = optionMinutes(timeValue);
@@ -1671,6 +1747,7 @@ function mainNavCardHtml() {
     ["Dashboard", "Overview"],
     ["Workplan", "Workplan"],
     ["Priority Stack", "Priority Stack"],
+    ["Achievements", "Achievements"],
     ["Resources", "Resources"],
     ["Life Seasons", "Life Seasons"],
     ["Weekly Review", "Weekly Review"],
@@ -1702,6 +1779,7 @@ function viewTitleHtml() {
     "Dashboard": "Overview",
     "Workplan": "Your Action Plan",
     "Priority Stack": "Priority Stack",
+    "Achievements": "Achievements",
     "Resources": "Resources",
     "Life Seasons": "Life Seasons",
     "Weekly Review": "Weekly Review",
@@ -1907,12 +1985,11 @@ function enterFromPossibility() {
 
 function renderPauseEntry() {
   document.getElementById("app").innerHTML = `
-    <div class="pause-entry-page pause-entry-image-page pause-composition-page">
-      <main class="pause-entry-main pause-composition-main" aria-label="Pause entry">
-        <img class="pause-composition-art" src="pause-background.png" alt="Pause." />
+    <div class="pause-entry-page pause-entry-image-page">
+      <main class="pause-entry-main" aria-label="Pause entry">
         <h1 class="sr-only">Pause.</h1>
       </main>
-      <button class="pause-entry-action pause-composition-action" onclick="enterFromPossibility()">Create from Possibility</button>
+      <button class="pause-entry-action" onclick="enterFromPossibility()">Create from Possibility</button>
     </div>`;
 }
 
@@ -1927,7 +2004,7 @@ function render() {
     return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
   const dashboard = `${priorityStackHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
-  let main = activeView === "Dashboard" ? dashboard : activeView === "Today / This Week" ? workplanHtml() : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Resources" ? resourcesHtml() : activeView === "Workplan" ? workplanHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
+  let main = activeView === "Dashboard" ? dashboard : activeView === "Today / This Week" ? workplanHtml() : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Achievements" ? achievementsHtml() : activeView === "Resources" ? resourcesHtml() : activeView === "Workplan" ? workplanHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
   document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand-row"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS</p></div></div>${utilityMenuHtml()}</aside><main class="content ${activeView==='Workbook' ? 'workbook-page' : ''}">
         <header class="app-header-simple">
           ${utilityMenuHtml()}

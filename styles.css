@@ -3188,125 +3188,242 @@ body {
   }
 }
 
-
-/* v61 Responsive Pause composition: show full artwork instead of cropping it as a background */
-.pause-composition-page {
+/* v61.1 Immersive cover Pause screen
+   Full-screen cover background with intentional focal points per viewport.
+   Desktop keeps the word Pause and the central light visible; mobile keeps Pause and entry action readable. */
+.pause-entry-image-page {
   min-height: 100svh !important;
-  width: 100% !important;
+  width: 100vw !important;
   overflow: hidden !important;
+  background-image: url("pause-background.png") !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-position: 63% 24% !important;
+  background-color: #b7aa97 !important;
+  display: block !important;
   position: relative !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: clamp(14px, 2.5vw, 34px) !important;
-  background: radial-gradient(circle at 62% 35%, #d6c3a6 0%, #a89b88 52%, #766e62 100%) !important;
-  background-image: none !important;
 }
 
-.pause-composition-page::before {
+.pause-entry-image-page::before {
   content: "" !important;
   position: fixed !important;
   inset: 0 !important;
-  z-index: 0 !important;
   pointer-events: none !important;
-  background: radial-gradient(circle at center, rgba(255,255,255,.06), rgba(17,24,39,.16)) !important;
+  z-index: 1 !important;
+  background:
+    linear-gradient(90deg, rgba(17,24,39,.16), rgba(17,24,39,0) 28%, rgba(17,24,39,0) 74%, rgba(17,24,39,.08)),
+    radial-gradient(circle at 55% 46%, rgba(255,255,255,0) 0%, rgba(17,24,39,.08) 100%) !important;
 }
 
-.pause-composition-page::after {
+.pause-entry-image-page::after {
   display: none !important;
 }
 
-.pause-composition-main {
-  position: relative !important;
-  z-index: 1 !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  width: 100% !important;
-  height: 100% !important;
-}
-
-.pause-composition-art {
-  display: block !important;
-  width: auto !important;
-  height: min(94svh, 1120px) !important;
-  max-width: 94vw !important;
-  object-fit: contain !important;
-  object-position: center center !important;
-  filter: saturate(.98) contrast(1.01) !important;
-  box-shadow: 0 28px 80px rgba(17,24,39,.10) !important;
-}
-
-.pause-composition-action {
+.pause-entry-image-page .pause-entry-action {
+  position: fixed !important;
+  z-index: 4 !important;
+  right: 28px !important;
+  bottom: 26px !important;
   opacity: .34 !important;
-  z-index: 3 !important;
-  right: clamp(18px, 3vw, 42px) !important;
-  bottom: clamp(18px, 3vw, 38px) !important;
-  color: rgba(255,253,248,.94) !important;
-  background: rgba(17,24,39,.18) !important;
-  border-color: rgba(255,255,255,.22) !important;
+  transform: none !important;
+  border: 1px solid rgba(255,255,255,.30) !important;
+  background: rgba(17,24,39,.16) !important;
+  color: rgba(255,253,248,.96) !important;
   backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  box-shadow: 0 10px 24px rgba(31,41,51,.08) !important;
 }
 
-.pause-composition-page:hover .pause-composition-action {
-  opacity: .44 !important;
+.pause-entry-image-page:hover .pause-entry-action {
+  opacity: .42 !important;
 }
 
-.pause-composition-action:hover,
-.pause-composition-action:focus,
-.pause-composition-action:focus-visible {
+.pause-entry-image-page .pause-entry-action:hover,
+.pause-entry-image-page .pause-entry-action:focus,
+.pause-entry-image-page .pause-entry-action:focus-visible {
   opacity: 1 !important;
+  transform: translateY(-1px) !important;
   background: rgba(255,253,248,.94) !important;
   color: #111827 !important;
+  outline: none !important;
 }
 
+/* Large desktop / iMac maximized: keep immersive cover but bias crop upward/right so Pause is not lost. */
 @media (min-aspect-ratio: 16/10) {
-  .pause-composition-art {
-    height: min(92svh, 1040px) !important;
-    max-width: 86vw !important;
+  .pause-entry-image-page {
+    background-position: 64% 23% !important;
   }
 }
 
-@media (max-width: 700px) {
-  .pause-composition-page {
-    align-items: flex-start !important;
-    padding: 18px 10px 92px !important;
-    overflow: hidden !important;
+@media (min-aspect-ratio: 2/1) {
+  .pause-entry-image-page {
+    background-position: 66% 22% !important;
   }
-  .pause-composition-main {
-    align-items: flex-start !important;
+}
+
+/* Tablet / narrow desktop */
+@media (max-width: 900px) {
+  .pause-entry-image-page {
+    min-height: 100svh !important;
+    background-size: cover !important;
+    background-position: 74% 50% !important;
   }
-  .pause-composition-art {
-    width: 100vw !important;
-    height: auto !important;
-    max-width: none !important;
-    margin-top: 4px !important;
-    box-shadow: none !important;
+  .pause-entry-image-page .pause-entry-action {
+    opacity: .48 !important;
+    right: 18px !important;
+    bottom: max(18px, env(safe-area-inset-bottom)) !important;
+    font-size: 13px !important;
+    padding: 10px 14px !important;
   }
-  .pause-composition-action {
+}
+
+/* Phone: preserve the built-in Pause text and keep the entry action visible/tappable. */
+@media (max-width: 600px) {
+  .pause-entry-image-page {
+    background-size: cover !important;
+    background-position: 82% center !important;
+  }
+  .pause-entry-image-page::before {
+    background:
+      linear-gradient(180deg, rgba(17,24,39,.03), rgba(17,24,39,0) 45%, rgba(17,24,39,.24)),
+      radial-gradient(circle at 70% 30%, rgba(255,255,255,0) 0%, rgba(17,24,39,.08) 100%) !important;
+  }
+  .pause-entry-image-page .pause-entry-action {
     left: 50% !important;
     right: auto !important;
-    bottom: max(22px, env(safe-area-inset-bottom)) !important;
+    bottom: max(20px, calc(env(safe-area-inset-bottom) + 16px)) !important;
     transform: translateX(-50%) !important;
+    width: max-content !important;
+    max-width: calc(100vw - 32px) !important;
     opacity: .72 !important;
-    white-space: nowrap !important;
     font-size: 13px !important;
     padding: 11px 16px !important;
+    white-space: nowrap !important;
   }
-  .pause-composition-action:hover,
-  .pause-composition-action:focus,
-  .pause-composition-action:focus-visible {
-    transform: translateX(-50%) !important;
+  .pause-entry-image-page .pause-entry-action:hover,
+  .pause-entry-image-page .pause-entry-action:focus,
+  .pause-entry-image-page .pause-entry-action:focus-visible {
+    transform: translateX(-50%) translateY(-1px) !important;
+    opacity: 1 !important;
   }
 }
 
-@media (max-width: 380px) {
-  .pause-composition-art {
-    width: 112vw !important;
-    margin-left: -6vw !important;
+/* v62 Goal Lifecycle + Achievements */
+.achievements-page {
+  display: grid;
+  gap: 20px;
+}
+
+.achievements-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+}
+
+.achievements-hero h3 {
+  font-size: 34px;
+  margin-bottom: 8px;
+}
+
+.achievement-count {
+  min-width: 150px;
+  padding: 18px 22px;
+  border-radius: 22px;
+  background: #111827;
+  color: #fff;
+  text-align: center;
+}
+
+.achievement-count strong,
+.achievement-count span {
+  display: block;
+}
+
+.achievement-count strong {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.achievement-count span {
+  margin-top: 6px;
+  color: #d1d5db;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.achievement-card {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 14px;
+  margin-bottom: 0;
+}
+
+.achievement-check {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #ecfdf3;
+  color: #027a48;
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.achievement-card h3 {
+  margin: 12px 0 4px;
+  font-size: 25px;
+}
+
+.achievement-date {
+  margin: 0 0 16px !important;
+  font-size: 13px;
+}
+
+.achievement-detail {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(31,41,51,.10);
+}
+
+.achievement-detail strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.achievement-detail p {
+  margin: 0 !important;
+}
+
+.achievement-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.achievement-actions button {
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 850;
+}
+
+@media(max-width:900px) {
+  .achievements-hero,
+  .achievements-grid {
+    grid-template-columns: 1fr;
   }
-  .pause-composition-action {
-    font-size: 12px !important;
-    padding: 10px 13px !important;
+  .achievement-count {
+    justify-self: start;
   }
 }
