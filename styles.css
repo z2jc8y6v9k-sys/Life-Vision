@@ -3427,3 +3427,19 @@ body {
     justify-self: start;
   }
 }
+
+
+/* v62.1 Streamlined goal fields */
+.life-season-control {
+  margin: 12px 0 20px;
+  max-width: 360px;
+}
+.life-season-control .timeline-label {
+  display: block;
+  margin: 0 0 9px;
+}
+.life-season-select {
+  width: 100%;
+  min-height: 44px;
+  font-size: 14px;
+}

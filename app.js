@@ -198,6 +198,14 @@ async function toggleAge(id, age) {
   if (error) showSaved("Save error"); else showSaved();
 }
 
+async function setLifeSeason(id, age) {
+  const goal = state.goals.find(g => g.id === id);
+  if (!goal) return;
+  goal.ages = age ? [age] : [];
+  const { error } = await supabaseClient.from("goals").update({ ages: goal.ages, updated_at: new Date().toISOString() }).eq("id", id);
+  if (error) showSaved("Save error"); else showSaved();
+}
+
 async function addGoal(event) {
   event.preventDefault();
   const title = document.getElementById("newGoalTitle").value.trim();
@@ -338,17 +346,15 @@ function coachInsights() {
   const highest = [...cats].sort((a,b)=>b.avg-a.avg)[0];
   const atRisk = state.goals.filter(g => (g.goal_type || "Project") === "Project" && g.status === "At Risk");
   const noNext30 = state.goals.filter(g => !(g.next30||"").trim());
-  const noPeople = state.goals.filter(g => !(g.people||"").trim());
   if (lowest) insights.push({title:`Under-invested area: ${lowest.cat}`, text:`This category has the lowest average progress at ${lowest.avg}%. Pick one small next action this week.`});
   if (highest && highest.avg > 0) insights.push({title:`Strongest momentum: ${highest.cat}`, text:`This category is currently leading at ${highest.avg}%. Ask what is working here that could transfer elsewhere.`});
   if (atRisk.length) insights.push({title:`At-risk goals need attention`, text:`You marked ${atRisk.length} goal(s) as At Risk. Review blockers and resources before adding new goals.`});
   if (noNext30.length) insights.push({title:`Next 30 Days gap`, text:`${noNext30.length} goal(s) have no next-30-day action. These are likely to stay aspirational unless you define the next move.`});
-  if (noPeople.length) insights.push({title:`People strategy gap`, text:`${noPeople.length} goal(s) do not name people yet. Add collaborators, beneficiaries, or supporters.`});
-  if (insights.length === 0) insights.push({title:"Solid system health", text:"Your goals have next actions, people, and progress. Use the quarterly review to choose what matters most now."});
+  if (insights.length === 0) insights.push({title:"Solid system health", text:"Your goals have next actions, resources, and progress. Use the quarterly review to choose what matters most now."});
   return insights;
 }
 
-const bulletFieldKeys = new Set(["key_results", "people", "money", "today_this_week", "next30", "next12", "wins", "lessons"]);
+const bulletFieldKeys = new Set(["key_results", "money", "today_this_week", "next30", "next12", "wins", "lessons"]);
 
 function fieldCard(goal, key, label, className = "") {
   const color = categories[goal.category].color;
@@ -982,15 +988,17 @@ function goalCard(goal) {
       ${localMetaFieldCard(goal, "feeling_completed", "Feeling This Will Provide When Completed")}
     </div>
 
-    <div class="timeline-label">Life Season</div>
-    <div class="timeline">${ageBands.map(age => `<label class="age-chip"><input type="checkbox" ${goal.ages?.includes(age) ? "checked" : ""} onchange="toggleAge('${goal.id}', '${age}')" />${age}</label>`).join("")}</div>
+    <div class="life-season-control">
+      <label class="timeline-label" for="life-season-${goal.id}">Life Season</label>
+      <select id="life-season-${goal.id}" class="status-select life-season-select" onchange="setLifeSeason('${goal.id}', this.value)">
+        <option value="">Select a life season</option>
+        ${ageBands.map(age => `<option value="${age}" ${goal.ages?.includes(age) ? "selected" : ""}>${age}</option>`).join("")}
+      </select>
+    </div>
 
-    <div class="grid-two">
-      ${fieldCard(goal, "people", "People")}
-      <div>
-        ${fieldCard(goal, "money", "Resources")}
-        ${resourceProfileHtml(goal)}
-      </div>
+    <div>
+      ${fieldCard(goal, "money", "Resources")}
+      ${resourceProfileHtml(goal)}
     </div>
 
     <div class="grid-two">
@@ -1200,7 +1208,6 @@ function strategicBriefText() {
   const needsImprovement = state.goals.filter(g => g.goal_type === "Behavior" && autoBehaviorRating(g) === "Needs Improvement");
   const noNext30 = state.goals.filter(g => !(g.next30||"").trim());
   const noResources = state.goals.filter(g => !(g.money||"").trim());
-  const noPeople = state.goals.filter(g => !(g.people||"").trim());
   const recent = recentGoals().slice(0,3);
 
   const highestLeverage = state.goals
@@ -1230,11 +1237,11 @@ Highest leverage action:
 
 Top 3 actions this week:
 1. Add or update Next 30 Days for ${noNext30.length ? "one of the " + noNext30.length + " goals missing it" : "your highest-priority goal"}.
-2. Add People or Resources to ${Math.max(noPeople.length, noResources.length)} goal(s) missing execution support.
+2. Add Resources to ${noResources.length} goal(s) missing execution support.
 3. Move one Not Started goal either into action or consciously defer it.
 
 One thing to stop doing:
-- Stop letting goals remain only aspirational. Every active goal should have a next 30-day move, people/resources attached, or a conscious decision to defer it.`;
+- Stop letting goals remain only aspirational. Every active goal should have a next 30-day move, resources attached, or a conscious decision to defer it.`;
 }
 
 function strategicBriefHtml() {
@@ -1663,7 +1670,6 @@ function decisionSnapshotHtml(items, totals) {
   const noTimeItems = items.filter(i => !i.minutes && !["Waiting", "Delegated"].includes(i.owner));
   return `<div class="decision-snapshot-card">
     <div>
-      <span class="workplan-eyebrow">Decision Snapshot</span>
       <h2>This Moment's Decision</h2>
       <p class="decision-prompt">What deserves your attention right now?</p>
     </div>
