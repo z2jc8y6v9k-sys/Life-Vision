@@ -1,7 +1,13 @@
-# My Life Vision v62.1 — Streamlined Goals
+# My Life Vision v63 — Belief, Boundaries, Gratitude
 
 Changes:
-- Life Season is now a dropdown using the existing choices: On-going, 53-58, 58-63, 63-68, 68-73, 73-78, 78-83, 83-88, and 88-93.
-- Removed People from goal cards and People-related coaching prompts.
-- Removed the words “Decision Snapshot” from Your Action Plan while preserving the underlying decision view.
-- Preserved Goal Lifecycle, Achievements, and the immersive Pause opening screen.
+- Renamed **Key Results** to **My Belief** on goal cards.
+- After **Create from Possibility**, the app now moves through three required prompts:
+  1. What do you Believe?
+  2. What are my Boundaries?
+  3. What are you Grateful for?
+- Uses the same full-screen Pause background for all three prompts.
+- Adds gentle fade transitions while keeping the background fixed.
+- Continues to the Dashboard after all three responses are entered.
+- Preserves responses while moving through the flow and saves the completed set locally in the browser.
+- Preserves the existing v62.1 functionality, including Goal Lifecycle and Achievements.

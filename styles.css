@@ -3443,3 +3443,104 @@ body {
   min-height: 44px;
   font-size: 14px;
 }
+
+/* v63 Belief, Boundaries, Gratitude entry flow */
+.possibility-entry-page {
+  display: grid !important;
+  place-items: center !important;
+  padding: 28px !important;
+}
+
+.possibility-prompt-panel {
+  position: relative;
+  z-index: 4;
+  width: min(720px, calc(100vw - 40px));
+  display: grid;
+  gap: 18px;
+  padding: 28px;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 30px;
+  background: rgba(17,24,39,.18);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 24px 60px rgba(17,24,39,.18);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: possibilityFadeIn .42s ease forwards;
+  transition: opacity .36s ease, transform .36s ease;
+}
+
+.possibility-prompt-panel.is-leaving {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.possibility-prompt-panel label {
+  color: rgba(255,253,248,.98);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(34px, 5vw, 64px);
+  line-height: 1;
+  letter-spacing: -.045em;
+  text-align: center;
+  text-shadow: 0 3px 18px rgba(17,24,39,.20);
+}
+
+.possibility-prompt-panel textarea {
+  width: 100%;
+  min-height: 180px;
+  resize: vertical;
+  border: 1px solid rgba(255,255,255,.34);
+  border-radius: 22px;
+  padding: 18px 20px;
+  background: rgba(255,253,248,.90);
+  color: #1f2933;
+  font-size: 18px;
+  line-height: 1.5;
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.65);
+}
+
+.possibility-prompt-panel textarea:focus {
+  border-color: rgba(255,255,255,.78);
+  box-shadow: 0 0 0 4px rgba(255,255,255,.12), inset 0 1px 0 rgba(255,255,255,.65);
+}
+
+.possibility-prompt-panel button {
+  justify-self: end;
+  border: 1px solid rgba(255,255,255,.34);
+  border-radius: 999px;
+  padding: 12px 20px;
+  background: rgba(255,253,248,.94);
+  color: #111827;
+  font-size: 14px;
+  font-weight: 900;
+  transition: opacity .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.possibility-prompt-panel button:hover:not(:disabled),
+.possibility-prompt-panel button:focus-visible:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(17,24,39,.16);
+}
+
+.possibility-prompt-panel button:disabled {
+  opacity: .38;
+  cursor: default;
+}
+
+@keyframes possibilityFadeIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .possibility-entry-page { padding: 18px !important; }
+  .possibility-prompt-panel {
+    width: 100%;
+    padding: 22px 18px;
+    border-radius: 24px;
+  }
+  .possibility-prompt-panel textarea {
+    min-height: 210px;
+    font-size: 17px;
+  }
+}

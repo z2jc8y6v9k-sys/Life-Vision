@@ -44,6 +44,8 @@ let saveTimer = null;
 let updateTimers = {};
 let decisionSort = { key: "priority", dir: "asc" };
 let showPauseEntry = true;
+let possibilityStage = 0;
+let possibilityAnswers = { belief: "", boundaries: "", gratitude: "" };
 
 async function init() {
   const { data } = await supabaseClient.auth.getSession();
@@ -429,7 +431,7 @@ function progressLabelFor(goal) {
 }
 
 function keyResultsLabelFor(goal) {
-  return "Key Results";
+  return "My Belief";
 }
 
 
@@ -981,7 +983,7 @@ function goalCard(goal) {
       <label>Priority<br>${priorityOptions(goal)}</label>
     </div>
 
-    ${fieldCard(goal, "key_results", "Key Results", "full")}
+    ${fieldCard(goal, "key_results", "My Belief", "full")}
 
     <div class="grid-two meaning-feeling-grid">
       ${fieldCard(goal, "why", "Why This Matters")}
@@ -1984,19 +1986,71 @@ function setWorkbookView(category) {
 
 
 function enterFromPossibility() {
-  showPauseEntry = false;
-  activeView = "Dashboard";
-  render();
+  possibilityStage = 1;
+  renderPauseEntry();
+}
+
+function possibilityConfig() {
+  if (possibilityStage === 1) return { key: "belief", prompt: "What do you Believe?", action: "Next" };
+  if (possibilityStage === 2) return { key: "boundaries", prompt: "What are my Boundaries?", action: "Next" };
+  return { key: "gratitude", prompt: "What are you Grateful for?", action: "Continue" };
+}
+
+function updatePossibilityAnswer(value) {
+  const config = possibilityConfig();
+  possibilityAnswers[config.key] = value;
+  const button = document.getElementById("possibilityNext");
+  if (button) button.disabled = !value.trim();
+}
+
+function advancePossibility() {
+  const config = possibilityConfig();
+  if (!possibilityAnswers[config.key].trim()) return;
+  const panel = document.querySelector(".possibility-prompt-panel");
+  if (panel) panel.classList.add("is-leaving");
+  window.setTimeout(() => {
+    if (possibilityStage < 3) {
+      possibilityStage += 1;
+      renderPauseEntry();
+      return;
+    }
+    try {
+      localStorage.setItem("myLifeVisionPossibility", JSON.stringify({
+        date: new Date().toISOString(),
+        ...possibilityAnswers
+      }));
+    } catch (error) {
+      console.warn("Could not save possibility responses locally", error);
+    }
+    showPauseEntry = false;
+    activeView = "Dashboard";
+    render();
+  }, 360);
 }
 
 function renderPauseEntry() {
+  if (possibilityStage === 0) {
+    document.getElementById("app").innerHTML = `
+      <div class="pause-entry-page pause-entry-image-page">
+        <main class="pause-entry-main" aria-label="Pause entry">
+          <h1 class="sr-only">Pause.</h1>
+        </main>
+        <button class="pause-entry-action" onclick="enterFromPossibility()">Create from Possibility</button>
+      </div>`;
+    return;
+  }
+
+  const config = possibilityConfig();
+  const answer = possibilityAnswers[config.key] || "";
   document.getElementById("app").innerHTML = `
-    <div class="pause-entry-page pause-entry-image-page">
-      <main class="pause-entry-main" aria-label="Pause entry">
-        <h1 class="sr-only">Pause.</h1>
+    <div class="pause-entry-page pause-entry-image-page possibility-entry-page">
+      <main class="possibility-prompt-panel" aria-label="${config.prompt}">
+        <label for="possibilityAnswer">${config.prompt}</label>
+        <textarea id="possibilityAnswer" autofocus oninput="updatePossibilityAnswer(this.value)">${escapeHtml(answer)}</textarea>
+        <button id="possibilityNext" onclick="advancePossibility()" ${answer.trim() ? "" : "disabled"}>${config.action}</button>
       </main>
-      <button class="pause-entry-action" onclick="enterFromPossibility()">Create from Possibility</button>
     </div>`;
+  requestAnimationFrame(() => document.getElementById("possibilityAnswer")?.focus());
 }
 
 function render() {
