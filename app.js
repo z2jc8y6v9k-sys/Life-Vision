@@ -431,7 +431,7 @@ function progressLabelFor(goal) {
 }
 
 function keyResultsLabelFor(goal) {
-  return "My Belief";
+  return "My Beliefs";
 }
 
 
@@ -983,7 +983,7 @@ function goalCard(goal) {
       <label>Priority<br>${priorityOptions(goal)}</label>
     </div>
 
-    ${fieldCard(goal, "key_results", "My Belief", "full")}
+    ${fieldCard(goal, "key_results", "My Beliefs", "full")}
 
     <div class="grid-two meaning-feeling-grid">
       ${fieldCard(goal, "why", "Why This Matters")}
