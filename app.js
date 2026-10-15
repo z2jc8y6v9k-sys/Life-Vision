@@ -62,6 +62,17 @@ let decisionSort = { key: "priority", dir: "asc" };
 let showPauseEntry = true;
 let possibilityStage = 0;
 let possibilityAnswers = { belief: "", boundaries: "", gratitude: "" };
+let passwordRecoveryMode = window.location.hash.includes("type=recovery") || window.location.search.includes("type=recovery");
+
+if (supabaseClient) {
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === "PASSWORD_RECOVERY") {
+      passwordRecoveryMode = true;
+      state.user = session?.user || null;
+      setTimeout(() => renderPasswordRecovery(), 0);
+    }
+  });
+}
 
 async function init() {
   if (!supabaseClient) {
@@ -70,6 +81,7 @@ async function init() {
   const { data } = await supabaseClient.auth.getSession();
   state.user = data.session?.user || null;
   if (!state.user) return renderAuth();
+  if (passwordRecoveryMode) return renderPasswordRecovery();
   await seedStarterGoalsIfEmpty();
   await Promise.all([loadGoals(), loadReviews(), loadMetrics(), loadVision()]);
   render();
@@ -87,9 +99,48 @@ function renderAuth(message = "") {
           <button onclick="signIn()">Sign In</button>
           <button class="secondary" onclick="signUp()">Create Account</button>
         </div>
+        <button class="secondary" style="width:100%;margin-top:12px" onclick="requestPasswordReset()">Forgot Password?</button>
         <div class="message">${escapeHtml(message)}</div>
       </div>
     </div>`;
+}
+
+async function requestPasswordReset() {
+  const email = document.getElementById("email").value.trim();
+  if (!email) return renderAuth("Enter your email address first, then click Forgot Password.");
+  const redirectTo = `${window.location.origin}${window.location.pathname}`;
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
+  if (error) return renderAuth(error.message);
+  renderAuth("Check your email for a password-reset link. You may also need to check Spam or Junk.");
+}
+
+function renderPasswordRecovery(message = "") {
+  document.getElementById("app").innerHTML = `
+    <div class="auth-page">
+      <div class="auth-card">
+        <h1>Choose a New Password</h1>
+        <p>Enter a new password for your existing My Life Vision account.</p>
+        <input id="newPassword" type="password" autocomplete="new-password" placeholder="New password" />
+        <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Confirm new password" />
+        <button style="width:100%;margin-top:12px" onclick="saveRecoveredPassword()">Save New Password</button>
+        <div class="message">${escapeHtml(message)}</div>
+      </div>
+    </div>`;
+}
+
+async function saveRecoveredPassword() {
+  const password = document.getElementById("newPassword").value;
+  const confirmation = document.getElementById("confirmPassword").value;
+  if (password.length < 6) return renderPasswordRecovery("Your new password must be at least 6 characters.");
+  if (password !== confirmation) return renderPasswordRecovery("The two passwords do not match. Please try again.");
+  const { data, error } = await supabaseClient.auth.updateUser({ password });
+  if (error) return renderPasswordRecovery(error.message);
+  passwordRecoveryMode = false;
+  state.user = data.user;
+  history.replaceState({}, document.title, `${window.location.origin}${window.location.pathname}`);
+  await Promise.all([loadGoals(), loadReviews(), loadMetrics(), loadVision()]);
+  render();
+  alert("Your password has been changed. You are now signed in.");
 }
 
 async function signUp() {
