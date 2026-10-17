@@ -256,7 +256,7 @@ async function setGoalStatus(id, value) {
     const nextWins = reflection && reflection.trim()
       ? `${goal.wins ? goal.wins.trim() + "\n" : ""}Completion reflection: ${reflection.trim()}`
       : goal.wins || "";
-    const updates = { status: "Completed", progress: 100, wins: nextWins, updated_at: new Date().toISOString() };
+    const updates = { status: "Completed", wins: nextWins, updated_at: new Date().toISOString() };
     const { error } = await supabaseClient.from("goals").update(updates).eq("id", id);
     if (error) return alert("Could not complete goal: " + error.message);
     Object.assign(goal, updates);
@@ -271,15 +271,6 @@ async function setGoalStatus(id, value) {
   Object.assign(goal, updates);
   showSaved();
   render();
-}
-
-function updateProgress(id, value) {
-  updateGoalNoRender(id, "progress", Number(value));
-  const fill = document.querySelector(`[data-progress-fill="${id}"]`);
-  const label = document.querySelector(`[data-progress-label="${id}"]`);
-  if (fill) fill.style.width = `${value}%`;
-  if (label) { const goal = state.goals.find(g => g.id === id); label.textContent = `${progressLabelFor(goal)}: ${value}%`; }
-  updateStatsOnly();
 }
 
 async function toggleAge(id, age) {
@@ -380,7 +371,7 @@ function exportData() {
 }
 
 function isCompletedGoal(goal) {
-  return goal.status === "Completed" || Number(goal.progress || 0) >= 100;
+  return goal.status === "Completed";
 }
 
 function isArchivedGoal(goal) {
@@ -396,53 +387,44 @@ function filteredGoals() {
   return activeCategory === "All" ? goals : goals.filter(g => g.category === activeCategory);
 }
 function completionStats() {
-  const total = state.goals.length || 1;
-  const avg = Math.round(state.goals.reduce((sum, g) => sum + Number(g.progress || 0), 0) / total);
-  const active = state.goals.filter(g => Number(g.progress || 0) > 0).length;
-  const complete = state.goals.filter(g => Number(g.progress || 0) >= 100 || g.status === "Completed").length;
-  return { total, avg, active, complete };
+  const total = state.goals.length;
+  const active = state.goals.filter(g => !["Not Started", "Completed", "Archived"].includes(g.status || "Not Started")).length;
+  const complete = state.goals.filter(g => g.status === "Completed").length;
+  return { total, active, complete };
 }
 function categoryStats() {
   return Object.keys(categories).map(cat => {
     const goals = state.goals.filter(g => g.category === cat);
-    const avg = goals.length ? Math.round(goals.reduce((s,g)=>s+Number(g.progress||0),0)/goals.length) : 0;
     const atRisk = goals.filter(g => g.status === "At Risk").length;
-    return { cat, count: goals.length, avg, atRisk };
+    const complete = goals.filter(g => g.status === "Completed").length;
+    const notStarted = goals.filter(g => (g.status || "Not Started") === "Not Started").length;
+    return { cat, count: goals.length, atRisk, complete, notStarted };
   });
 }
 function recentGoals() {
   return [...state.goals].sort((a,b)=>new Date(b.updated_at || b.created_at)-new Date(a.updated_at || a.created_at)).slice(0,5);
 }
-function updateStatsOnly() {
-  const stats = completionStats();
-  const ids = {Total:stats.total, Avg:stats.avg+"%", Active:stats.active, Complete:stats.complete};
-  Object.keys(ids).forEach(k => { const el = document.getElementById("stat"+k); if (el) el.textContent = ids[k]; });
-}
-function categoryProgressHtml() {
+function categoryStatusHtml() {
   return categoryStats().map(s => `
     <div class="category-row">
       <span style="color:${categories[s.cat].color}">${s.cat}</span>
-      <div class="mini-bar"><div class="mini-fill" style="width:${s.avg}%;background:${categories[s.cat].color}"></div></div>
-      <small>${s.avg}%</small>
+      <small>${s.count} goal${s.count === 1 ? "" : "s"} • ${s.complete} completed${s.atRisk ? ` • ${s.atRisk} at risk` : ""}</small>
     </div>`).join("");
 }
 function recentHtml() {
   return recentGoals().map(g => `
-    <div class="recent-item"><strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong><small>${g.category} • ${g.status || "Not Started"} • Progress ${g.progress || 0}%</small></div>`).join("");
+    <div class="recent-item"><strong style="color:${categories[g.category].color}">${escapeHtml(g.title)}</strong><small>${g.category} • ${g.status || "Not Started"}</small></div>`).join("");
 }
 
 function coachInsights() {
   const insights = [];
-  const cats = categoryStats();
-  const lowest = [...cats].sort((a,b)=>a.avg-b.avg)[0];
-  const highest = [...cats].sort((a,b)=>b.avg-a.avg)[0];
   const atRisk = state.goals.filter(g => (g.goal_type || "Project") === "Project" && g.status === "At Risk");
   const noNext30 = state.goals.filter(g => !(g.next30||"").trim());
-  if (lowest) insights.push({title:`Under-invested area: ${lowest.cat}`, text:`This category has the lowest average progress at ${lowest.avg}%. Pick one small next action this week.`});
-  if (highest && highest.avg > 0) insights.push({title:`Strongest momentum: ${highest.cat}`, text:`This category is currently leading at ${highest.avg}%. Ask what is working here that could transfer elsewhere.`});
+  const notStarted = state.goals.filter(g => (g.status || "Not Started") === "Not Started");
   if (atRisk.length) insights.push({title:`At-risk goals need attention`, text:`You marked ${atRisk.length} goal(s) as At Risk. Review blockers and resources before adding new goals.`});
   if (noNext30.length) insights.push({title:`Next 30 Days gap`, text:`${noNext30.length} goal(s) have no next-30-day action. These are likely to stay aspirational unless you define the next move.`});
-  if (insights.length === 0) insights.push({title:"Solid system health", text:"Your goals have next actions, resources, and progress. Use the quarterly review to choose what matters most now."});
+  if (notStarted.length) insights.push({title:`Goals waiting for a decision`, text:`${notStarted.length} goal(s) are Not Started. Choose which one deserves attention and consciously defer the rest.`});
+  if (insights.length === 0) insights.push({title:"Solid system health", text:"Your goals have clear statuses, next actions, and resources. Use the quarterly review to choose what matters most now."});
   return insights;
 }
 
@@ -514,10 +496,6 @@ function handleBulletKeydown(event) {
 
 function goalType(goal) {
   return goal?.goal_type || "Project";
-}
-
-function progressLabelFor(goal) {
-  return goalType(goal) === "Behavior" ? "Consistency" : "Completion";
 }
 
 function keyResultsLabelFor(goal) {
@@ -831,7 +809,6 @@ function achievementsHtml() {
             <span class="category-pill" style="background:${categories[g.category]?.color || '#111827'}">${escapeHtml(g.category || "Goal")}</span>
             <h3>${escapeHtml(g.title || "Untitled Goal")}</h3>
             <p class="achievement-date">Completed ${escapeHtml(completedDate)}</p>
-            ${(g.why || "").trim() ? `<div class="achievement-detail"><strong>Why it mattered</strong><p>${escapeHtml(g.why).replaceAll("\n","<br>")}</p></div>` : ""}
             ${(g.wins || "").trim() ? `<div class="achievement-detail"><strong>Wins & reflection</strong><p>${escapeHtml(g.wins).replaceAll("\n","<br>")}</p></div>` : ""}
             ${(g.lessons || "").trim() ? `<div class="achievement-detail"><strong>Lessons</strong><p>${escapeHtml(g.lessons).replaceAll("\n","<br>")}</p></div>` : ""}
             <div class="achievement-actions">
@@ -1087,10 +1064,7 @@ function goalCard(goal) {
 
     ${fieldCard(goal, "key_results", "My Beliefs", "full")}
 
-    <div class="grid-two meaning-feeling-grid">
-      ${fieldCard(goal, "why", "Why This Matters")}
-      ${localMetaFieldCard(goal, "feeling_completed", "Feeling This Will Provide When Completed")}
-    </div>
+    ${localMetaFieldCard(goal, "feeling_completed", "Feeling This Will Provide", "full")}
 
     <div class="life-season-control">
       <label class="timeline-label" for="life-season-${goal.id}">Life Season</label>
@@ -1120,17 +1094,7 @@ function goalCard(goal) {
 
     ${reflectionHtml(goal)}
 
-    <div class="card-actions">
-      <div class="progress-wrap">
-        ${type === "Behavior" ? `
-          <div class="progress-help">Behavior goals are rated above as Needs Improvement, Meets, or Exceeds instead of tracked by project completion.</div>
-        ` : `
-          <div class="progress-label" data-progress-label="${goal.id}">Completion: ${goal.progress || 0}%</div>
-          <input class="progress-slider" type="range" min="0" max="100" value="${goal.progress || 0}" oninput="updateProgress('${goal.id}', this.value)" />
-          <div class="progress-bar"><div class="progress-fill" data-progress-fill="${goal.id}" style="width:${goal.progress || 0}%;background:${color}"></div></div>
-          <div class="progress-help">Use this as project completion.</div>
-        `}
-      </div>
+    <div class="card-actions" style="justify-content:flex-end">
       <button class="delete" onclick="deleteGoal('${goal.id}')">Delete</button>
     </div>
   </article>`;
@@ -1152,7 +1116,7 @@ function reviewsHtml() {
   return `<section class="panel"><h3>Planning Reviews</h3><div class="review-grid">${reviews.map(r=>`<div class="review-card"><div class="field-header" style="background:#111827">${r[1]}</div><textarea placeholder="${r[2]}" oninput="updateReview('${r[0]}', this.value)">${escapeHtml(state.reviews[r[0]] || "")}</textarea></div>`).join("")}</div></section>`;
 }
 function coachHtml() {
-  return `<section class="panel"><h3>Built-in Coach</h3><p>Rules-based coaching based on your goals, progress, statuses, people fields, and next actions.</p><div class="coach-list">${coachInsights().map(i=>`<div class="coach-item"><strong>${escapeHtml(i.title)}</strong><p>${escapeHtml(i.text)}</p></div>`).join("")}</div></section>`;
+  return `<section class="panel"><h3>Built-in Coach</h3><p>Rules-based coaching based on your goals, statuses, people fields, and next actions.</p><div class="coach-list">${coachInsights().map(i=>`<div class="coach-item"><strong>${escapeHtml(i.title)}</strong><p>${escapeHtml(i.text)}</p></div>`).join("")}</div></section>`;
 }
 function visionHtml() {
   return `<section class="panel"><h3>Vision Board</h3><p>Add image URLs for Italy, music, family, adventure, leadership, or anything that pulls you forward.</p><button class="primary" onclick="showAddVision=!showAddVision;render()">${showAddVision?"Close":"Add Vision Item"}</button>${showAddVision?`<form class="add-form" onsubmit="addVisionItem(event)"><select id="visionCategory">${Object.keys(categories).map(c=>`<option>${c}</option>`).join("")}</select><input id="visionTitle" placeholder="Title" /><input id="visionImage" placeholder="Image URL" /><textarea id="visionNote" placeholder="Note"></textarea><button>Add</button></form>`:""}<div class="vision-grid">${state.vision.map(v=>`<div class="vision-item"><div class="vision-img" style="background-image:url('${escapeHtml(v.image_url)}')"></div><div class="vision-body"><select onchange="updateVision('${v.id}','category',this.value)">${Object.keys(categories).map(c=>`<option ${v.category===c?"selected":""}>${c}</option>`).join("")}</select><input value="${escapeHtml(v.title)}" oninput="updateVision('${v.id}','title',this.value)" placeholder="Title" /><input value="${escapeHtml(v.image_url)}" oninput="updateVision('${v.id}','image_url',this.value)" placeholder="Image URL" /><textarea oninput="updateVision('${v.id}','note',this.value)" placeholder="Note">${escapeHtml(v.note||"")}</textarea><button class="delete" onclick="deleteVision('${v.id}')">Delete</button></div></div>`).join("")}</div></section>`;
@@ -1182,9 +1146,7 @@ function buildAIPrompt() {
       category: g.category,
       title: g.title,
       status: g.status,
-      progress: g.progress,
       behavior_rating: autoBehaviorRating(g),
-      why: g.why,
       people: g.people,
       resources: g.money,
       resource_time: g.resource_time,
@@ -1263,7 +1225,7 @@ function aiCoachHtml() {
   const hasKey = !!getOpenAIKey();
   return `<section class="panel">
     <h3>AI Coach</h3>
-    <p>This uses OpenAI to review your goals, progress, reviews, metrics, vision board, blockers, people, and resources. Your OpenAI key is stored only in this browser's local storage.</p>
+    <p>This uses OpenAI to review your goals, statuses, reviews, metrics, vision board, blockers, people, and resources. Your OpenAI key is stored only in this browser's local storage.</p>
     <div class="ai-warning">For a stronger production version, the OpenAI key should eventually be moved to a secure Supabase Edge Function. This version is designed for your personal use.</div>
     <div class="ai-setup">
       <input id="openaiKey" type="password" placeholder="${hasKey ? "OpenAI API key saved locally" : "Paste OpenAI API key"}" />
@@ -1303,38 +1265,38 @@ function weeklyReviewHtml() {
 function strategicBriefText() {
   const stats = completionStats();
   const cats = categoryStats();
-  const lowest = [...cats].sort((a,b)=>a.avg-b.avg)[0];
-  const highest = [...cats].sort((a,b)=>b.avg-a.avg)[0];
   const atRisk = state.goals.filter(g => (g.goal_type || "Project") === "Project" && g.status === "At Risk");
   const onTrack = state.goals.filter(g => (g.goal_type || "Project") === "Project" && g.status === "On Track");
-  const completed = state.goals.filter(g => (g.goal_type || "Project") === "Project" && (g.status === "Completed" || Number(g.progress||0) >= 100));
-  const notStarted = state.goals.filter(g => (g.status || "Not Started") === "Not Started" && Number(g.progress||0) === 0);
+  const completed = state.goals.filter(g => (g.goal_type || "Project") === "Project" && g.status === "Completed");
+  const notStarted = state.goals.filter(g => (g.status || "Not Started") === "Not Started");
   const needsImprovement = state.goals.filter(g => g.goal_type === "Behavior" && autoBehaviorRating(g) === "Needs Improvement");
   const noNext30 = state.goals.filter(g => !(g.next30||"").trim());
   const noResources = state.goals.filter(g => !(g.money||"").trim());
   const recent = recentGoals().slice(0,3);
+  const mostAtRisk = [...cats].sort((a,b) => b.atRisk - a.atRisk)[0];
+  const mostNotStarted = [...cats].sort((a,b) => b.notStarted - a.notStarted)[0];
 
   const highestLeverage = state.goals
     .filter(g => (g.next30||"").trim() || g.status === "At Risk")
-    .sort((a,b) => (b.status === "At Risk") - (a.status === "At Risk") || Number(b.progress||0)-Number(a.progress||0))[0];
+    .sort((a,b) => (b.status === "At Risk") - (a.status === "At Risk") || prioritySortValue(a) - prioritySortValue(b))[0];
 
   return `TODD'S STRATEGIC BRIEF
 
 What changed:
-- You currently have ${stats.total} goals with ${stats.avg}% average progress.
+- You currently have ${stats.total} goals, with ${stats.active} active and ${stats.complete} completed.
 - ${onTrack.length} goals are On Track, ${atRisk.length} are At Risk, ${completed.length} are Completed, and ${notStarted.length} are Not Started.
 - Most recent updates: ${recent.map(g => g.title).join("; ") || "No recent updates yet."}
 
 Biggest opportunity:
-- ${highest ? highest.cat + " has the strongest current momentum at " + highest.avg + "%." : "Add progress data to see momentum."}
-- The opportunity is to transfer what is working there into a weaker category.
+- ${noNext30.length ? noNext30.length + " goal(s) still need a concrete Next 30 Days action." : "Every goal has a Next 30 Days action."}
+- Turn one high-priority intention into a scheduled next move.
 
 Biggest risk:
-- ${lowest ? lowest.cat + " is the most neglected category at " + lowest.avg + "%." : "No category risk detected yet."}
+- ${mostAtRisk && mostAtRisk.atRisk ? mostAtRisk.cat + " has the most At Risk goals (" + mostAtRisk.atRisk + ")." : "No category currently has an At Risk goal."}
 - ${atRisk.length ? atRisk.length + " project/goal(s) are marked At Risk." : "No project goals are currently marked At Risk."}\n- ${needsImprovement.length ? needsImprovement.length + " behavior goal(s) are rated Needs Improvement." : "No behavior goals are currently rated Needs Improvement."}
 
 Most neglected category:
-- ${lowest ? lowest.cat + " needs the most attention right now." : "Not enough data yet."}
+- ${mostNotStarted && mostNotStarted.notStarted ? mostNotStarted.cat + " has the most goals that have not started (" + mostNotStarted.notStarted + ")." : "No category is clearly neglected based on status."}
 
 Highest leverage action:
 - ${highestLeverage ? "Focus on: " + highestLeverage.title : "Pick one goal and define a concrete next 30-day action."}
@@ -1351,7 +1313,7 @@ One thing to stop doing:
 function strategicBriefHtml() {
   return `<section class="panel">
     <h3>Todd's Strategic Brief</h3>
-    <p>A concise operating brief based on your current goals, progress, statuses, and next actions.</p>
+    <p>A concise operating brief based on your current goals, statuses, priorities, and next actions.</p>
     <div class="brief-actions">
       <button class="primary" onclick="document.getElementById('briefOutput').textContent = strategicBriefText()">Generate Strategic Brief</button>
     </div>
@@ -2020,8 +1982,8 @@ function statusRibbonHtml(stats) {
   const projects = state.goals.filter(g => (g.goal_type || "Project") === "Project");
   const behaviors = state.goals.filter(g => g.goal_type === "Behavior");
 
-  const projectStarted = projects.filter(g => Number(g.progress || 0) > 0 || !["Not Started", "", null, undefined].includes(g.status)).length;
-  const projectDone = projects.filter(g => g.status === "Completed" || Number(g.progress || 0) >= 100).length;
+  const projectStarted = projects.filter(g => !["Not Started", "", null, undefined].includes(g.status)).length;
+  const projectDone = projects.filter(g => g.status === "Completed").length;
 
   const behaviorStarted = behaviors.filter(g => effectiveBehaviorRating(g) !== "Needs Improvement" || (g.today_this_week || "").trim() || (g.key_results || "").trim()).length;
   const behaviorMeets = behaviors.filter(g => ["Meets", "Exceeds"].includes(effectiveBehaviorRating(g))).length;
@@ -2194,7 +2156,7 @@ function render() {
     if (!goals.length) return "";
     return `<h3 class="category-title" style="color:${categories[cat].color}">${cat}</h3>${goals.map(goalCard).join("")}`;
   }).join("");
-  const dashboard = `${priorityStackHtml()}<section class="dashboard-grid"><div class="panel"><h3>Progress by Category</h3><div>${categoryProgressHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
+  const dashboard = `${priorityStackHtml()}<section class="dashboard-grid"><div class="panel"><h3>Goals by Category</h3><div>${categoryStatusHtml()}</div></div><div class="panel"><h3>Recently Updated</h3><div class="recent-list">${recentHtml()}</div></div></section>${metricsHtml()}${coachHtml()}`;
   let main = activeView === "Dashboard" ? dashboard : activeView === "Today / This Week" ? workplanHtml() : activeView === "Weekly Review" ? weeklyReviewHtml() : activeView === "Strategic Brief" ? strategicBriefHtml() : activeView === "Priority Stack" ? priorityStackHtml() : activeView === "Achievements" ? achievementsHtml() : activeView === "Resources" ? resourcesHtml() : activeView === "Workplan" ? workplanHtml() : activeView === "Life Seasons" ? lifeSeasonsHtml() : activeView === "Reviews" ? reviewsHtml() : activeView === "Coach" ? aiCoachHtml() : `${showAdd ? addForm() : ""}${grouped}`;
   document.getElementById("app").innerHTML = `<div class="app-shell"><aside class="sidebar"><div class="brand-row"><div class="brand"><h1>My Life Vision</h1><p>Strategic Life OS</p></div></div>${utilityMenuHtml()}</aside><main class="content ${activeView==='Workbook' ? 'workbook-page' : ''}">
         <header class="app-header-simple">
