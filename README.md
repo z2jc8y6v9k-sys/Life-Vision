@@ -1,4 +1,4 @@
-# My Life Vision V23 — Tighter Workplan action spacing
+# My Life Vision V24 — Action-focused Workplan
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
@@ -27,6 +27,8 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 - Restored + Add Action to its original size, kept it borderless, and changed it to green.
 - Removed the Action column heading while preserving the action column itself.
 - Reduced the vertical space between + Add Action and the action table.
+- Removed the Resources column and its sorting behavior from Workplan.
+- Expanded the action column while keeping Feeling, Priority, and Time.
 - Removed repeated inner page headings from Priority Stack, Achievements, Resources, Life Seasons, Weekly Review, Strategic Brief, and Coach.
 - Kept the Priority Stack heading on the Overview page, where there is no top-level page heading.
 - Kept the opening reflection flow, including Return to advance and Shift+Return for a new line.
@@ -35,11 +37,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v23.js`
-- `styles-v23.css`
-- `pause-background-v23.png`
+- `app-v24.js`
+- `styles-v24.css`
+- `pause-background-v24.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V23 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V24 JavaScript and stylesheet filenames.
