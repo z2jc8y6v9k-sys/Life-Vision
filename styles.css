@@ -3534,6 +3534,138 @@ body {
   .goal-settings-fields { grid-template-columns: 1fr; }
 }
 
+/* v63.4 Workplan quick add + category filters */
+.workplan-category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+.workplan-category-filters button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 11px;
+  background: #fff;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.workplan-category-filters button:hover { transform: translateY(-1px); }
+.workplan-category-filters button.active:first-child {
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
+}
+.workplan-category-filters button span {
+  display: inline-grid;
+  min-width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(148,163,184,.16);
+  font-size: 11px;
+}
+.workplan-add-drawer {
+  margin: 0 0 18px;
+  border: 1px solid rgba(31,41,51,.12);
+  border-radius: 16px;
+  background: #fbfaf7;
+  overflow: hidden;
+}
+.workplan-add-drawer summary {
+  padding: 11px 14px;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 950;
+  cursor: pointer;
+  list-style: none;
+}
+.workplan-add-drawer summary::-webkit-details-marker { display: none; }
+.workplan-add-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.5fr) minmax(220px, 1.2fr) 130px 130px auto;
+  gap: 12px;
+  align-items: end;
+  padding: 14px;
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+.workplan-add-form label {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 900;
+}
+.workplan-add-form input,
+.workplan-add-form select {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 9px 10px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+  font-size: 13px;
+}
+.workplan-add-form button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 11px;
+  padding: 10px 16px;
+  background: #111827;
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+.workplan-add-empty {
+  margin: 0 0 18px;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  color: #667085;
+  font-size: 13px;
+}
+.decision-action-context {
+  display: flex !important;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.workplan-category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--category-color);
+  border-radius: 999px;
+  padding: 3px 7px;
+  color: var(--category-color);
+  background: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+.workplan-category-pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--category-color);
+}
+@media(max-width:1200px) {
+  .workplan-add-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .workplan-add-form button { grid-column: 1 / -1; }
+}
+@media(max-width:650px) {
+  .workplan-add-form { grid-template-columns: 1fr; }
+  .workplan-add-form button { grid-column: auto; }
+}
+
 /* v63 Belief, Boundaries, Gratitude entry flow */
 .possibility-entry-page {
   display: grid !important;
