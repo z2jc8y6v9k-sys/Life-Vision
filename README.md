@@ -1,4 +1,4 @@
-# My Life Vision V17 — Cleaner Workplan metrics
+# My Life Vision V18 — Streamlined Workplan actions
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
@@ -13,8 +13,9 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 - Renamed the Workplan page to This Moment's Decisions.
 - Renamed the decision snapshot to Summary and removed its prompt sentence.
 - Moved the category filter bubbles directly above My Actions.
-- Put all five Workplan Summary metrics on one row on desktop.
-- Removed the Summary label so the metrics begin immediately below the Workplan page heading.
+- Removed the Workplan metrics summary, including priority, duration, waiting, and estimated-time counts.
+- Removed the separate My Actions heading.
+- Added the current My Actions count directly to the This Moment's Decisions page heading.
 - Removed repeated inner page headings from Priority Stack, Achievements, Resources, Life Seasons, Weekly Review, Strategic Brief, and Coach.
 - Kept the Priority Stack heading on the Overview page, where there is no top-level page heading.
 - Kept the opening reflection flow, including Return to advance and Shift+Return for a new line.
@@ -23,11 +24,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v17.js`
-- `styles-v17.css`
-- `pause-background-v17.png`
+- `app-v18.js`
+- `styles-v18.css`
+- `pause-background-v18.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V17 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V18 JavaScript and stylesheet filenames.
