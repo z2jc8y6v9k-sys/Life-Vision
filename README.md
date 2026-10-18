@@ -1,4 +1,4 @@
-# My Life Vision V21 — Tighter Workplan controls
+# My Life Vision V22 — Refined Workplan action control
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
@@ -24,6 +24,8 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 - Tightened the spacing between Feeling and Priority.
 - Removed the separate Sort By controls and added sort arrows to every table heading.
 - Changed + Add Action into a smaller borderless control.
+- Restored + Add Action to its original size, kept it borderless, and changed it to green.
+- Removed the Action column heading while preserving the action column itself.
 - Removed repeated inner page headings from Priority Stack, Achievements, Resources, Life Seasons, Weekly Review, Strategic Brief, and Coach.
 - Kept the Priority Stack heading on the Overview page, where there is no top-level page heading.
 - Kept the opening reflection flow, including Return to advance and Shift+Return for a new line.
@@ -32,11 +34,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v21.js`
-- `styles-v21.css`
-- `pause-background-v21.png`
+- `app-v22.js`
+- `styles-v22.css`
+- `pause-background-v22.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V21 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V22 JavaScript and stylesheet filenames.
