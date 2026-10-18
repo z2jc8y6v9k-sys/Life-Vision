@@ -3441,6 +3441,99 @@ body {
   font-size: 14px;
 }
 
+/* v63.3 Compact goal settings */
+.goal-settings-drawer {
+  margin: 0 0 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fbfaf7;
+  overflow: hidden;
+}
+.goal-settings-drawer summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 14px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.goal-settings-drawer summary::-webkit-details-marker { display: none; }
+.goal-settings-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.goal-settings-summary > strong {
+  color: #344054;
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+.goal-settings-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.goal-settings-values > span {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(31,41,51,.10);
+  border-radius: 999px;
+  background: #fff;
+  color: #475467;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1;
+}
+.goal-settings-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.goal-settings-chevron {
+  display: inline-block;
+  font-size: 16px;
+  transition: transform .18s ease;
+}
+.goal-settings-drawer[open] .goal-settings-chevron { transform: rotate(180deg); }
+.goal-settings-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  padding: 14px;
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+.goal-settings-fields label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+.goal-settings-fields .status-select {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  margin-top: 6px;
+}
+@media(max-width:900px) {
+  .goal-settings-summary { align-items: flex-start; flex-direction: column; gap: 7px; }
+  .goal-settings-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media(max-width:600px) {
+  .goal-settings-drawer summary { align-items: flex-start; }
+  .goal-settings-fields { grid-template-columns: 1fr; }
+}
+
 /* v63 Belief, Boundaries, Gratitude entry flow */
 .possibility-entry-page {
   display: grid !important;
