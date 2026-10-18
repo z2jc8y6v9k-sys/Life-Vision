@@ -1,4 +1,4 @@
-# My Life Vision V18 — Streamlined Workplan actions
+# My Life Vision V19 — Simpler navigation and action-first opening
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
@@ -16,6 +16,9 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 - Removed the Workplan metrics summary, including priority, duration, waiting, and estimated-time counts.
 - Removed the separate My Actions heading.
 - Added the current My Actions count directly to the This Moment's Decisions page heading.
+- Simplified the Dashboard navigation to Overview, Workplan, Priority Stack, and Achievements.
+- Moved Resources, Life Seasons, Weekly Review, Strategic Brief, and Coach into a More menu.
+- After the opening reflections, the app now goes directly to This Moment's Decisions.
 - Removed repeated inner page headings from Priority Stack, Achievements, Resources, Life Seasons, Weekly Review, Strategic Brief, and Coach.
 - Kept the Priority Stack heading on the Overview page, where there is no top-level page heading.
 - Kept the opening reflection flow, including Return to advance and Shift+Return for a new line.
@@ -24,11 +27,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v18.js`
-- `styles-v18.css`
-- `pause-background-v18.png`
+- `app-v19.js`
+- `styles-v19.css`
+- `pause-background-v19.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V18 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V19 JavaScript and stylesheet filenames.
