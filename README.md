@@ -1,4 +1,4 @@
-# My Life Vision V16 — Compact dashboard headings and summary
+# My Life Vision V17 — Cleaner Workplan metrics
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
@@ -14,6 +14,7 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 - Renamed the decision snapshot to Summary and removed its prompt sentence.
 - Moved the category filter bubbles directly above My Actions.
 - Put all five Workplan Summary metrics on one row on desktop.
+- Removed the Summary label so the metrics begin immediately below the Workplan page heading.
 - Removed repeated inner page headings from Priority Stack, Achievements, Resources, Life Seasons, Weekly Review, Strategic Brief, and Coach.
 - Kept the Priority Stack heading on the Overview page, where there is no top-level page heading.
 - Kept the opening reflection flow, including Return to advance and Shift+Return for a new line.
@@ -22,11 +23,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v16.js`
-- `styles-v16.css`
-- `pause-background-v16.png`
+- `app-v17.js`
+- `styles-v17.css`
+- `pause-background-v17.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V16 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V17 JavaScript and stylesheet filenames.
