@@ -1,7 +1,23 @@
-# My Life Vision v63.1 — Writing Into the Light
+# My Life Vision V13 — approved opening-page artwork
 
-Changes:
-- Renamed “My Belief” to “My Beliefs” throughout goal cards.
-- Reworked the Belief, Boundaries, and Gratitude entry screens so the answer is typed directly over the artwork with no visible text box or frosted panel.
-- Preserved the same Pause background and gentle fade transitions.
-- Kept all v63 entry-flow behavior and saved responses intact.
+This build installs the approved opening-page artwork while preserving the complete working application.
+
+## What changed
+
+- Added the approved dark blue-green, merlot, and emerging-gold opening artwork.
+- Added the final upper-left light speckles radiating from the center.
+- Removed the earlier experimental color overlay so the artwork renders with its intended colors and contrast.
+- Kept the opening reflection flow, including Return to advance and Shift+Return for a new line.
+- Preserved all existing workbook, dashboard, workplan, priority, review, and goal functionality.
+
+## Files to upload
+
+- `index.html`
+- `app-v13.js`
+- `styles-v13.css`
+- `pause-background-v13.png`
+- `README.md`
+
+## GitHub installation
+
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V13 JavaScript and stylesheet filenames.
