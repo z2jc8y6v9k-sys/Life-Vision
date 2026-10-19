@@ -1,8 +1,13 @@
-# My Life Vision V41 — Restored Full Navigation
+# My Life Vision V42 — White Navigation and Focus
 
-This build restores the full-size Dashboard and Workbook navigation while keeping the quieter artwork background.
+This build restores clean white navigation cards and simplifies the Workplan focus control.
 
 ## What changed
+
+- Returned the Dashboard and Workbook card backgrounds to white.
+- Renamed the Workplan control from the numeric Do Next label to + Focus.
+- Updated the related star guidance and focused-view messages to use Focus consistently.
+- Preserved the three-action Focus limit and existing filtering behavior.
 
 - Restored the full-size Dashboard and Workbook navigation cards; they no longer collapse into a slim bar.
 - Preserved all navigation choices in their prior visible positions.
@@ -105,12 +110,12 @@ This build restores the full-size Dashboard and Workbook navigation while keepin
 ## Files to upload
 
 - `index.html`
-- `app-v41.js`
-- `styles-v41.css`
-- `pause-background-v41.png`
-- `pause-background-questions-v41.png`
+- `app-v42.js`
+- `styles-v42.css`
+- `pause-background-v42.png`
+- `pause-background-questions-v42.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V41 JavaScript and stylesheet filenames.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V42 JavaScript and stylesheet filenames.
