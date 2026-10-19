@@ -1,8 +1,12 @@
-# My Life Vision V33 — Capture Navigation Placement
+# My Life Vision V34 — Dashboard Menu Repair
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
 ## What changed
+
+- Fixed the Dashboard More menu so its dropdown is no longer clipped by the navigation card.
+- Raised the More menu above adjacent cards so every option remains clickable.
+- Forced the bottom + Capture button to remain green in its normal, hover, and open states.
 
 - Moved + Capture to the right of Workbook in the fixed navigation.
 - Added the matching vertical gray divider between Workbook and + Capture.
@@ -72,11 +76,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v33.js`
-- `styles-v33.css`
-- `pause-background-v33.png`
+- `app-v34.js`
+- `styles-v34.css`
+- `pause-background-v34.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V33 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V34 JavaScript and stylesheet filenames.
