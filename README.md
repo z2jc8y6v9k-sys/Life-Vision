@@ -1,16 +1,15 @@
-# My Life Vision V43 — Integrated Header Navigation
+# My Life Vision V44 — Restored Cards with Focused Pages
 
-This build removes the stacked navigation cards and puts navigation into the My Life Vision header only when it is needed.
+This build restores the prior full-size navigation design while retaining the cleaner selected-page behavior.
 
 ## What changed
 
-- Kept My Life Vision permanently visible in the page header.
-- Moved Dashboard and Workbook into an integrated header navigation matching the approved mockup.
-- The bottom-right Dashboard and Workbook buttons now open their choices in the header.
-- Selecting any Dashboard section or Workbook category closes the navigation choices automatically.
-- After selection, the page shows only My Life Vision, the selected section heading, and its content.
-- Preserved the bottom-right Dashboard, Workbook, divider, and + Capture controls on every section.
-- Removed the two large Dashboard and Workbook cards from the page layout.
+- Reversed the integrated-header navigation from V43.
+- Restored the full-size white Dashboard and Workbook boxes beneath My Life Vision.
+- Kept the bottom-right Dashboard, Workbook, divider, and + Capture controls.
+- Clicking Dashboard or Workbook at the bottom reopens the two navigation boxes.
+- Selecting any Dashboard section or Workbook category hides both boxes.
+- After selection, the page shows My Life Vision, the selected section heading, and its content without the navigation boxes.
 
 - Returned the Dashboard and Workbook card backgrounds to white.
 - Renamed the Workplan control from the numeric Do Next label to + Focus.
@@ -118,12 +117,12 @@ This build removes the stacked navigation cards and puts navigation into the My 
 ## Files to upload
 
 - `index.html`
-- `app-v43.js`
-- `styles-v43.css`
-- `pause-background-v43.png`
-- `pause-background-questions-v43.png`
+- `app-v44.js`
+- `styles-v44.css`
+- `pause-background-v44.png`
+- `pause-background-questions-v44.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V43 JavaScript and stylesheet filenames.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V44 JavaScript and stylesheet filenames.
