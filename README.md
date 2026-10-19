@@ -1,8 +1,13 @@
-# My Life Vision V38 — Clearer Navigation Color and Unified Headings
+# My Life Vision V39 — Opening Artwork Navigation and Aligned Headings
 
-This build strengthens the established color palette and makes Dashboard headings consistent with Workbook headings.
+This build brings the opening artwork into the navigation and fully aligns Dashboard headings with Workbook headings.
 
 ## What changed
+
+- Replaced the spectrum-style Dashboard and Workbook backgrounds with a softened miniature of the actual opening artwork.
+- Used the text-free version of the artwork so Pause does not appear inside the navigation cards.
+- Added a light cream veil so the artwork remains visible while the buttons and text stay easy to read.
+- Positioned Dashboard page headings at the same top and left spacing as the Workbook category headings.
 
 - Increased the blue, green, merlot, and gold shading behind the Dashboard and Workbook navigation without making the cards dark or heavy.
 - Changed the Dashboard page headings—including This Moment's Decisions, Priority Stack, Achievements, Resources, and the remaining Dashboard sections—to the same 28px font treatment used by Relationships, Health, and the other Workbook category headings.
@@ -96,12 +101,12 @@ This build strengthens the established color palette and makes Dashboard heading
 ## Files to upload
 
 - `index.html`
-- `app-v38.js`
-- `styles-v38.css`
-- `pause-background-v38.png`
-- `pause-background-questions-v38.png`
+- `app-v39.js`
+- `styles-v39.css`
+- `pause-background-v39.png`
+- `pause-background-questions-v39.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V38 JavaScript and stylesheet filenames.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V39 JavaScript and stylesheet filenames.
