@@ -1,8 +1,14 @@
-# My Life Vision V44 — Restored Cards with Focused Pages
+# My Life Vision V45 — Persistent Navigation with Focused Scrolling
 
-This build restores the prior full-size navigation design while retaining the cleaner selected-page behavior.
+This build keeps the full navigation available above every page while moving immediately to the selected content.
 
 ## What changed
+
+- The app now opens Workplan with the Dashboard and Workbook boxes visible above it.
+- The Dashboard and Workbook boxes remain present above every section, so scrolling upward always reveals them.
+- Selecting a section scrolls directly to its heading and content rather than removing the boxes.
+- Clicking Dashboard or Workbook at the bottom scrolls to the corresponding box without changing or hiding the current page below it.
+- The last-used screen remains fully intact beneath the navigation boxes.
 
 - Reversed the integrated-header navigation from V43.
 - Restored the full-size white Dashboard and Workbook boxes beneath My Life Vision.
@@ -117,12 +123,12 @@ This build restores the prior full-size navigation design while retaining the cl
 ## Files to upload
 
 - `index.html`
-- `app-v44.js`
-- `styles-v44.css`
-- `pause-background-v44.png`
-- `pause-background-questions-v44.png`
+- `app-v45.js`
+- `styles-v45.css`
+- `pause-background-v45.png`
+- `pause-background-questions-v45.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V44 JavaScript and stylesheet filenames.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V45 JavaScript and stylesheet filenames.
