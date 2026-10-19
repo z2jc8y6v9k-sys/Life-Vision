@@ -1,4 +1,4 @@
-# My Life Vision V24 — Action-focused Workplan
+# My Life Vision V25 — Do Next and action notes
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
@@ -29,6 +29,9 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 - Reduced the vertical space between + Add Action and the action table.
 - Removed the Resources column and its sorting behavior from Workplan.
 - Expanded the action column while keeping Feeling, Priority, and Time.
+- Added a Do Next star for personal actions, limited to three selections.
+- Pinned Do Next actions to the top of the action list and added a 0–3 count beside the page title.
+- Added an editable Notes column after Time, with notes saved to each individual action.
 - Removed repeated inner page headings from Priority Stack, Achievements, Resources, Life Seasons, Weekly Review, Strategic Brief, and Coach.
 - Kept the Priority Stack heading on the Overview page, where there is no top-level page heading.
 - Kept the opening reflection flow, including Return to advance and Shift+Return for a new line.
@@ -37,11 +40,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v24.js`
-- `styles-v24.css`
-- `pause-background-v24.png`
+- `app-v25.js`
+- `styles-v25.css`
+- `pause-background-v25.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V24 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V25 JavaScript and stylesheet filenames.
