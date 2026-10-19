@@ -1,8 +1,14 @@
-# My Life Vision V36 — Simplified Workplan Toolbar
+# My Life Vision V37 — Clear Question Screen and Palette
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
 ## What changed
+
+- Preserved the approved Pause artwork on the initial opening screen.
+- Added a matched alternate background with only the baked-in Pause lettering removed.
+- Automatically switches to the text-free artwork after Create from Possibility is clicked.
+- Prevented the Pause lettering from intersecting with the belief, boundaries, and gratitude questions.
+- Changed the Dashboard and Workbook box backgrounds from white to a subtle blue, green, merlot, and gold blend matching the My Life Vision title.
 
 - Removed the Relationships, Health, Adventure, Creativity, and Impact filter buttons from Workplan.
 - Removed their category action counts.
@@ -87,11 +93,12 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v36.js`
-- `styles-v36.css`
-- `pause-background-v36.png`
+- `app-v37.js`
+- `styles-v37.css`
+- `pause-background-v37.png`
+- `pause-background-questions-v37.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V36 JavaScript and stylesheet filenames.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V37 JavaScript and stylesheet filenames.
