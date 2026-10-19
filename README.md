@@ -1,14 +1,12 @@
-# My Life Vision V40 — Compact Navigation and Quieter Artwork
+# My Life Vision V41 — Restored Full Navigation
 
-This build gives content more room by collapsing the primary navigation and softens the opening artwork used behind it.
+This build restores the full-size Dashboard and Workbook navigation while keeping the quieter artwork background.
 
 ## What changed
 
-- Collapsed the two large Dashboard and Workbook cards into a compact navigation bar after a destination is chosen.
-- Kept the current Dashboard section or Workbook category visible in the compact bar.
-- Made either compact card clickable to reopen all Dashboard and Workbook choices.
-- Automatically collapses the full navigation again after the next choice.
-- Increased the cream opacity over the opening artwork so it remains recognizable without dominating the controls.
+- Restored the full-size Dashboard and Workbook navigation cards; they no longer collapse into a slim bar.
+- Preserved all navigation choices in their prior visible positions.
+- Kept the increased cream opacity over the opening artwork so the card background is less dominant.
 
 - Replaced the spectrum-style Dashboard and Workbook backgrounds with a softened miniature of the actual opening artwork.
 - Used the text-free version of the artwork so Pause does not appear inside the navigation cards.
@@ -107,12 +105,12 @@ This build gives content more room by collapsing the primary navigation and soft
 ## Files to upload
 
 - `index.html`
-- `app-v40.js`
-- `styles-v40.css`
-- `pause-background-v40.png`
-- `pause-background-questions-v40.png`
+- `app-v41.js`
+- `styles-v41.css`
+- `pause-background-v41.png`
+- `pause-background-questions-v41.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V40 JavaScript and stylesheet filenames.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V41 JavaScript and stylesheet filenames.
