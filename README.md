@@ -1,8 +1,15 @@
-# My Life Vision V31 — Streamlined Workplan Controls
+# My Life Vision V32 — Fast Capture Inbox
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
 ## What changed
+
+- Added a persistent + Capture button throughout the signed-in app.
+- Captured ideas and tasks save to the existing private cloud data store.
+- Added a compact Capture inbox for reviewing saved items.
+- Captures can be assigned to a goal and converted directly into Workplan actions.
+- Captures can be deleted without affecting goals or actions.
+- Changed both Workplan toolbar separators from horizontal lines to vertical gray lines.
 
 - Removed the All button from the Workplan category controls.
 - Clicking an already-selected category now returns the Workplan to all categories.
@@ -62,11 +69,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v31.js`
-- `styles-v31.css`
-- `pause-background-v31.png`
+- `app-v32.js`
+- `styles-v32.css`
+- `pause-background-v32.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V31 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V32 JavaScript and stylesheet filenames.
