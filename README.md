@@ -1,8 +1,15 @@
-# My Life Vision V29 — Focused, Editable Workplan
+# My Life Vision V30 — Responsive Screen Fit
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
 ## What changed
+
+- Made the opening artwork fit fully within computer and tablet screens.
+- Unified the Workbook and Dashboard widths so neither can extend beyond the screen.
+- Reduced oversized navigation spacing while preserving the existing visual design.
+- Added dedicated laptop, tablet, phone, and small-phone layouts.
+- Converted wide Workplan content into readable stacked cards before it can overflow.
+- Kept the fixed Dashboard/Workbook controls inside the visible screen area.
 
 - Made the Do Next count clickable: switch between all actions and only the selected Do Next actions.
 - Made each Workplan action editable directly in its row; press Return or click away to save.
@@ -50,11 +57,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v29.js`
-- `styles-v29.css`
-- `pause-background-v29.png`
+- `app-v30.js`
+- `styles-v30.css`
+- `pause-background-v30.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V29 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V30 JavaScript and stylesheet filenames.
