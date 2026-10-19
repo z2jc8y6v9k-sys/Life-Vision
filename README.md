@@ -1,8 +1,14 @@
-# My Life Vision V39 — Opening Artwork Navigation and Aligned Headings
+# My Life Vision V40 — Compact Navigation and Quieter Artwork
 
-This build brings the opening artwork into the navigation and fully aligns Dashboard headings with Workbook headings.
+This build gives content more room by collapsing the primary navigation and softens the opening artwork used behind it.
 
 ## What changed
+
+- Collapsed the two large Dashboard and Workbook cards into a compact navigation bar after a destination is chosen.
+- Kept the current Dashboard section or Workbook category visible in the compact bar.
+- Made either compact card clickable to reopen all Dashboard and Workbook choices.
+- Automatically collapses the full navigation again after the next choice.
+- Increased the cream opacity over the opening artwork so it remains recognizable without dominating the controls.
 
 - Replaced the spectrum-style Dashboard and Workbook backgrounds with a softened miniature of the actual opening artwork.
 - Used the text-free version of the artwork so Pause does not appear inside the navigation cards.
@@ -101,12 +107,12 @@ This build brings the opening artwork into the navigation and fully aligns Dashb
 ## Files to upload
 
 - `index.html`
-- `app-v39.js`
-- `styles-v39.css`
-- `pause-background-v39.png`
-- `pause-background-questions-v39.png`
+- `app-v40.js`
+- `styles-v40.css`
+- `pause-background-v40.png`
+- `pause-background-questions-v40.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V39 JavaScript and stylesheet filenames.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V40 JavaScript and stylesheet filenames.
