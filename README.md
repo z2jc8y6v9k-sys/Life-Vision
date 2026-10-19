@@ -1,4 +1,17 @@
-# My Life Vision V46 — Direct Bottom Navigation
+# My Life Vision V47 — Workplan Status and Waiting Queue
+
+## What changed in V47
+
+- Added an editable Status column after Time and before Notes in every Workplan table.
+- Reused the existing Today / This Week action status field, so changes remain synchronized with the Workbook.
+- Changing an action to Waiting immediately moves it into the separate Waiting section.
+- The Waiting section now uses the full editable table, allowing an action to be moved back into active work directly.
+- Changing an action to Delegated immediately moves it into the Delegated section.
+- Waiting and Delegated actions are automatically removed from + Focus.
+- Added a live breakdown beneath This Moment's Decisions for Today / This Week, Delegated, and Waiting.
+- The total in parentheses now includes every Workplan action represented in that breakdown.
+
+# Previous V46 changes
 
 This build turns the bottom Dashboard and Workbook controls into direct shortcuts while preserving the full navigation above every page.
 
@@ -128,12 +141,12 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 ## Files to upload
 
 - `index.html`
-- `app-v46.js`
-- `styles-v46.css`
-- `pause-background-v46.png`
-- `pause-background-questions-v46.png`
+- `app-v47.js`
+- `styles-v47.css`
+- `pause-background-v47.png`
+- `pause-background-questions-v47.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V46 JavaScript and stylesheet filenames.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V47 JavaScript and stylesheet filenames.
