@@ -1,4 +1,4 @@
-# My Life Vision V26 — Workplan-first Dashboard
+# My Life Vision V27 — Dashboard-first navigation order
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
@@ -34,6 +34,8 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 - Added an editable Notes column after Time, with notes saved to each individual action.
 - Removed Overview from the Dashboard navigation and routing.
 - Made the Dashboard button open Workplan / This Moment's Decisions directly.
+- Swapped the main navigation panels so Dashboard appears before Workbook.
+- Swapped the fixed bottom-right controls to Dashboard, then Workbook, while preserving their styling.
 - Removed repeated inner page headings from Priority Stack, Achievements, Resources, Life Seasons, Weekly Review, Strategic Brief, and Coach.
 - Kept the Priority Stack heading on the Overview page, where there is no top-level page heading.
 - Kept the opening reflection flow, including Return to advance and Shift+Return for a new line.
@@ -42,11 +44,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v26.js`
-- `styles-v26.css`
-- `pause-background-v26.png`
+- `app-v27.js`
+- `styles-v27.css`
+- `pause-background-v27.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V26 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V27 JavaScript and stylesheet filenames.
