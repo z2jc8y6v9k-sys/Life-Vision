@@ -1,8 +1,11 @@
-# My Life Vision V37 — Clear Question Screen and Palette
+# My Life Vision V38 — Clearer Navigation Color and Unified Headings
 
-This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
+This build strengthens the established color palette and makes Dashboard headings consistent with Workbook headings.
 
 ## What changed
+
+- Increased the blue, green, merlot, and gold shading behind the Dashboard and Workbook navigation without making the cards dark or heavy.
+- Changed the Dashboard page headings—including This Moment's Decisions, Priority Stack, Achievements, Resources, and the remaining Dashboard sections—to the same 28px font treatment used by Relationships, Health, and the other Workbook category headings.
 
 - Preserved the approved Pause artwork on the initial opening screen.
 - Added a matched alternate background with only the baked-in Pause lettering removed.
@@ -93,12 +96,12 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v37.js`
-- `styles-v37.css`
-- `pause-background-v37.png`
-- `pause-background-questions-v37.png`
+- `app-v38.js`
+- `styles-v38.css`
+- `pause-background-v38.png`
+- `pause-background-questions-v38.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V37 JavaScript and stylesheet filenames.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V38 JavaScript and stylesheet filenames.
