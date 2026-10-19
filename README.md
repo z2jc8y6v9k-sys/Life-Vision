@@ -1,8 +1,13 @@
-# My Life Vision V34 — Dashboard Menu Repair
+# My Life Vision V35 — Header Spacing and Color
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
 ## What changed
+
+- Increased separation between the Workplan Priority and Time column headings.
+- Preserved the compact relationship between the other Workplan columns.
+- Changed My Life Vision from black to a blue, green, merlot, and gold blend inspired by the Pause artwork.
+- Clipped the color treatment strictly inside the title letters.
 
 - Fixed the Dashboard More menu so its dropdown is no longer clipped by the navigation card.
 - Raised the More menu above adjacent cards so every option remains clickable.
@@ -76,11 +81,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v34.js`
-- `styles-v34.css`
-- `pause-background-v34.png`
+- `app-v35.js`
+- `styles-v35.css`
+- `pause-background-v35.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V34 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V35 JavaScript and stylesheet filenames.
