@@ -1,8 +1,14 @@
-# My Life Vision V35 — Header Spacing and Color
+# My Life Vision V36 — Simplified Workplan Toolbar
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
 ## What changed
+
+- Removed the Relationships, Health, Adventure, Creativity, and Impact filter buttons from Workplan.
+- Removed their category action counts.
+- Removed the now-unnecessary divider lines from the Workplan toolbar.
+- Left only + Action and Do Next so the controls stay focused on taking action.
+- Preserved category colors on the action rows themselves.
 
 - Increased separation between the Workplan Priority and Time column headings.
 - Preserved the compact relationship between the other Workplan columns.
@@ -81,11 +87,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v35.js`
-- `styles-v35.css`
-- `pause-background-v35.png`
+- `app-v36.js`
+- `styles-v36.css`
+- `pause-background-v36.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V35 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V36 JavaScript and stylesheet filenames.
