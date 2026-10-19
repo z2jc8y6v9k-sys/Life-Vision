@@ -1,8 +1,15 @@
-# My Life Vision V30 — Responsive Screen Fit
+# My Life Vision V31 — Streamlined Workplan Controls
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
 ## What changed
+
+- Removed the All button from the Workplan category controls.
+- Clicking an already-selected category now returns the Workplan to all categories.
+- Moved + Action into the same outlined toolbar as the category buttons.
+- Moved the Do Next counter into that toolbar as an outlined button.
+- Added short light-gray divider lines between categories, + Action, and Do Next.
+- Removed the word Focus from the Do Next control.
 
 - Made the opening artwork fit fully within computer and tablet screens.
 - Unified the Workbook and Dashboard widths so neither can extend beyond the screen.
@@ -36,10 +43,8 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 - Reordered the Workplan columns to Action, Feeling, Priority, Time, and Resources.
 - Tightened the spacing between Feeling and Priority.
 - Removed the separate Sort By controls and added sort arrows to every table heading.
-- Changed + Add Action into a smaller borderless control.
-- Restored + Add Action to its original size, kept it borderless, and changed it to green.
 - Removed the Action column heading while preserving the action column itself.
-- Reduced the vertical space between + Add Action and the action table.
+- Reduced the vertical space above the action table.
 - Removed the Resources column and its sorting behavior from Workplan.
 - Expanded the action column while keeping Feeling, Priority, and Time.
 - Added a Do Next star for personal actions, limited to three selections.
@@ -57,11 +62,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v30.js`
-- `styles-v30.css`
-- `pause-background-v30.png`
+- `app-v31.js`
+- `styles-v31.css`
+- `pause-background-v31.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V30 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V31 JavaScript and stylesheet filenames.
