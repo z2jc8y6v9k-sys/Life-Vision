@@ -1,8 +1,11 @@
-# My Life Vision V32 — Fast Capture Inbox
+# My Life Vision V33 — Capture Navigation Placement
 
 This build keeps the approved opening-page artwork and makes the Dashboard pages more compact.
 
 ## What changed
+
+- Moved + Capture to the right of Workbook in the fixed navigation.
+- Added the matching vertical gray divider between Workbook and + Capture.
 
 - Added a persistent + Capture button throughout the signed-in app.
 - Captured ideas and tasks save to the existing private cloud data store.
@@ -69,11 +72,11 @@ This build keeps the approved opening-page artwork and makes the Dashboard pages
 ## Files to upload
 
 - `index.html`
-- `app-v32.js`
-- `styles-v32.css`
-- `pause-background-v32.png`
+- `app-v33.js`
+- `styles-v33.css`
+- `pause-background-v33.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V32 JavaScript and stylesheet filenames.
+Upload all five files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V33 JavaScript and stylesheet filenames.
