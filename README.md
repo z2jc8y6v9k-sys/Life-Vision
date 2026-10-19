@@ -1,8 +1,13 @@
-# My Life Vision V45 — Persistent Navigation with Focused Scrolling
+# My Life Vision V46 — Direct Bottom Navigation
 
-This build keeps the full navigation available above every page while moving immediately to the selected content.
+This build turns the bottom Dashboard and Workbook controls into direct shortcuts while preserving the full navigation above every page.
 
 ## What changed
+
+- The bottom-right Dashboard button now always opens Workplan.
+- The bottom-right Workbook button now always opens the All goals page.
+- Both shortcuts scroll directly to the selected page content.
+- The full Dashboard and Workbook boxes remain above every page and are still available by scrolling upward.
 
 - The app now opens Workplan with the Dashboard and Workbook boxes visible above it.
 - The Dashboard and Workbook boxes remain present above every section, so scrolling upward always reveals them.
@@ -123,12 +128,12 @@ This build keeps the full navigation available above every page while moving imm
 ## Files to upload
 
 - `index.html`
-- `app-v45.js`
-- `styles-v45.css`
-- `pause-background-v45.png`
-- `pause-background-questions-v45.png`
+- `app-v46.js`
+- `styles-v46.css`
+- `pause-background-v46.png`
+- `pause-background-questions-v46.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V45 JavaScript and stylesheet filenames.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V46 JavaScript and stylesheet filenames.
