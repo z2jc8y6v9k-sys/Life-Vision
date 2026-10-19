@@ -1,4 +1,13 @@
-# My Life Vision V47 — Workplan Status and Waiting Queue
+# My Life Vision V48 — Active Status Language
+
+## What changed in V48
+
+- Renamed the action status displayed as Me or Today / This Week to Active.
+- Applied Active consistently in the Workplan Status column, Workbook action controls, quick-add form, and heading counts.
+- Preserved the existing saved value internally so all prior actions retain their status and location.
+- Selecting Active keeps or returns an action to the active Workplan section.
+
+# Previous V47 changes
 
 ## What changed in V47
 
@@ -141,12 +150,12 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 ## Files to upload
 
 - `index.html`
-- `app-v47.js`
-- `styles-v47.css`
-- `pause-background-v47.png`
-- `pause-background-questions-v47.png`
+- `app-v48.js`
+- `styles-v48.css`
+- `pause-background-v48.png`
+- `pause-background-questions-v48.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V47 JavaScript and stylesheet filenames.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V48 JavaScript and stylesheet filenames.
