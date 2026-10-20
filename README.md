@@ -1,4 +1,13 @@
-# My Life Vision V55 — Fraunces Stone Opening Typography
+# My Life Vision V56 — Full-Screen iPhone Opening Artwork
+
+## What changed in V56
+
+- Removed the enlarged duplicate artwork layers above and below the opening image on iPhone.
+- Uses one copy of the complete center artwork to fill the entire visible iPhone screen.
+- Applies the same single-image treatment behind all three opening reflection questions.
+- Preserved the approved Fraunces light-stone typography and all V55 functionality.
+
+# Previous V55 changes
 
 ## What changed in V55
 
@@ -218,8 +227,8 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 ## Files to upload
 
 - `index.html`
-- `app-v55.js`
-- `styles-v55.css`
+- `app-v56.js`
+- `styles-v56.css`
 - `pause-background-v54.png`
 - `pause-background-questions-v54.png`
 - `Fraunces-Medium.ttf`
@@ -228,4 +237,4 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 
 ## GitHub installation
 
-Upload all eight files to the repository root, preserving the exact filenames. `index.html` already points to the V55 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
+Upload all eight files to the repository root, preserving the exact filenames. `index.html` already points to the V56 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
