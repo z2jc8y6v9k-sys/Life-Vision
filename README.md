@@ -1,4 +1,14 @@
-# My Life Vision V52 — Refined Questions and iPhone Fit
+# My Life Vision V53 — Full iPhone Layout
+
+## What changed in V53
+
+- Removed the Next button from the opening questions; Return advances, and the iPhone keyboard shows Next or Done.
+- Applied responsive iPhone sizing to the entire app, not only the opening page.
+- Reworked the mobile header, Dashboard and Workbook panels, Workplan action cards, Workbook goal cards, forms, Capture panel, login screen, and bottom navigation to fit the phone width.
+- Added iPhone safe-area spacing and 16px form controls to prevent unwanted Safari zooming.
+- Preserved all V52 desktop behavior, data, login, workbook, dashboard, and workplan functionality.
+
+# Previous V52 changes
 
 ## What changed in V52
 
@@ -187,12 +197,12 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 ## Files to upload
 
 - `index.html`
-- `app-v52.js`
-- `styles-v52.css`
-- `pause-background-v52.png`
-- `pause-background-questions-v52.png`
+- `app-v53.js`
+- `styles-v53.css`
+- `pause-background-v53.png`
+- `pause-background-questions-v53.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V52 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V53 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
