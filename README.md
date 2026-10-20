@@ -1,4 +1,14 @@
-# My Life Vision V53 — Full iPhone Layout
+# My Life Vision V54 — Sapphire Writing and Mobile Repairs
+
+## What changed in V54
+
+- Changed typed opening-question answers to a dark sapphire with subtle textured paint-like edges for stronger readability.
+- Shows the complete opening artwork palette on iPhone as a centered full-image layer, with a dark ambient artwork layer filling the tall screen behind it.
+- Added stricter width containment throughout the iPhone Workplan, including actions, labels, selectors, notes, quick-add controls, and completed items.
+- Changed Dashboard More on iPhone to open inside the Dashboard card so none of its buttons can extend beyond the screen.
+- Preserved all V53 functionality and desktop layouts.
+
+# Previous V53 changes
 
 ## What changed in V53
 
@@ -197,12 +207,12 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 ## Files to upload
 
 - `index.html`
-- `app-v53.js`
-- `styles-v53.css`
-- `pause-background-v53.png`
-- `pause-background-questions-v53.png`
+- `app-v54.js`
+- `styles-v54.css`
+- `pause-background-v54.png`
+- `pause-background-questions-v54.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V53 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V54 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
