@@ -1,4 +1,14 @@
-# My Life Vision V50 — Textured Opening Cover
+# My Life Vision V51 — Interactive Pause Opening
+
+## What changed in V51
+
+- Removed the separate Create from Possibility button.
+- Made “Pause.” the opening control; it changes to “Create from Possibility” when hovered or keyboard-focused and opens the questions when clicked or tapped.
+- Uses the same textured artwork behind both the opening and all reflection questions.
+- Added iPhone-safe viewport sizing, safe-area spacing, and a compact reflection layout that fits the phone screen.
+- Preserved all V50 workbook, dashboard, workplan, data, and login functionality.
+
+# Previous V50 changes
 
 ## What changed in V50
 
@@ -167,12 +177,12 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 ## Files to upload
 
 - `index.html`
-- `app-v50.js`
-- `styles-v50.css`
-- `pause-background-v50.png`
-- `pause-background-questions-v50.png`
+- `app-v51.js`
+- `styles-v51.css`
+- `pause-background-v51.png`
+- `pause-background-questions-v51.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V50 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V51 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
