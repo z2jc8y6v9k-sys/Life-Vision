@@ -1,4 +1,13 @@
-# My Life Vision V48 — Active Status Language
+# My Life Vision V49 — Workplan Visual Refinements
+
+## What changed in V49
+
+- Applied the My Life Vision blue, green, merlot, gold, and sapphire blend to This Moment's Decisions and its total count.
+- Removed the nested bordered Delegated treatment and gave Delegated the same clean section structure as Waiting.
+- Moved Waiting above Delegated in the Workplan.
+- Kept the editable Status column and synchronized action movement unchanged.
+
+# Previous V48 changes
 
 ## What changed in V48
 
@@ -150,12 +159,12 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 ## Files to upload
 
 - `index.html`
-- `app-v48.js`
-- `styles-v48.css`
-- `pause-background-v48.png`
-- `pause-background-questions-v48.png`
+- `app-v49.js`
+- `styles-v49.css`
+- `pause-background-v49.png`
+- `pause-background-questions-v49.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V48 JavaScript and stylesheet filenames.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V49 JavaScript and stylesheet filenames.
