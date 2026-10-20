@@ -1,4 +1,14 @@
-# My Life Vision V51 — Interactive Pause Opening
+# My Life Vision V52 — Refined Questions and iPhone Fit
+
+## What changed in V52
+
+- Matched the reflection-question headings to the “Pause.” font and warm cream-gold color.
+- Kept the question headings slightly smaller than “Pause.” so they remain elegant and readable.
+- Added live Safari viewport sizing so the opening and question screens use the iPhone’s actually visible height.
+- Tightened the mobile question, answer, and Next-button layout so all three remain on one screen.
+- Preserved all V51 interactions, workbook, dashboard, workplan, data, and login functionality.
+
+# Previous V51 changes
 
 ## What changed in V51
 
@@ -177,12 +187,12 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 ## Files to upload
 
 - `index.html`
-- `app-v51.js`
-- `styles-v51.css`
-- `pause-background-v51.png`
-- `pause-background-questions-v51.png`
+- `app-v52.js`
+- `styles-v52.css`
+- `pause-background-v52.png`
+- `pause-background-questions-v52.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V51 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V52 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
