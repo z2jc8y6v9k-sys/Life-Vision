@@ -1,4 +1,15 @@
-# My Life Vision V54 — Sapphire Writing and Mobile Repairs
+# My Life Vision V55 — Fraunces Stone Opening Typography
+
+## What changed in V55
+
+- Changed “Pause.” to Fraunces SemiBold in a solid light-stone color.
+- Changed all three opening reflection questions to Fraunces Medium in the same light-stone color.
+- Changed typed reflection answers from sapphire blue to the same light-stone color.
+- Added a restrained charcoal shadow so the stone lettering remains readable across the textured artwork.
+- Bundled both Fraunces font files with the app so the design does not depend on an external font service.
+- Preserved all V54 functionality, artwork, desktop layouts, and iPhone repairs.
+
+# Previous V54 changes
 
 ## What changed in V54
 
@@ -207,12 +218,14 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 ## Files to upload
 
 - `index.html`
-- `app-v54.js`
-- `styles-v54.css`
+- `app-v55.js`
+- `styles-v55.css`
 - `pause-background-v54.png`
 - `pause-background-questions-v54.png`
+- `Fraunces-Medium.ttf`
+- `Fraunces-SemiBold.ttf`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V54 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
+Upload all eight files to the repository root, preserving the exact filenames. `index.html` already points to the V55 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
