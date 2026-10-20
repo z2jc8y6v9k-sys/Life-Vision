@@ -1,4 +1,12 @@
-# My Life Vision V49 — Workplan Visual Refinements
+# My Life Vision V50 — Textured Opening Cover
+
+## What changed in V50
+
+- Replaced the opening cover with the approved sapphire, forest-green, gold, charcoal, and merlot palette-knife artwork.
+- Added a matching text-free background for the reflection questions so “Pause.” disappears after Create from Possibility is selected.
+- Preserved all V49 workbook, dashboard, workplan, data, and login functionality.
+
+# Previous V49 changes
 
 ## What changed in V49
 
@@ -159,12 +167,12 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 ## Files to upload
 
 - `index.html`
-- `app-v49.js`
-- `styles-v49.css`
-- `pause-background-v49.png`
-- `pause-background-questions-v49.png`
+- `app-v50.js`
+- `styles-v50.css`
+- `pause-background-v50.png`
+- `pause-background-questions-v50.png`
 - `README.md`
 
 ## GitHub installation
 
-Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V49 JavaScript and stylesheet filenames.
+Upload all six files to the repository root, preserving the exact lowercase filenames. `index.html` already points to the V50 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
