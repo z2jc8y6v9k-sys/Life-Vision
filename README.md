@@ -1,4 +1,12 @@
-# My Life Vision V62 — Workbook Hover Navigation
+# My Life Vision V63 — Workbook All Areas
+
+## What changed in V63
+
+- Clicking the bottom Workbook button now restores the previous All behavior.
+- The Workbook opens with every area shown and an All Areas heading.
+- Hovering over Workbook still reveals the individual area choices.
+
+# Previous V62 changes
 
 ## What changed in V62
 
