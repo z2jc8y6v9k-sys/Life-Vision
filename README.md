@@ -1,4 +1,13 @@
-# My Life Vision V61 — Workbook Areas in Bottom Navigation
+# My Life Vision V62 — Workbook Hover Navigation
+
+## What changed in V62
+
+- Switched the bottom Workbook and Dashboard button order so the area choices visually belong to Workbook.
+- Hid the five Workbook area choices until the pointer is over the Workbook control.
+- Kept the choices open while moving from Workbook into the area list.
+- Clicking Workbook opens Relationships; clicking an area opens that Workbook page.
+
+# Previous V61 changes
 
 ## What changed in V61
 
