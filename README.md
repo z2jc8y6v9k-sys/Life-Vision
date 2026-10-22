@@ -1,4 +1,14 @@
-# My Life Vision V59 — Streamlined Navigation
+# My Life Vision V60 — Persistent Workbook Navigation
+
+## What changed in V60
+
+- Increased the vertical spacing between Relationships, Health, Adventure, Creativity, and Impact inside the upper-left Workbook menu.
+- Added a faint floating Workbook-area row that stays visible above the bottom Dashboard and Workbook controls while scrolling through Workbook pages.
+- Kept the floating area row deliberately subtle; each area becomes clearer and shows its category color on hover or focus.
+- After the three opening questions, the app now lands directly on Workplan at **This Moment's Decisions**.
+- Preserved all V59 navigation changes, the 14-day reminder, and category-colored feeling text.
+
+# Previous V59 changes
 
 ## What changed in V59
 
