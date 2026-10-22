@@ -1,4 +1,15 @@
-# My Life Vision V58 — Category-Colored Feeling Text
+# My Life Vision V59 — Streamlined Navigation
+
+## What changed in V59
+
+- Removed the separate Dashboard and Workbook navigation boxes from the top of the app.
+- Reorganized the upper-left menu in this order: Add Goal, Dashboard and all Dashboard pages, Workbook and all five areas, Export Backup, and Sign Out.
+- Added the approved horizontal Workbook heading: the current area appears first, with the other areas continuing directly to its right.
+- Other Workbook area names remain faint until hovered; hovering enlarges the name and reveals that area's color.
+- Clicking Workbook in the bottom navigation now opens Relationships as the starting area.
+- Preserved the 14-day Next 30 review reminder and category-colored Feeling This Will Provide text.
+
+# Previous V58 changes
 
 ## What changed in V58
 
