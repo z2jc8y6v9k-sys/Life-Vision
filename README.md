@@ -1,4 +1,13 @@
-# My Life Vision V60 — Persistent Workbook Navigation
+# My Life Vision V61 — Workbook Areas in Bottom Navigation
+
+## What changed in V61
+
+- Removed the inactive Workbook area names from the top of the page.
+- Kept the current Workbook area as the page heading.
+- Moved the faint, persistent Workbook area navigation into the bottom control bar, immediately left of Dashboard.
+- Preserved the area-specific hover colors and active-area tint.
+
+# Previous V60 changes
 
 ## What changed in V60
 
