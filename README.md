@@ -1,4 +1,12 @@
-# My Life Vision V57 — 14-Day Next 30 Review
+# My Life Vision V58 — Category-Colored Feeling Text
+
+## What changed in V58
+
+- The text entered under **Feeling This Will Provide** now matches the goal's category color.
+- Health feelings display in green, Relationships in blue, Adventure in ocean blue, Creativity in purple, and Impact in orange.
+- Existing saved feelings are unchanged; only their display color is corrected.
+
+# Previous V57 changes
 
 ## What changed in V57
 
@@ -243,8 +251,8 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 ## Files to upload
 
 - `index.html`
-- `app-v57.js`
-- `styles-v57.css`
+- `app-v58.js`
+- `styles-v58.css`
 - `pause-background-v54.png`
 - `pause-background-questions-v54.png`
 - `Fraunces-Medium.ttf`
@@ -253,4 +261,4 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 
 ## GitHub installation
 
-Upload all eight files to the repository root, preserving the exact filenames. `index.html` already points to the V57 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
+Upload all eight files to the repository root, preserving the exact filenames. `index.html` already points to the V58 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
