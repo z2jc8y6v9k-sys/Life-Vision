@@ -1,4 +1,20 @@
-# My Life Vision V56 — Full-Screen iPhone Opening Artwork
+# My Life Vision V57 — 14-Day Next 30 Review
+
+## What changed in V57
+
+- Every individual action in **Next 30 +/- Days** now receives its own added date and 14-day review date.
+- Existing actions begin their first 14-day cycle when V57 is first opened.
+- A cloud-synced in-app reminder appears when actions are due for review.
+- A numbered badge beside **Workbook** keeps overdue reviews visible.
+- **Review Now** presents one action at a time with three choices:
+  - Move to Today / This Week
+  - Keep for 14 More Days
+  - Archive
+- **Remind Me Tomorrow** hides the reminder until the next day.
+- Actions are never moved or removed automatically.
+- Review dates and archived action records use the existing cloud metadata, so no database migration is required.
+
+# Previous V56 changes
 
 ## What changed in V56
 
@@ -227,8 +243,8 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 ## Files to upload
 
 - `index.html`
-- `app-v56.js`
-- `styles-v56.css`
+- `app-v57.js`
+- `styles-v57.css`
 - `pause-background-v54.png`
 - `pause-background-questions-v54.png`
 - `Fraunces-Medium.ttf`
@@ -237,4 +253,4 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 
 ## GitHub installation
 
-Upload all eight files to the repository root, preserving the exact filenames. `index.html` already points to the V56 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
+Upload all eight files to the repository root, preserving the exact filenames. `index.html` already points to the V57 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
