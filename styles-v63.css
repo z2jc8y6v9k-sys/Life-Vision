@@ -6803,3 +6803,10 @@ body.opening-active #app {
     font-size: 10px !important;
   }
 }
+
+/* V63.5.1 — the masthead spans the full horizontal content area. */
+.app-header-simple {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: none !important;
+}

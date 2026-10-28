@@ -1,4 +1,11 @@
-# My Life Vision V63.5 — Exact Masthead and Responsive Display Repair
+# My Life Vision V63.5.1 — Full-Width Masthead
+
+## What changed in V63.5.1
+
+- Extended the Navy to Radiant Gold masthead across the entire available horizontal content area.
+- Preserved its narrow height, menu placement, typography, artwork, and all content below it.
+
+# Previous V63.5 — Exact Masthead and Responsive Display Repair
 
 ## What changed in V63.5
 
