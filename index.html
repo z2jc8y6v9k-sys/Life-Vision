@@ -4,14 +4,38 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="color-scheme" content="light" />
-  <title>My Life Vision V63</title>
+  <title>My Life Vision V63.5</title>
   <link rel="stylesheet" href="styles-v63.css" />
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="app-v63.js"></script>
+  <script>
+    (() => {
+      let appRequested = false;
+      const loadApp = () => {
+        if (appRequested) return;
+        appRequested = true;
+        const appScript = document.createElement("script");
+        appScript.src = "app-v63.js";
+        appScript.onerror = () => {
+          const app = document.getElementById("app");
+          if (app) app.innerHTML = '<div class="auth-page"><div class="auth-card startup-error" role="alert"><h1>My Life Vision</h1><h2>The app could not load</h2><p>Refresh the page and try again. Your saved content is safe.</p><button onclick="window.location.reload()">Try Again</button></div></div>';
+        };
+        document.body.appendChild(appScript);
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        const cloudScript = document.createElement("script");
+        cloudScript.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        cloudScript.async = true;
+        cloudScript.onload = loadApp;
+        cloudScript.onerror = loadApp;
+        document.head.appendChild(cloudScript);
+        window.setTimeout(loadApp, 6000);
+      });
+    })();
+  </script>
 </head>
 <body>
   <div id="app" aria-live="polite">
-    <div class="app-loading">Opening My Life Vision…</div>
+    <div class="app-loading" role="status">Opening My Life Vision…</div>
   </div>
   <noscript>This app requires JavaScript to open.</noscript>
 </body>

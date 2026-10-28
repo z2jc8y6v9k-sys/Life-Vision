@@ -3222,7 +3222,7 @@ body {
 
 .pause-entry-image-page {
   min-height: 100vh;
-  background-image: url("pause-background.png");
+  background-image: url("pause-background-v54.jpg");
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
@@ -3515,7 +3515,7 @@ body {
   min-height: 100svh !important;
   width: 100vw !important;
   overflow: hidden !important;
-  background-image: url("pause-background.png") !important;
+  background-image: url("pause-background-v54.jpg") !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;
   background-position: 63% 24% !important;
@@ -4220,7 +4220,7 @@ body {
 
 /* V13 approved dark-blue/green, merlot, and emerging-gold opening artwork */
 .pause-entry-image-page {
-  background-image: url("pause-background-v54.png") !important;
+  background-image: url("pause-background-v54.jpg") !important;
   background-size: cover !important;
   background-position: center center !important;
   background-repeat: no-repeat !important;
@@ -4634,7 +4634,7 @@ select {
 
 /* V37 question state: preserve the artwork while removing the baked-in Pause lettering. */
 .pause-entry-image-page.possibility-entry-page {
-  background-image: url("pause-background-questions-v54.png") !important;
+  background-image: url("pause-background-v54.jpg") !important;
 }
 
 /* V39 use a softened miniature of the opening artwork instead of a spectrum gradient. */
@@ -4939,7 +4939,7 @@ select {
   min-height: 100svh !important;
   height: 100dvh !important;
   overflow: hidden !important;
-  background-image: url("pause-background-v54.png") !important;
+  background-image: url("pause-background-v54.jpg") !important;
   background-size: cover !important;
   background-position: center center !important;
 }
@@ -5568,9 +5568,9 @@ select {
   .pause-entry-image-page,
   .pause-entry-image-page.possibility-entry-page {
     background-image:
-      url("pause-background-v54.png"),
+      url("pause-background-v54.jpg"),
       linear-gradient(rgba(4,18,28,.48), rgba(4,18,28,.48)),
-      url("pause-background-v54.png") !important;
+      url("pause-background-v54.jpg") !important;
     background-size: contain, cover, cover !important;
     background-position: center center, center center, center center !important;
     background-repeat: no-repeat, no-repeat, no-repeat !important;
@@ -5789,7 +5789,7 @@ select {
 @media (max-width: 700px) {
   .pause-entry-image-page,
   .pause-entry-image-page.possibility-entry-page {
-    background-image: url("pause-background-v54.png") !important;
+    background-image: url("pause-background-v54.jpg") !important;
     background-size: 100% 100% !important;
     background-position: center center !important;
     background-repeat: no-repeat !important;
@@ -6278,5 +6278,528 @@ select {
     padding-left: 3px;
     padding-right: 9px;
     overflow-x: auto;
+  }
+}
+
+/* V63.4 — approved light-burst masthead and mobile stability fixes. */
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+/* Only the masthead changes; all headings and content below retain V63. */
+.app-header-simple {
+  position: relative !important;
+  isolation: isolate;
+  z-index: 120;
+  width: min(100%, 760px) !important;
+  min-height: 172px;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 13px !important;
+  overflow: visible;
+  margin: 0 0 24px !important;
+  padding: 20px;
+  border-radius: 14px;
+  background-color: #071d2c;
+  background-image: url("masthead-light-burst.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 0 14px 32px rgba(24, 31, 36, .16);
+}
+
+.app-header-simple::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    rgba(1, 13, 26, .46) 0%,
+    rgba(1, 13, 26, .30) 34%,
+    rgba(1, 13, 26, .10) 44%,
+    rgba(1, 13, 26, 0) 53%);
+}
+
+.app-header-simple .brand-main {
+  order: 2 !important;
+  flex: 0 1 auto !important;
+  color: #fff9e9;
+  text-shadow: 0 2px 14px rgba(0, 7, 17, .82), 0 1px 2px rgba(0, 0, 0, .66);
+}
+
+.app-header-simple .brand-main h1 {
+  margin: 0 !important;
+  background: none !important;
+  color: #fff9e9 !important;
+  -webkit-text-fill-color: #fff9e9 !important;
+  font-family: "Fraunces MLV", Georgia, "Times New Roman", serif !important;
+  font-size: clamp(27px, 4vw, 35px) !important;
+  font-weight: 500 !important;
+  line-height: 1.03 !important;
+  letter-spacing: -.035em !important;
+}
+
+.app-header-simple .brand-main p {
+  display: block !important;
+  margin: 8px 0 0 !important;
+  color: #f1dfb8 !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+
+.app-header-simple > .tiny-menu {
+  position: relative;
+  order: 1 !important;
+  z-index: 130 !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  display: grid !important;
+  place-items: center;
+  flex: 0 0 40px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid rgba(255, 249, 233, .48) !important;
+  border-radius: 50% !important;
+  background: rgba(3, 25, 41, .40) !important;
+  color: #fff9e9 !important;
+  box-shadow: 0 7px 18px rgba(0, 10, 20, .22) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.app-header-simple > .tiny-menu summary {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #fff9e9;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.app-header-simple > .tiny-menu[open] {
+  width: 40px !important;
+  min-width: 40px !important;
+}
+
+/* Keep the artwork full-frame while the mobile keyboard opens and closes. */
+body:has(.pause-entry-page) {
+  overflow: hidden !important;
+}
+
+.pause-entry-image-page,
+.pause-entry-image-page.possibility-entry-page {
+  position: fixed !important;
+  inset: 0 !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 100vh !important;
+  height: 100svh !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  background-image: url("pause-background-v54.jpg") !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-color: #07131b !important;
+}
+
+.pause-entry-image-page::before,
+.pause-entry-image-page::after {
+  position: absolute !important;
+}
+
+.pause-word-action.is-entering {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: none !important;
+}
+
+.pause-entry-image-page.possibility-entry-page {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    max(18px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(18px, env(safe-area-inset-left)) !important;
+}
+
+.possibility-prompt-panel {
+  width: min(880px, 100%) !important;
+  max-height: 100% !important;
+  gap: clamp(14px, 3dvh, 28px) !important;
+  padding: clamp(10px, 3dvh, 30px) 22px !important;
+  overflow: hidden !important;
+}
+
+.possibility-prompt-panel textarea {
+  min-height: clamp(110px, 28dvh, 190px) !important;
+  max-height: 34dvh !important;
+}
+
+/* Bottom controls stay above device chrome and keep every label intact. */
+.global-top-nav {
+  right: max(12px, env(safe-area-inset-right)) !important;
+  bottom: max(12px, env(safe-area-inset-bottom)) !important;
+  max-width: calc(100vw - 24px) !important;
+  align-items: center !important;
+  overflow: visible !important;
+}
+
+.global-top-nav button {
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px !important;
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+}
+
+.workbook-nav-cluster {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.workbook-bottom-areas {
+  gap: clamp(11px, 1.4vw, 20px) !important;
+}
+
+.workbook-nav-cluster:hover .workbook-bottom-areas,
+.workbook-nav-cluster:focus-within .workbook-bottom-areas {
+  max-width: 560px !important;
+  padding: 0 8px 0 14px !important;
+}
+
+.workbook-bottom-areas button {
+  min-height: 36px !important;
+  padding: 7px 1px !important;
+  color: var(--area-color) !important;
+  font-size: 12.5px !important;
+  font-weight: 850 !important;
+  line-height: 1.2 !important;
+  opacity: .48 !important;
+}
+
+.workbook-bottom-areas button.active {
+  color: var(--area-color) !important;
+  opacity: .82 !important;
+}
+
+.workbook-bottom-areas button:hover,
+.workbook-bottom-areas button:focus-visible {
+  color: var(--area-color) !important;
+  opacity: 1 !important;
+  transform: scale(1.09) !important;
+}
+
+.content,
+.workbook-page {
+  padding-bottom: calc(112px + env(safe-area-inset-bottom)) !important;
+}
+
+@media (max-width: 700px) {
+  .content,
+  .workbook-page {
+    padding-bottom: calc(126px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .app-header-simple {
+    width: 100% !important;
+    min-height: 150px;
+    padding: 16px;
+    background-position: 45% center;
+  }
+
+  .app-header-simple > .tiny-menu,
+  .app-header-simple > .tiny-menu[open] {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    flex-basis: 44px !important;
+  }
+
+  /* Preserve the complete opening art at its natural proportions. The darker
+     cover layer fills the tall phone canvas without stretching the picture. */
+  .pause-entry-image-page,
+  .pause-entry-image-page.possibility-entry-page {
+    background-image:
+      url("pause-background-v54.jpg"),
+      linear-gradient(rgba(4, 18, 28, .48), rgba(4, 18, 28, .48)),
+      url("pause-background-v54.jpg") !important;
+    background-size: contain, cover, cover !important;
+    background-position: center center, center center, center center !important;
+    background-repeat: no-repeat, no-repeat, no-repeat !important;
+  }
+
+  .pause-entry-image-page.possibility-entry-page {
+    padding:
+      max(8px, env(safe-area-inset-top))
+      max(12px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left)) !important;
+  }
+
+  .possibility-prompt-panel {
+    width: 100% !important;
+    max-width: 430px !important;
+    gap: clamp(9px, 1.8dvh, 14px) !important;
+    padding: 8px 6px !important;
+  }
+
+  .possibility-prompt-panel label {
+    font-size: clamp(28px, 8.5vw, 42px) !important;
+    line-height: 1.04 !important;
+  }
+
+  .possibility-prompt-panel textarea {
+    min-height: clamp(92px, 23dvh, 145px) !important;
+    max-height: 28dvh !important;
+    padding: 4px 2px !important;
+    font-size: clamp(20px, 5.8vw, 27px) !important;
+    line-height: 1.3 !important;
+  }
+
+  .global-top-nav {
+    left: max(8px, env(safe-area-inset-left)) !important;
+    right: max(8px, env(safe-area-inset-right)) !important;
+    bottom: max(8px, env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+    max-width: none !important;
+    gap: 5px !important;
+    padding: 6px !important;
+  }
+
+  .global-top-nav button {
+    min-height: 44px !important;
+    padding: 9px 10px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* Touch devices have no hover state, so Workbook exposes a clear scrollable
+   area row only while the workbook is open. */
+@media (hover: none), (pointer: coarse) {
+  .workbook-nav-cluster.is-current .workbook-bottom-areas {
+    position: fixed;
+    left: max(8px, env(safe-area-inset-left));
+    right: max(8px, env(safe-area-inset-right));
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    z-index: 49;
+    width: auto !important;
+    max-width: none !important;
+    display: flex !important;
+    gap: 20px !important;
+    margin: 0 !important;
+    padding: 8px 14px !important;
+    overflow-x: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    border: 1px solid rgba(31, 41, 51, .10);
+    border-radius: 999px;
+    background: rgba(255, 253, 248, .96);
+    box-shadow: 0 10px 24px rgba(31, 41, 51, .12);
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    scrollbar-width: none;
+  }
+
+  .workbook-nav-cluster.is-current .workbook-bottom-areas::-webkit-scrollbar {
+    display: none;
+  }
+
+  .workbook-nav-cluster:not(.is-current) .workbook-bottom-areas {
+    display: none !important;
+  }
+
+  .workbook-bottom-areas button {
+    min-height: 36px !important;
+    font-size: 13px !important;
+    opacity: .72 !important;
+  }
+}
+
+@media (max-height: 620px) {
+  .possibility-prompt-panel label {
+    font-size: clamp(26px, 7dvh, 38px) !important;
+  }
+
+  .possibility-prompt-panel textarea {
+    min-height: 84px !important;
+    max-height: 23dvh !important;
+  }
+}
+
+/* V63.5 — exact Navy to Radiant Gold masthead and final viewport repair. */
+.app-header-simple {
+  background-image: url("masthead-light-burst.jpg") !important;
+  background-position: center 50% !important;
+  background-size: cover !important;
+}
+
+/* Keep an artwork-backed surface behind the fixed opening page. If mobile
+   Safari repositions its visual viewport for the keyboard, the exposed area
+   is still the artwork rather than the browser's white page background. */
+body.opening-active {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  background-color: #07131b !important;
+  background-image: url("pause-background-v54.jpg") !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+}
+
+body.opening-active #app {
+  min-height: var(--opening-viewport-height, 100svh) !important;
+  background: transparent !important;
+}
+
+.pause-entry-image-page,
+.pause-entry-image-page.possibility-entry-page {
+  inset: 0 auto auto 0 !important;
+  width: 100vw !important;
+  height: var(--opening-viewport-height, 100svh) !important;
+  min-height: var(--opening-viewport-height, 100svh) !important;
+  max-height: var(--opening-viewport-height, 100svh) !important;
+  transform: none !important;
+  background-size: cover !important;
+  background-position: center center !important;
+}
+
+.pause-word-action.is-entering,
+.pause-word-action.is-entering .pause-word-default,
+.pause-word-action.is-entering .pause-word-invitation {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Let the bottom controls size themselves from their labels, while keeping the
+   entire group inside the viewport. */
+.global-top-nav {
+  box-sizing: border-box !important;
+  width: max-content !important;
+  max-width: calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)) !important;
+}
+
+.global-top-nav > button,
+.workbook-nav-cluster > .workbook-nav-button {
+  flex: 0 0 auto !important;
+  min-width: max-content !important;
+  text-overflow: clip !important;
+}
+
+.workbook-nav-cluster {
+  flex: 0 1 auto !important;
+  max-width: min(72vw, 680px);
+}
+
+.workbook-bottom-areas button {
+  color: var(--area-color) !important;
+  opacity: .62 !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,.72);
+}
+
+.workbook-bottom-areas button.active {
+  opacity: .90 !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .workbook-nav-cluster:hover .workbook-bottom-areas,
+  .workbook-nav-cluster:focus-within .workbook-bottom-areas {
+    max-width: min(560px, max(120px, calc(100vw - 330px))) !important;
+    overflow-x: auto !important;
+    scrollbar-width: none;
+  }
+}
+
+@media (max-width: 700px) {
+  body.opening-active {
+    background-image:
+      url("pause-background-v54.jpg"),
+      linear-gradient(rgba(4, 18, 28, .48), rgba(4, 18, 28, .48)),
+      url("pause-background-v54.jpg") !important;
+    background-size: contain, cover, cover !important;
+    background-position: center center, center center, center center !important;
+    background-repeat: no-repeat, no-repeat, no-repeat !important;
+  }
+
+  .pause-entry-image-page,
+  .pause-entry-image-page.possibility-entry-page {
+    background-image:
+      url("pause-background-v54.jpg"),
+      linear-gradient(rgba(4, 18, 28, .48), rgba(4, 18, 28, .48)),
+      url("pause-background-v54.jpg") !important;
+    background-size: contain, cover, cover !important;
+    background-position: center center, center center, center center !important;
+    background-repeat: no-repeat, no-repeat, no-repeat !important;
+  }
+
+  .global-top-nav {
+    width: auto !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    gap: clamp(3px, 1.2vw, 6px) !important;
+  }
+
+  .global-top-nav button,
+  .workbook-nav-cluster > .workbook-nav-button {
+    min-width: 0 !important;
+    padding-left: clamp(7px, 2.4vw, 10px) !important;
+    padding-right: clamp(7px, 2.4vw, 10px) !important;
+    font-size: clamp(10.5px, 3.15vw, 12px) !important;
+  }
+
+  .workbook-nav-cluster {
+    max-width: none;
+    min-width: 0;
+  }
+
+  .workbook-nav-cluster.is-current .workbook-bottom-areas {
+    gap: 17px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .workbook-bottom-areas button {
+    flex: 0 0 auto !important;
+    min-width: max-content !important;
+    font-size: 12px !important;
+    opacity: .76 !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .global-top-nav button,
+  .workbook-nav-cluster > .workbook-nav-button {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+    font-size: 10px !important;
   }
 }

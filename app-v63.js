@@ -88,15 +88,29 @@ async function init() {
   if (!supabaseClient) {
     return renderStartupError("The secure cloud connection did not load. Check your internet connection, then try again.");
   }
-  const { data } = await supabaseClient.auth.getSession();
+  const { data } = await withStartupTimeout(
+    supabaseClient.auth.getSession(),
+    8000,
+    "The secure cloud connection is taking too long. Check your internet connection, then try again."
+  );
   state.user = data.session?.user || null;
   if (!state.user) return renderAuth();
   if (passwordRecoveryMode) return renderPasswordRecovery();
-  await seedStarterGoalsIfEmpty();
-  await Promise.all([loadGoals(), loadReviews(), loadMetrics(), loadVision()]);
-  await migrateLocalActionMetadata();
-  await initializeNext30ReviewTracking();
+  await withStartupTimeout((async () => {
+    await seedStarterGoalsIfEmpty();
+    await Promise.all([loadGoals(), loadReviews(), loadMetrics(), loadVision()]);
+    await migrateLocalActionMetadata();
+    await initializeNext30ReviewTracking();
+  })(), 15000, "Your data is taking too long to load. Check your connection, then try again.");
   render();
+}
+
+function withStartupTimeout(promise, milliseconds, message) {
+  let timeoutId;
+  const timeout = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => reject(new Error(message)), milliseconds);
+  });
+  return Promise.race([promise, timeout]).finally(() => window.clearTimeout(timeoutId));
 }
 
 function renderAuth(message = "") {
@@ -2706,7 +2720,11 @@ function setWorkbookView(category) {
 }
 
 
-function enterFromPossibility() {
+function enterFromPossibility(button) {
+  if (button) {
+    button.disabled = true;
+    button.classList.add("is-entering");
+  }
   possibilityStage = 1;
   possibilityAdvancing = false;
   renderPauseEntry();
@@ -2802,19 +2820,37 @@ function openingPaletteHtml() {
   </style>`;
 }
 
+let openingViewportHeight = 0;
+let openingViewportWidth = 0;
+
 function syncOpeningViewportHeight() {
-  const viewportHeight = Math.round(window.visualViewport?.height || window.innerHeight || 0);
-  if (viewportHeight > 0) {
-    document.documentElement.style.setProperty("--opening-viewport-height", `${viewportHeight}px`);
+  const viewportHeight = Math.round(window.innerHeight || document.documentElement.clientHeight || window.visualViewport?.height || 0);
+  const viewportWidth = Math.round(window.innerWidth || document.documentElement.clientWidth || 0);
+  const orientationChanged = openingViewportWidth > 0 && Math.abs(viewportWidth - openingViewportWidth) > 100;
+
+  if (orientationChanged) openingViewportHeight = 0;
+  openingViewportWidth = viewportWidth;
+
+  // Keep the largest height for the current orientation. The iPhone keyboard
+  // temporarily shrinks visualViewport; accepting that smaller value caused
+  // the artwork to jump upward and exposed an empty strip underneath it.
+  if (viewportHeight > openingViewportHeight) openingViewportHeight = viewportHeight;
+  if (openingViewportHeight > 0) {
+    document.documentElement.style.setProperty("--opening-viewport-height", `${openingViewportHeight}px`);
   }
 }
 
-window.addEventListener("resize", syncOpeningViewportHeight, { passive: true });
-window.addEventListener("orientationchange", syncOpeningViewportHeight, { passive: true });
-window.visualViewport?.addEventListener("resize", syncOpeningViewportHeight, { passive: true });
+window.addEventListener("resize", () => syncOpeningViewportHeight(), { passive: true });
+window.addEventListener("orientationchange", () => {
+  openingViewportHeight = 0;
+  openingViewportWidth = 0;
+  window.requestAnimationFrame(syncOpeningViewportHeight);
+}, { passive: true });
+window.visualViewport?.addEventListener("resize", () => syncOpeningViewportHeight(), { passive: true });
 
 function renderPauseEntry() {
   syncOpeningViewportHeight();
+  document.body.classList.add("opening-active");
   if (possibilityStage === 0) {
     document.getElementById("app").innerHTML = `
       <div class="pause-entry-page pause-entry-image-page">
@@ -2822,7 +2858,7 @@ function renderPauseEntry() {
         <main class="pause-entry-main" aria-label="Pause entry">
           <h1 class="sr-only">Pause.</h1>
         </main>
-        <button class="pause-word-action" type="button" onclick="enterFromPossibility()" aria-label="Create from Possibility">
+        <button class="pause-word-action" type="button" onclick="enterFromPossibility(this)" aria-label="Create from Possibility">
           <span class="pause-word-default" aria-hidden="true">Pause.</span>
           <span class="pause-word-invitation" aria-hidden="true">Create from Possibility</span>
         </button>
@@ -2837,14 +2873,14 @@ function renderPauseEntry() {
       ${openingPaletteHtml()}
       <main class="possibility-prompt-panel" aria-label="${config.prompt}">
         <label for="possibilityAnswer">${config.prompt}</label>
-        <textarea id="possibilityAnswer" autofocus enterkeyhint="${possibilityStage < 3 ? "next" : "done"}" aria-label="${config.prompt}. Press Return to continue." oninput="updatePossibilityAnswer(this.value)" onkeydown="handlePossibilityKeydown(event)">${escapeHtml(answer)}</textarea>
+        <textarea id="possibilityAnswer" enterkeyhint="${possibilityStage < 3 ? "next" : "done"}" aria-label="${config.prompt}. Press Return to continue." oninput="updatePossibilityAnswer(this.value)" onkeydown="handlePossibilityKeydown(event)">${escapeHtml(answer)}</textarea>
       </main>
     </div>`;
-  requestAnimationFrame(() => document.getElementById("possibilityAnswer")?.focus());
 }
 
 function render() {
   if (showPauseEntry) return renderPauseEntry();
+  document.body.classList.remove("opening-active");
   const stats = completionStats();
   const navCats = "";
   const viewButtons = "";
@@ -2868,9 +2904,9 @@ function render() {
 
 
         <div class="global-top-nav" aria-label="Quick navigation">
-          <div class="workbook-nav-cluster">
-            ${workbookFloatingAreasHtml()}
+          <div class="workbook-nav-cluster ${activeView === "Workbook" ? "is-current" : ""}">
             <button class="workbook-nav-button" onclick="openWorkbookTop()" aria-haspopup="true">Workbook ${next30ReviewBadgeHtml()}</button>
+            ${workbookFloatingAreasHtml()}
           </div>
           <button onclick="openDashboardTop()">Dashboard</button>
           <span class="global-nav-divider" aria-hidden="true"></span>
@@ -2893,5 +2929,5 @@ function escapeHtml(text) {
 }
 init().catch(error => {
   console.error("My Life Vision failed to start", error);
-  renderStartupError("Your content is still safe, but the app hit a startup error. Refresh the page and try again.");
+  renderStartupError(error?.message || "Your content is still safe, but the app hit a startup error. Refresh the page and try again.");
 });

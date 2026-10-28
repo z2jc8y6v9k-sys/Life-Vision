@@ -1,4 +1,40 @@
-# My Life Vision V63 — Workbook All Areas
+# My Life Vision V63.5 — Exact Masthead and Responsive Display Repair
+
+## What changed in V63.5
+
+- Built the masthead with the exact Navy to Radiant Gold reference artwork at higher resolution.
+- Preserved the narrow masthead, dark blue-green left side, and radiant center/right light burst.
+- Stopped the opening artwork from shrinking or jumping when the iPhone keyboard opens.
+- Added an artwork-backed page surface so no blank strip can appear below the opening questions.
+- Removed the last possible transition flash from the Pause control.
+- Rebuilt the bottom navigation sizing so Workbook, Dashboard, and Capture remain fully readable.
+- Increased the resting legibility of Workbook areas while keeping them faint and color-coded.
+
+# Previous V63.4.1 — Reliable Startup and Smaller Commit
+
+## What changed in V63.4.1
+
+- Removed the duplicate 2.9 MB opening artwork file.
+- Re-encoded the remaining opening artwork as a high-quality progressive JPEG, reducing the build dramatically without changing the design.
+- Added a six-second cloud-script fallback so a stalled connection displays a useful recovery screen instead of remaining blank.
+- Added guarded startup timeouts for account and data loading.
+- Kept all V63.4 design and navigation changes unchanged.
+
+# Previous V63.4 changes — Light-Burst Masthead and Mobile Polish
+
+## What changed in V63.4
+
+- Added the approved narrow masthead using the dark blue-green left side and brighter light-burst center/right artwork.
+- Kept every page heading and control below the masthead in its existing V63 format.
+- Rebuilt the opening screen so the artwork keeps its natural proportions instead of stretching on phones.
+- Removed automatic keyboard focus from the opening questions and locked the artwork to the visible viewport, preventing the image jump and blank space beneath it while typing.
+- Removed the brief “Create from Possibility” flash during the transition into the questions.
+- Increased the bottom Workbook and Dashboard controls' safe-area spacing, line height, and readable width.
+- Made Workbook area choices more legible while retaining their faint resting state, area colors, and hover enlargement.
+- On touch screens, Workbook areas appear as a readable horizontal row above the bottom controls while the Workbook is open.
+- Preserved the 14-day Next 30 review, category-colored feeling text, and Workbook's All Areas behavior.
+
+# Previous V63 changes — Workbook All Areas
 
 ## What changed in V63
 
@@ -298,14 +334,14 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 ## Files to upload
 
 - `index.html`
-- `app-v58.js`
-- `styles-v58.css`
-- `pause-background-v54.png`
-- `pause-background-questions-v54.png`
+- `app-v63.js`
+- `styles-v63.css`
+- `pause-background-v54.jpg`
+- `masthead-light-burst.jpg`
 - `Fraunces-Medium.ttf`
 - `Fraunces-SemiBold.ttf`
 - `README.md`
 
 ## GitHub installation
 
-Upload all eight files to the repository root, preserving the exact filenames. `index.html` already points to the V58 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
+Upload all eight files to the repository root, preserving the exact filenames. `index.html` already points to the V63 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
