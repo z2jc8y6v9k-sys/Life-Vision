@@ -4,8 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="color-scheme" content="light" />
-  <title>My Life Vision V63.5.4</title>
-  <link rel="stylesheet" href="styles-v63.css" />
+  <title>My Life Vision V63.5.5</title>
+  <link rel="stylesheet" href="styles-v63-5-5.css" />
+  <style id="workbook-order-v63-5-5">
+    /* Critical navigation order is inline so Safari cannot reuse an older
+       cached rule: areas, Workbook, Dashboard on laptops; original order on phones. */
+    @media (min-width: 701px) {
+      .workbook-nav-cluster { flex-direction: row !important; }
+      .workbook-bottom-areas { order: 1 !important; }
+      .workbook-nav-button { order: 2 !important; }
+    }
+    @media (max-width: 700px) {
+      .workbook-nav-cluster { flex-direction: row !important; }
+      .workbook-nav-button { order: 1 !important; }
+      .workbook-bottom-areas { order: 2 !important; }
+    }
+  </style>
   <script>
     (() => {
       let appRequested = false;
@@ -13,7 +27,7 @@
         if (appRequested) return;
         appRequested = true;
         const appScript = document.createElement("script");
-        appScript.src = "app-v63.js";
+        appScript.src = "app-v63.js?v=63.5.5";
         appScript.onerror = () => {
           const app = document.getElementById("app");
           if (app) app.innerHTML = '<div class="auth-page"><div class="auth-card startup-error" role="alert"><h1>My Life Vision</h1><h2>The app could not load</h2><p>Refresh the page and try again. Your saved content is safe.</p><button onclick="window.location.reload()">Try Again</button></div></div>';

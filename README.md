@@ -1,4 +1,11 @@
-# My Life Vision V63.5.4 — Safari-Safe Workbook Direction
+# My Life Vision V63.5.5 — Cache-Proof Workbook Ordering
+
+## What changed in V63.5.5
+
+- Added a uniquely named stylesheet so Safari must load the current navigation rules.
+- Explicitly orders the laptop controls as: area choices, Workbook, Dashboard.
+- Duplicates that critical ordering inline in the page so an older cached stylesheet cannot reverse it.
+- Explicitly locks phone navigation to its existing order and preserves the mobile opening artwork.
 
 ## What changed in V63.5.4
 
@@ -364,7 +371,8 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 
 - `index.html`
 - `app-v63.js`
-- `styles-v63.css`
+- `styles-v63-5-5.css` — active, cache-busted stylesheet
+- `styles-v63.css` — retained compatibility copy
 - `pause-background-v54.jpg`
 - `pause-background-mobile-v63.jpg`
 - `masthead-light-burst.jpg`
