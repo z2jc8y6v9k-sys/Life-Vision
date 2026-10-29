@@ -1,4 +1,10 @@
-# My Life Vision V63.5.3 — Desktop Workbook Hover Direction
+# My Life Vision V63.5.4 — Safari-Safe Workbook Direction
+
+## What changed in V63.5.4
+
+- Replaced the browser mouse-capability test with a direct laptop-width rule.
+- On every viewport wider than 700px, Workbook areas reveal to the left of the anchored Workbook button.
+- Phone navigation and opening artwork remain unchanged.
 
 ## What changed in V63.5.3
 

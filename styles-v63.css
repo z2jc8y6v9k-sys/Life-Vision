@@ -6730,7 +6730,7 @@ body.opening-active #app {
   opacity: .90 !important;
 }
 
-@media (min-width: 701px) and (hover: hover) and (pointer: fine) {
+@media (min-width: 701px) {
   /* Laptop/desktop: keep Workbook anchored beside Dashboard and reveal its
      area choices to the left. Touch layouts deliberately retain V63.5.2. */
   .workbook-nav-cluster {
