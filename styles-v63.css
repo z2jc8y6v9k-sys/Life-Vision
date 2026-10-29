@@ -6730,12 +6730,24 @@ body.opening-active #app {
   opacity: .90 !important;
 }
 
-@media (hover: hover) and (pointer: fine) {
+@media (min-width: 701px) and (hover: hover) and (pointer: fine) {
+  /* Laptop/desktop: keep Workbook anchored beside Dashboard and reveal its
+     area choices to the left. Touch layouts deliberately retain V63.5.2. */
+  .workbook-nav-cluster {
+    flex-direction: row-reverse !important;
+  }
+
+  .workbook-bottom-areas {
+    transform: translateX(-8px);
+  }
+
   .workbook-nav-cluster:hover .workbook-bottom-areas,
   .workbook-nav-cluster:focus-within .workbook-bottom-areas {
     max-width: min(560px, max(120px, calc(100vw - 330px))) !important;
+    padding: 0 14px 0 8px !important;
     overflow-x: auto !important;
     scrollbar-width: none;
+    transform: translateX(0);
   }
 }
 

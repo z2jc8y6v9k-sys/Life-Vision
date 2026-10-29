@@ -1,4 +1,10 @@
-# My Life Vision V63.5.2 — Single Continuous Mobile Opening
+# My Life Vision V63.5.3 — Desktop Workbook Hover Direction
+
+## What changed in V63.5.3
+
+- Restored the laptop behavior where Workbook areas reveal to the left of the Workbook button.
+- The Workbook button stays in its bottom-right position instead of shifting left when the choices appear.
+- Phone navigation and the continuous mobile opening artwork are unchanged from V63.5.2.
 
 ## What changed in V63.5.2
 
