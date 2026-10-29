@@ -6810,3 +6810,42 @@ body.opening-active #app {
   width: 100% !important;
   max-width: none !important;
 }
+
+/* The rest of the app remains capped for readability, but the masthead alone
+   uses a full-bleed treatment so it still reaches both browser edges on a
+   monitor wider than the app's 1500px content limit. */
+@media (min-width: 701px) {
+  .app-header-simple {
+    left: 50% !important;
+    width: 100vw !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
+/* V63.5.2 — one continuous opening image on phones. The earlier layered
+   contain/cover treatment is intentionally replaced by a dedicated portrait
+   composition, so there are no repeated sections or visible seams. */
+@media (max-width: 700px) and (orientation: portrait) {
+  body.opening-active,
+  .pause-entry-image-page,
+  .pause-entry-image-page.possibility-entry-page {
+    background-color: #07131b !important;
+    background-image: url("pause-background-mobile-v63.jpg") !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+  }
+}
+
+/* A rotated phone uses the original landscape composition, still as one image. */
+@media (max-width: 900px) and (orientation: landscape) {
+  body.opening-active,
+  .pause-entry-image-page,
+  .pause-entry-image-page.possibility-entry-page {
+    background-color: #07131b !important;
+    background-image: url("pause-background-v54.jpg") !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+  }
+}

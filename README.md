@@ -1,4 +1,14 @@
-# My Life Vision V63.5.1 — Full-Width Masthead
+# My Life Vision V63.5.2 — Single Continuous Mobile Opening
+
+## What changed in V63.5.2
+
+- Replaced the phone's layered copies of the opening artwork with one seamless portrait composition.
+- Added a dedicated phone-shaped version of the same palette-knife artwork, using a broader centered light burst instead of a vertical color column.
+- Removed the visible bands, seams, repeated sections, and background overlays from the opening screen and all three opening questions.
+- Preserved the desktop opening artwork, full-width masthead, and every other V63.5.1 change.
+- Extended the masthead past the app's desktop content-width limit so it spans the full visible browser width on large monitors.
+
+# Previous V63.5.1 — Full-Width Masthead
 
 ## What changed in V63.5.1
 
@@ -344,6 +354,7 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 - `app-v63.js`
 - `styles-v63.css`
 - `pause-background-v54.jpg`
+- `pause-background-mobile-v63.jpg`
 - `masthead-light-burst.jpg`
 - `Fraunces-Medium.ttf`
 - `Fraunces-SemiBold.ttf`
@@ -351,4 +362,4 @@ This build turns the bottom Dashboard and Workbook controls into direct shortcut
 
 ## GitHub installation
 
-Upload all eight files to the repository root, preserving the exact filenames. `index.html` already points to the V63 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
+Upload all nine files to the repository root, preserving the exact filenames. `index.html` already points to the V63 JavaScript and stylesheet filenames. Leave the GitHub Pages settings unchanged.
